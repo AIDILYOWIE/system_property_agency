@@ -55,14 +55,14 @@ const GroupColumnChart = memo(() => {
                         >
                             <div className="flex justify-between items-center mb-1 gap-3">
                                 <div className="flex items-center gap-1.5">
-                                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#145D40' }}></div>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-status-sold"></div>
                                     <span className="font-medium text-text-muted">Lead New</span>
                                 </div>
                                 <span className="font-bold text-text-primary">{(activeItem.d1).toFixed(0)}</span>
                             </div>
                             <div className="flex justify-between items-center mb-1 gap-3">
                                 <div className="flex items-center gap-1.5">
-                                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#52A77A' }}></div>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-status-available"></div>
                                     <span className="font-medium text-text-muted">Lead Viewing</span>
                                 </div>
                                 <span className="font-bold text-text-primary">{(activeItem.d2).toFixed(0)}</span>
@@ -111,33 +111,26 @@ const GroupColumnChart = memo(() => {
                                 >
                                     {/* Q2 Segment (Top) */}
                                     <div
-                                        className="w-full flex-shrink-0"
-                                        style={{ height: `${q2Percent}%`, background: isProjected ? 'repeating-linear-gradient(-45deg, transparent, transparent 4px, #D1D5DB 4px, #D1D5DB 6px)' : '#52A77A' }}
+                                        className={`w-full flex-shrink-0 ${isProjected ? 'bg-projected-pattern' : 'bg-status-available'}`}
+                                        style={{ height: `${q2Percent}%` }}
                                     />
                                     {/* Q1 Segment (Bottom) with a white top border acting as the GAP between stacks */}
                                     <div
-                                        className="w-full flex-shrink-0"
-                                        style={{ height: `${q1Percent}%`, background: isProjected ? 'repeating-linear-gradient(-45deg, transparent, transparent 4px, #D1D5DB 4px, #D1D5DB 6px)' : '#145D40' }}
+                                        className={`w-full flex-shrink-0 ${isProjected ? 'bg-projected-pattern' : 'bg-status-sold'}`}
+                                        style={{ height: `${q1Percent}%` }}
                                     />
                                 </div>
 
                                 {/* White ring dot sticking out at top of today's bar */}
                                 {isToday && (
-                                    <div className="absolute z-10 -top-[6px] left-1/2 -translate-x-1/2 w-[6px] h-[6px] rounded-full bg-white border border-[#52A77A]" />
+                                    <div className="absolute z-10 -top-[6px] left-1/2 -translate-x-1/2 w-[6px] h-[6px] rounded-full bg-white border border-status-available" />
                                 )}
                             </div>
 
                             {/* Axis Label */}
                             <span
-                                className="text-[10px] font-medium uppercase transition-colors duration-150"
-                                style={{
-                                    color: isHovered
-                                        ? '#0A5F41'
-                                        : isToday
-                                            ? '#0A5F41'
-                                            : '#9CA3AF',
-                                    fontWeight: isHovered || isToday ? 600 : 500,
-                                }}
+                                className={`text-[10px] uppercase transition-colors duration-150 ${isHovered || isToday ? 'text-primary font-semibold' : 'text-text-muted font-medium'
+                                    }`}
                             >
                                 {item.label}
                             </span>

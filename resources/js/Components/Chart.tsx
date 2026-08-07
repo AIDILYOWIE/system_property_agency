@@ -99,13 +99,9 @@ const Chart: FC<ChartProps> = memo(({ data, className = '', title }) => {
                     if (isActual) {
                         barClass += ' bg-primary';
                     } else if (isToday) {
-                        barClass += ' bg-[#52A77A]';
+                        barClass += ' bg-status-available';
                     } else {
-                        barStyle = {
-                            ...barStyle,
-                            background:
-                                'repeating-linear-gradient(-45deg, transparent, transparent 4px, #D1D5DB 4px, #D1D5DB 6px)',
-                        };
+                        barClass += ' bg-projected-pattern';
                     }
 
                     return (
@@ -118,19 +114,12 @@ const Chart: FC<ChartProps> = memo(({ data, className = '', title }) => {
                             <div className={barClass} style={barStyle}>
                                 {/* White ring-dot at top of today's bar */}
                                 {isToday && (
-                                    <div className="absolute -top-[6px] left-1/2 -translate-x-1/2 w-[6px] h-[6px] rounded-full bg-white border border-[#52A77A]" />
+                                    <div className="absolute -top-[6px] left-1/2 -translate-x-1/2 w-[6px] h-[6px] rounded-full bg-white border border-status-available" />
                                 )}
                             </div>
                             <span
-                                className="text-[10px] font-medium uppercase transition-colors duration-150"
-                                style={{
-                                    color: isHovered
-                                        ? '#0A5F41'
-                                        : isToday
-                                            ? '#0A5F41'
-                                            : '#9CA3AF',
-                                    fontWeight: isHovered || isToday ? 600 : 500,
-                                }}
+                                className={`text-[10px] uppercase transition-colors duration-150 ${isHovered || isToday ? 'text-primary font-semibold' : 'text-text-muted font-medium'
+                                    }`}
                             >
                                 {item.day}
                             </span>

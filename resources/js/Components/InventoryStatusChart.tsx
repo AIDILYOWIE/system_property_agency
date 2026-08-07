@@ -19,14 +19,6 @@ interface InventoryStatusChartProps {
 // Circumference = π × 40 ≈ 125.66
 const HC = 125.66; // half-circle arc length in SVG units
 
-// Segment colors exactly from reference
-const COLORS = {
-    rented: '#003620ff',       // dark primary green
-    sold: '#145D40',       // dark primary green
-    available: '#52A77A',  // mid green
-    draft: '#D1D5DB',      // gray (shown as hatch)
-};
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 /**
@@ -126,7 +118,7 @@ const InventoryStatusChart: FC<InventoryStatusChartProps> = memo(({ data, classN
                     <path
                         d={ARC}
                         fill="none"
-                        stroke={COLORS.rented}
+                        className="stroke-status-rented"
                         strokeWidth="16"
                         strokeLinecap="butt"
                         strokeDasharray={`${rentedL} 1000`}
@@ -138,7 +130,7 @@ const InventoryStatusChart: FC<InventoryStatusChartProps> = memo(({ data, classN
                     <path
                         d={ARC}
                         fill="none"
-                        stroke={COLORS.sold}
+                        className="stroke-status-sold"
                         strokeWidth="16"
                         strokeLinecap="butt"
                         strokeDasharray={`${soldL} 1000`}
@@ -150,7 +142,7 @@ const InventoryStatusChart: FC<InventoryStatusChartProps> = memo(({ data, classN
                     <path
                         d={ARC}
                         fill="none"
-                        stroke={COLORS.available}
+                        className="stroke-status-available"
                         strokeWidth="16"
                         strokeLinecap="butt"
                         strokeDasharray={`${availableL} 1000`}
@@ -194,7 +186,7 @@ const InventoryStatusChart: FC<InventoryStatusChartProps> = memo(({ data, classN
                         onMouseLeave={() => setHoveredSegment(null)}
                         aria-label={`Rented: ${rented} properties`}
                     >
-                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS.rented }} />
+                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-status-rented" />
                         <span className="font-medium">Rented</span>
                         <span className="font-bold text-text-primary ml-0.5">{rented}</span>
                     </button>
@@ -208,7 +200,7 @@ const InventoryStatusChart: FC<InventoryStatusChartProps> = memo(({ data, classN
                         onMouseLeave={() => setHoveredSegment(null)}
                         aria-label={`Sold: ${sold} properties`}
                     >
-                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS.sold }} />
+                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-status-sold" />
                         <span className="font-medium">Sold</span>
                         <span className="font-bold text-text-primary ml-0.5">{sold}</span>
                     </button>
@@ -224,7 +216,7 @@ const InventoryStatusChart: FC<InventoryStatusChartProps> = memo(({ data, classN
                         onMouseLeave={() => setHoveredSegment(null)}
                         aria-label={`Available: ${available} properties`}
                     >
-                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS.available }} />
+                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-status-available" />
                         <span className="font-medium">Available</span>
                         <span className="font-bold text-text-primary ml-0.5">{available}</span>
                     </button>
@@ -238,13 +230,7 @@ const InventoryStatusChart: FC<InventoryStatusChartProps> = memo(({ data, classN
                         onMouseLeave={() => setHoveredSegment(null)}
                         aria-label={`Draft: ${draft} properties`}
                     >
-                        <div
-                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                            style={{
-                                background:
-                                    'repeating-linear-gradient(-45deg, transparent, transparent 1px, #D1D5DB 1px, #D1D5DB 2px)',
-                            }}
-                        />
+                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-draft-pattern" />
                         <span className="font-medium">Draft</span>
                         <span className="font-bold text-text-primary ml-0.5">{draft}</span>
                     </button>

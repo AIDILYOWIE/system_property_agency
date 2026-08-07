@@ -32,6 +32,14 @@ export default {
                     800: "#053B27",
                     900: "#032E1E",
                 },
+                // status / chart colors
+                status: {
+                    rented: "#003620",
+                    sold: "#145D40",
+                    available: "#52A77A",
+                    draft: "#D1D5DB",
+                    projected: "#D1D5DB",
+                },
                 surface: "#FFFFFF",
                 canvas: "#FAFAFA",
                 "text-primary": "#000000",
@@ -42,6 +50,12 @@ export default {
                 warning: "#F59E0B",
                 danger: "#EF4444",
                 info: "#3B82F6",
+            },
+            backgroundImage: {
+                "projected-pattern":
+                    "repeating-linear-gradient(-45deg, transparent, transparent 4px, #D1D5DB 4px, #D1D5DB 6px)",
+                "draft-pattern":
+                    "repeating-linear-gradient(-45deg, transparent, transparent 1px, #D1D5DB 1px, #D1D5DB 2px)",
             },
             borderRadius: {
                 sm: "6px",
