@@ -37,7 +37,7 @@ const Topbar: FC<TopbarProps> = memo(({ pageTitle, pageDescription, actions }) =
                        px-5 gap-4 flex-shrink-0"
         >
             {/* Left: Hamburger (mobile) + Title */}
-                <MobileMenuButton />
+            <MobileMenuButton />
 
             {/* Center: Search bar */}
             <div className="flex-1 max-w-xs hidden md:flex">
@@ -117,6 +117,15 @@ const DashboardLayoutInner: FC<DashboardLayoutProps> = ({
                     id="main-content"
                     tabIndex={-1}
                 >
+                    {/* ── Page Header ─────────────────────────────────────── */}
+                    <div className="mb-6">
+                        <h1 className="text-2xl font-bold text-text-primary tracking-tight" style={{ letterSpacing: '-0.02em' }}>
+                            {pageTitle}
+                        </h1>
+                        <p className="text-sm text-text-muted mt-1">
+                            {pageDescription}
+                        </p>
+                    </div>
                     {children}
                 </main>
             </div>

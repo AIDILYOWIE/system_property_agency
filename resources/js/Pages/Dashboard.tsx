@@ -151,24 +151,14 @@ export default function Dashboard() {
 
     return (
         <DashboardLayout
-            pageTitle="Overview"
+            pageTitle="Dashboard"
             pageDescription="Actionable metrics for Chris Property Signature"
             badgeOverrides={{
                 'crm-buyers': metrics.moneyOnTable,
                 'crm-partners': metrics.brandGatekeeper,
             }}
         >
-            <Head title="Dashboard" />
 
-            {/* ── Page Header ─────────────────────────────────────── */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-text-primary tracking-tight" style={{ letterSpacing: '-0.02em' }}>
-                    Dashboard
-                </h1>
-                <p className="text-sm text-text-muted mt-1">
-                    Plan, monitor, and execute with precision.
-                </p>
-            </div>
 
             {/* ── Actionable Metrics Bento Grid ────────────────────── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
