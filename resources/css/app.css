@@ -1,0 +1,152 @@
+/* Google Fonts – Inter */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design System CSS Custom Properties ─────────────────────────────── */
+@layer base {
+    :root {
+        --color-primary: #0a5f41;
+        --color-primary-hover: #074831;
+        --color-primary-light: #e6f0ec;
+        --color-canvas: #fafafa;
+        --color-surface: #ffffff;
+        --color-text-primary: #000000;
+        --color-text-secondary: #717171;
+        --color-text-muted: #9ca3af;
+        --color-border: #e5e7eb;
+        --color-success: #10b981;
+        --color-warning: #f59e0b;
+        --color-danger: #ef4444;
+        --color-info: #3b82f6;
+
+        --radius-sm: 6px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+        --radius-full: 9999px;
+
+        --sidebar-width: 240px;
+        --sidebar-collapsed-width: 64px;
+        --header-height: 56px;
+
+        --transition-fast: 150ms ease;
+        --transition-base: 200ms ease;
+        --transition-slow: 300ms ease;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    html {
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+        background-color: var(--color-canvas);
+        color: var(--color-text-primary);
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    /* KPI numbers — tabular figures for alignment */
+    .kpi-number,
+    [data-kpi] {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum";
+        letter-spacing: -0.02em;
+    }
+
+    /* Scrollbar — minimal */
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: var(--color-border);
+        border-radius: var(--radius-full);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+    }
+}
+
+/* ─── Component Utilities ──────────────────────────────────────────────── */
+@layer components {
+    /* Sidebar nav item */
+    .sidebar-item {
+        @apply flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer
+               text-text-secondary text-sm font-medium
+               transition-colors duration-200 w-full select-none;
+    }
+    .sidebar-item:hover {
+        @apply bg-gray-100 text-text-primary;
+    }
+    .sidebar-item.active {
+        @apply bg-primary-light text-primary font-semibold;
+    }
+    .sidebar-item.active .sidebar-icon {
+        @apply text-primary;
+    }
+
+    /* Section label */
+    .sidebar-section-label {
+        @apply text-[0.625rem] font-semibold tracking-widest uppercase
+               text-text-muted px-3 mb-1 mt-4 first:mt-0;
+    }
+
+    /* Badge pill */
+    .badge {
+        @apply inline-flex items-center justify-center rounded-full
+               text-[0.625rem] font-semibold leading-none select-none;
+    }
+    .badge-count {
+        @apply badge px-1.5 py-0.5 min-w-[18px] text-center;
+    }
+
+    /* Card base */
+    .card {
+        @apply bg-surface border border-border-base rounded-xl p-6;
+    }
+
+    /* Primary button */
+    .btn-primary {
+        @apply inline-flex items-center gap-2 rounded-md px-[18px] py-[10px]
+               bg-primary text-white text-sm font-medium
+               transition-colors duration-200 cursor-pointer
+               hover:bg-primary-hover active:scale-[0.98]
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50;
+    }
+
+    /* Secondary button */
+    .btn-secondary {
+        @apply inline-flex items-center gap-2 rounded-md px-[18px] py-[10px]
+               bg-surface border border-border-base text-text-primary text-sm font-medium
+               transition-colors duration-200 cursor-pointer
+               hover:bg-gray-50 active:scale-[0.98]
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30;
+    }
+}
+
+/* ─── Reduced Motion ───────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
