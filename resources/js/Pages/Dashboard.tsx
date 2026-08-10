@@ -1,4 +1,3 @@
-import { Head } from '@inertiajs/react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { TrendingUp, Clock, Handshake, AlertTriangle, ArrowUpRight } from 'lucide-react';
 import { memo, useMemo, type FC } from 'react';

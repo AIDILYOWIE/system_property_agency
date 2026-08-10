@@ -17,6 +17,8 @@ interface DashboardLayoutProps {
     actions?: ReactNode;
     /** Live badge overrides keyed by nav item key */
     badgeOverrides?: Record<string, number>;
+    /** Optional action button */
+    action?: ReactNode;
 }
 
 // ─── Topbar ───────────────────────────────────────────────────────────────────
@@ -96,6 +98,7 @@ const DashboardLayoutInner: FC<DashboardLayoutProps> = ({
     pageDescription,
     actions,
     badgeOverrides = {},
+    action,
 }) => {
     return (
         <div className="flex h-screen overflow-hidden bg-canvas font-sans">
@@ -118,13 +121,16 @@ const DashboardLayoutInner: FC<DashboardLayoutProps> = ({
                     tabIndex={-1}
                 >
                     {/* ── Page Header ─────────────────────────────────────── */}
-                    <div className="mb-6">
-                        <h1 className="text-2xl font-bold text-text-primary tracking-tight" style={{ letterSpacing: '-0.02em' }}>
-                            {pageTitle}
-                        </h1>
-                        <p className="text-sm text-text-muted mt-1">
-                            {pageDescription}
-                        </p>
+                    <div className="mb-6 flex justify-between items-center">
+                        <div className='flex flex-col gap-1'>
+                            <h1 className="text-2xl font-bold text-text-primary tracking-tight" style={{ letterSpacing: '-0.02em' }}>
+                                {pageTitle}
+                            </h1>
+                            <p className="text-sm text-text-muted">
+                                {pageDescription}
+                            </p>
+                        </div>
+                        {action}
                     </div>
                     {children}
                 </main>
