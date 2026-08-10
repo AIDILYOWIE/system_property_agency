@@ -50,6 +50,31 @@ export default {
                 warning: "#F59E0B",
                 danger: "#EF4444",
                 info: "#3B82F6",
+                background: "#FAFAFA", // canvas
+                foreground: "#000000", // text-primary
+                border: "#E5E7EB", // border-base
+                input: "#E5E7EB", // border-base
+                ring: "#0A5F41", // primary
+                muted: {
+                    DEFAULT: "#F3F4F6",
+                    foreground: "#9CA3AF",
+                },
+                accent: {
+                    DEFAULT: "#F3F4F6",
+                    foreground: "#000000",
+                },
+                popover: {
+                    DEFAULT: "#FFFFFF",
+                    foreground: "#000000",
+                },
+                card: {
+                    DEFAULT: "#FFFFFF",
+                    foreground: "#000000",
+                },
+                destructive: {
+                    DEFAULT: "#EF4444",
+                    foreground: "#FFFFFF",
+                },
             },
             backgroundImage: {
                 "projected-pattern":
