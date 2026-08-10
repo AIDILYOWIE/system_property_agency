@@ -55,9 +55,9 @@ const NAV_SECTIONS: NavSection[] = [
             {
                 key: 'properties',
                 label: 'Inventory',
-                href: '/admin/properties',
+                href: '//inventory',
                 icon: Building2,
-                routeName: 'properties.index',
+                routeName: 'inventory.index',
             },
         ],
     },
