@@ -3,7 +3,7 @@
 import { createColumnHelper } from "@tanstack/react-table"
 import { type DataTableFeatures } from "@/Components/ui/table-data-features"
 import { cn } from "@/lib/utils"
-import { MapPin, Grid, Link2, Eye, Edit2, Upload, MoreHorizontal, ArrowUpDown } from "lucide-react"
+import { MapPin, Grid, Link2, Eye, Edit2, Upload, MoreHorizontal, ArrowUpDown, AlertTriangle } from "lucide-react"
 
 import {
     DropdownMenu,
@@ -25,6 +25,8 @@ export type PropertyData = {
     category: "Villa" | "Land" | "Commercial" | "Premium House"
     listingType: "For Sale" | "For Rent"
     status: PropertyStatus
+    leads: number
+    days_on_market: number
     thumbnail: string
 }
 
@@ -48,6 +50,15 @@ const getStatusColor = (status: PropertyStatus) => {
             return "bg-draft-pattern"
         default:
             return "bg-gray-300"
+    }
+}
+
+
+const performance = (days: number, leads: number) => {
+    if (days >= 60 && leads == 0) {
+        return true
+    } else {
+        false
     }
 }
 
@@ -99,6 +110,9 @@ export const columns = columnHelper.columns([
                             </div>
                         </div>
                     </div>
+                    {performance(prop.days_on_market, prop.leads) && (
+                        <AlertTriangle size={18} className="text-danger" />
+                    )}
                 </div>
             )
         },
@@ -152,6 +166,31 @@ export const columns = columnHelper.columns([
                 </span>
             </div>
         ),
+    }),
+    columnHelper.display({
+        id: "performance",
+        header: () => (
+            <div>
+                Performance
+            </div>
+        ),
+        cell: (info: any) => {
+            const prop = info.row.original
+
+            return (
+                <div className={`px-6 py-4 flex items-center jutify-start gap-2 ${performance(prop.days_on_market, prop.leads) ? "text-danger" : "text-text-muted"}`}>
+
+                    <div className="flex flex-col ">
+                        <h2 className={" font-medium text-[13px]"}>
+                            {prop.days_on_market} Days
+                        </h2>
+                        <h2 className={" font-medium text-[13px]"}>
+                            {prop.leads} Leads
+                        </h2>
+                    </div>
+                </div>
+            )
+        }
     }),
     columnHelper.display({
         id: "actions",
