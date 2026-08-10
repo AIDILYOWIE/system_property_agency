@@ -12,7 +12,15 @@ import {
 } from "./table"
 
 import { features, type DataTableFeatures } from "./table-data-features"
-import { Button } from "./button"
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "./pagination"
 
 interface DataTableProps<TData extends RowData> {
     columns: ColumnDef<DataTableFeatures, TData>[]
@@ -27,6 +35,12 @@ export function DataTable<TData extends RowData>({
         features,
         data,
         columns,
+        initialState: {
+            pagination: {
+                pageSize: 5,
+                pageIndex: 0,
+            },
+        },
     })
 
     return (
@@ -77,23 +91,71 @@ export function DataTable<TData extends RowData>({
                 </TableBody>
             </Table>
 
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                >
-                    Previous
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                >
-                    Next
-                </Button>
+            <div className="flex items-center justify-between border-t border-border-base px-6 py-3">
+                <div className="text-xs text-text-muted flex-shrink-0 font-medium">
+                    Showing {table.getRowModel().rows.length > 0 ? (table.state.pagination.pageIndex * table.state.pagination.pageSize + 1) : 0} to{" "}
+                    {Math.min(table.getFilteredRowModel().rows.length, (table.state.pagination.pageIndex + 1) * table.state.pagination.pageSize)}{" "}
+                    of {table.getFilteredRowModel().rows.length} entries
+                </div>
+                <Pagination className="w-auto mx-0">
+                    <PaginationContent>
+                        <PaginationItem>
+                            <PaginationPrevious
+                                href="#"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    table.previousPage();
+                                }}
+                                className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50" : ""}
+                            />
+                        </PaginationItem>
+
+                        {table.getPageCount() > 0 && Array.from({ length: table.getPageCount() }).map((_, i) => {
+                            const currentPage = table.state.pagination.pageIndex;
+                            // Show first, last, current, and immediate neighbors
+                            if (i === 0 || i === table.getPageCount() - 1 || Math.abs(currentPage - i) <= 1) {
+                                return (
+                                    <PaginationItem key={i}>
+                                        <PaginationLink
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                table.setPageIndex(i);
+                                            }}
+                                            isActive={currentPage === i}
+                                            className="font-medium text-xs h-8 w-8"
+                                        >
+                                            {i + 1}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                );
+                            }
+                            // Show ellipsis if exactly one gap away
+                            if (
+                                (i === 1 && currentPage > 2) ||
+                                (i === table.getPageCount() - 2 && currentPage < table.getPageCount() - 3)
+                            ) {
+                                return (
+                                    <PaginationItem key={`ellipsis-${i}`}>
+                                        <PaginationEllipsis />
+                                    </PaginationItem>
+                                );
+                            }
+                            return null;
+                        })}
+
+                        <PaginationItem>
+                            <PaginationNext
+                                href="#"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    table.nextPage();
+                                }}
+                                className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : ""}
+                            />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
             </div>
         </div>
     )

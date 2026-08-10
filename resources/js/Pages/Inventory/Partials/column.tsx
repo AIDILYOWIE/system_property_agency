@@ -3,7 +3,7 @@
 import { createColumnHelper } from "@tanstack/react-table"
 import { type DataTableFeatures } from "@/Components/ui/table-data-features"
 import { cn } from "@/lib/utils"
-import { MapPin, Grid, Link2, Eye, Edit2, Upload, MoreHorizontal } from "lucide-react"
+import { MapPin, Grid, Link2, Eye, Edit2, Upload, MoreHorizontal, ArrowUpDown } from "lucide-react"
 
 import {
     DropdownMenu,
@@ -12,6 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu"
+import { Button } from "@/Components/ui/button"
 
 export type PropertyStatus = "available" | "sold" | "rented" | "draft"
 
@@ -103,10 +104,15 @@ export const columns = columnHelper.columns([
         },
     }),
     columnHelper.accessor("price", {
-        header: () => (
-            <div className="">
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                className="-ml-3 hover:text-text-muted !hover:bg-transparent h-8 flex items-center gap-2 text-[11px] font-semibold tracking-wider text-text-muted uppercase"
+            >
                 Price
-            </div>
+                <ArrowUpDown size={12} />
+            </Button>
         ),
         cell: (info: any) => (
             <div className="px-6 py-4 font-semibold text-text-primary">
