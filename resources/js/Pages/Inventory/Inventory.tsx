@@ -1,6 +1,8 @@
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import { Plus, Share } from "lucide-react";
 import InventoryTable from "./Partials/InventoryTable";
+import { Button } from "@/Components/ui/button";
+import { router } from "@inertiajs/react";
 
 export default function Inventory() {
     return (
@@ -13,7 +15,7 @@ export default function Inventory() {
                         <Share size={18} />
                         Export
                     </button>
-                    <button className="btn btn-primary">
+                    <button onClick={() => router.visit(route('inventory.add'))} className="btn btn-primary">
                         <Plus size={18} />
                         Add Property
                     </button>

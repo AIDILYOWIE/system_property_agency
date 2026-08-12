@@ -19,8 +19,12 @@ Route::get('/dashboard', function () {
 })->name('dashboard');
 
 Route::get('/inventory', function () {
-    return Inertia::render( 'Inventory/Inventory');
+    return Inertia::render('Inventory/Inventory');
 })->name('inventory');
+
+Route::get('/add', function () {
+    return Inertia::render('Inventory/AddInventory');
+})->name('inventory.add');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -28,4 +32,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

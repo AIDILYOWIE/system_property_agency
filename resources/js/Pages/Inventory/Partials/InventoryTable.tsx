@@ -65,8 +65,8 @@ const mockProperties: PropertyData[] = [
         category: "Villa",
         listingType: "For Rent",
         status: "available",
-        leads: 0,
-        days_on_market: 101,
+        leads: 40,
+        days_on_market: 10,
         thumbnail:
             "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
     },
