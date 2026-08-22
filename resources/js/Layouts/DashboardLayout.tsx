@@ -4,6 +4,7 @@ import type { PageProps } from '@/types';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 import Sidebar, { MobileMenuButton, NotificationBell } from '@/Components/Sidebar';
 import { Search } from 'lucide-react';
+import { Toaster } from '@/Components/ui/toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -135,6 +136,7 @@ const DashboardLayoutInner: FC<DashboardLayoutProps> = ({
                     {children}
                 </main>
             </div>
+            <Toaster />
         </div>
     );
 };
