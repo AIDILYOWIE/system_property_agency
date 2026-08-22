@@ -21,15 +21,18 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "./pagination"
+import { SearchX } from "lucide-react"
 
 interface DataTableProps<TData extends RowData> {
     columns: ColumnDef<DataTableFeatures, TData>[]
     data: TData[]
+    headerSlot?: React.ReactNode
 }
 
 export function DataTable<TData extends RowData>({
     columns,
     data,
+    headerSlot,
 }: DataTableProps<TData>) {
     const table = useTable({
         features,
@@ -45,6 +48,11 @@ export function DataTable<TData extends RowData>({
 
     return (
         <div className="bg-white border border-border-base rounded-2xl overflow-hidden shadow-card">
+            {headerSlot && (
+                <div className="border-b border-border-base">
+                    {headerSlot}
+                </div>
+            )}
             <Table>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
@@ -82,9 +90,19 @@ export function DataTable<TData extends RowData>({
                             )
                         })
                     ) : (
-                        <TableRow>
-                            <TableCell colSpan={columns.length} className="h-24 text-center text-text-muted">
-                                No results.
+                        <TableRow className="hover:bg-transparent">
+                            <TableCell colSpan={columns.length} className="h-[280px] px-6 py-12 text-center text-text-muted">
+                                <div className="flex flex-col items-center justify-center">
+                                    <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 mb-4 border border-gray-100 shadow-sm">
+                                        <SearchX size={32} />
+                                    </div>
+                                    <p className="text-sm font-semibold text-text-primary mb-1">
+                                        Data tidak ditemukan
+                                    </p>
+                                    <p className="text-xs text-text-muted text-center leading-relaxed">
+                                        Saat ini tidak ada data atau riwayat yang dapat ditampilkan pada tabel.
+                                    </p>
+                                </div>
                             </TableCell>
                         </TableRow>
                     )}
