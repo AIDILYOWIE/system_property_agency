@@ -37,6 +37,7 @@ import {
 } from "@/Components/ui/select";
 import { ButtonGroup } from "@/Components/ui/button-group";
 import SectionCard from "@/Components/SectionCard";
+import { CardPrimary, CardPrimaryHeader, CardPrimaryContent } from "@/Components/CardPrimary";
 import {
     Breadcrumb,
     BreadcrumbList,
@@ -675,16 +676,13 @@ export default function InventoryForm() {
                         </SectionCard>
 
                         {/* Investor Dossier */}
-                        <SectionCard
-                            icon={<LockKeyhole size={16} />}
-                            title="Investor Dossier Fields"
-                            dark
-                        >
-                            <p className="text-xs text-white/60 -mt-3 mb-5">
-                                These fields are used for generating private VVIP
-                                prospectuses.
-                            </p>
-                            <div className="flex flex-col gap-4">
+                        <CardPrimary>
+                            <CardPrimaryHeader
+                                icon={<LockKeyhole size={16} />}
+                                title="Investor Dossier Fields"
+                                subtitle="These fields are used for generating private VVIP prospectuses."
+                            />
+                            <CardPrimaryContent className="flex flex-col gap-4 !bg-transparent !space-y-0">
                                 {/* Title Status */}
                                 <Field>
                                     <FieldLabel>Title Status</FieldLabel>
@@ -809,8 +807,8 @@ export default function InventoryForm() {
                                         </Select>
                                     </Field>
                                 </div>
-                            </div>
-                        </SectionCard>
+                            </CardPrimaryContent>
+                        </CardPrimary>
                     </div>
                 </div>
             </form>

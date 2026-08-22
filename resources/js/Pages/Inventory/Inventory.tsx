@@ -1,7 +1,6 @@
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import { Plus, Share } from "lucide-react";
 import InventoryTable from "./Partials/InventoryTable";
-import { Button } from "@/Components/ui/button";
 import { router } from "@inertiajs/react";
 
 export default function Inventory() {
