@@ -19,10 +19,12 @@ import { cn } from "@/lib/utils";
 import { X, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { CardPrimary, CardPrimaryHeader, CardPrimaryContent } from "@/Components/CardPrimary";
 import { DataTable } from "@/Components/ui/data-table";
+import { router, Link } from "@inertiajs/react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { type DataTableFeatures } from "@/Components/ui/table-data-features";
 import { Switch } from "@/Components/ui/switch";
 import { toast } from "@/Components/ui/toast";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/Components/ui/breadcrumb";
 
 type ClientData = {
     id: string;
@@ -134,6 +136,7 @@ export default function DetailInventory() {
                         </div>
                         <button
                             type="button"
+                            onClick={() => router.visit(route('inventory.edit'))}
                             className="btn btn-secondary"
                         >
                             <Edit2 className="w-4 h-4 stroke-[2.5]" />
@@ -147,6 +150,20 @@ export default function DetailInventory() {
                 }
             >
                 <div>
+                    <Breadcrumb className="mb-4">
+                        <BreadcrumbList>
+                            <BreadcrumbItem>
+                                <BreadcrumbLink render={<Link href="/inventory" />}>
+                                    Inventory
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                            <BreadcrumbItem>
+                                <BreadcrumbPage>Detail Property</BreadcrumbPage>
+                            </BreadcrumbItem>
+                        </BreadcrumbList>
+                    </Breadcrumb>
+
                     {/* Stale Property Alert Banner */}
                     <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between shadow-sm animate-fade-in">
                         <div className="flex items-center gap-4">
