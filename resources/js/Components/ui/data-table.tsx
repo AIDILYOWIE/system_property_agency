@@ -27,12 +27,14 @@ interface DataTableProps<TData extends RowData> {
     columns: ColumnDef<DataTableFeatures, TData>[]
     data: TData[]
     headerSlot?: React.ReactNode
+    onRowClick?: (row: TData) => void
 }
 
 export function DataTable<TData extends RowData>({
     columns,
     data,
     headerSlot,
+    onRowClick,
 }: DataTableProps<TData>) {
     const table = useTable({
         features,
@@ -78,6 +80,7 @@ export function DataTable<TData extends RowData>({
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
+                                    onClick={() => onRowClick && onRowClick(row.original)}
                                     className={`hover:bg-gray-50 hover:cursor-pointer transition-colors group ${isDraft ? "opacity-60 grayscale-[10%]" : ""
                                         }`}
                                 >

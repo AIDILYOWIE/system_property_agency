@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { router } from "@inertiajs/react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { DataTable } from "@/Components/ui/data-table";
 import { columns, PropertyData } from "./column";
@@ -296,7 +297,11 @@ export default function InventoryTable() {
             </div>
 
             {/* Reusable Data Table Component */}
-            <DataTable columns={columns} data={mockProperties} />
+            <DataTable
+                columns={columns}
+                data={mockProperties}
+                onRowClick={(row) => router.visit(route('inventory.detail', { id: row.id }))}
+            />
         </div>
     );
 }
