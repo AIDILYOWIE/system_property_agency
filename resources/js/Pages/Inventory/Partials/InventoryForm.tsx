@@ -134,7 +134,7 @@ const ZOONING = [
     { label: "Pink (Tourism)", value: "pink" },
 ]
 
-export default function InventoryForm() {
+export default function InventoryForm({ initialData, isEdit }: { initialData?: Partial<FormState>, isEdit?: boolean }) {
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
@@ -143,22 +143,22 @@ export default function InventoryForm() {
     const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
     const [form, setForm] = useState<FormState>({
-        title: "",
-        location: "",
-        description: "",
-        price: "",
-        currency: "USD",
-        partnership: "",
-        landSize: "",
-        buildingSize: "",
-        bedrooms: "",
-        bathrooms: "",
-        listingType: "sale",
-        category: "",
-        titleStatus: "",
-        leaseholdYears: "",
-        projectedRoi: "",
-        zoning: "",
+        title: initialData?.title ?? "",
+        location: initialData?.location ?? "",
+        description: initialData?.description ?? "",
+        price: initialData?.price ?? "",
+        currency: initialData?.currency ?? "USD",
+        partnership: initialData?.partnership ?? "",
+        landSize: initialData?.landSize ?? "",
+        buildingSize: initialData?.buildingSize ?? "",
+        bedrooms: initialData?.bedrooms ?? "",
+        bathrooms: initialData?.bathrooms ?? "",
+        listingType: initialData?.listingType ?? "sale",
+        category: initialData?.category ?? "",
+        titleStatus: initialData?.titleStatus ?? "",
+        leaseholdYears: initialData?.leaseholdYears ?? "",
+        projectedRoi: initialData?.projectedRoi ?? "",
+        zoning: initialData?.zoning ?? "",
     });
 
     const isLand = form.category === "strategic_land";
@@ -201,9 +201,23 @@ export default function InventoryForm() {
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                        <BreadcrumbPage>Add New Property</BreadcrumbPage>
-                    </BreadcrumbItem>
+                    {isEdit ? (
+                        <>
+                            <BreadcrumbItem>
+                                <BreadcrumbLink render={<Link href="/inventory/detail" />}>
+                                    Detail Property
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                            <BreadcrumbItem>
+                                <BreadcrumbPage>Edit Property</BreadcrumbPage>
+                            </BreadcrumbItem>
+                        </>
+                    ) : (
+                        <BreadcrumbItem>
+                            <BreadcrumbPage>Add New Property</BreadcrumbPage>
+                        </BreadcrumbItem>
+                    )}
                 </BreadcrumbList>
             </Breadcrumb>
 

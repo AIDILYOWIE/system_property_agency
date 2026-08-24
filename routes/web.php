@@ -18,17 +18,35 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->name('dashboard');
 
-Route::get('/inventory', function () {
-    return Inertia::render('Inventory/Inventory');
-})->name('inventory');
+Route::prefix('/inventory')->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('Inventory/Inventory');
+    })->name('inventory');
 
-Route::get('/add', function () {
-    return Inertia::render('Inventory/AddInventory');
-})->name('inventory.add');
+    Route::get('/add', function () {
+        return Inertia::render('Inventory/AddInventory');
+    })->name('inventory.add');
 
-Route::get('/detail', function () {
-    return Inertia::render('Inventory/DetailInventory');
-})->name('inventory.detail');
+    Route::get('/detail', function () {
+        return Inertia::render('Inventory/DetailInventory');
+    })->name('inventory.detail');
+
+    Route::get('/edit', function () {
+        return Inertia::render('Inventory/EditInventory');
+    })->name('inventory.edit');
+});
+
+// Route::get('/inventory', function () {
+//     return Inertia::render('Inventory/Inventory');
+// })->name('inventory');
+
+// Route::get('/add', function () {
+//     return Inertia::render('Inventory/AddInventory');
+// })->name('inventory.add');
+
+// Route::get('/detail', function () {
+//     return Inertia::render('Inventory/DetailInventory');
+// })->name('inventory.detail');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
