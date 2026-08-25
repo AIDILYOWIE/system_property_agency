@@ -36,6 +36,20 @@ Route::prefix('/inventory')->group(function () {
     })->name('inventory.edit');
 });
 
+Route::prefix('/customer')->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('Customer/Customer');
+    })->name('customer');
+
+    Route::get('/add', function () {
+        return Inertia::render('Customer/AddCustomer');
+    })->name('customer.add');
+
+    Route::get('/detail/{id}', function ($id) {
+        return Inertia::render('Customer/DetailCustomer', ['id' => $id]);
+    })->name('customer.detail');
+});
+
 // Route::get('/inventory', function () {
 //     return Inertia::render('Inventory/Inventory');
 // })->name('inventory');

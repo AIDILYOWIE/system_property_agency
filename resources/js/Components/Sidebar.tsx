@@ -81,9 +81,9 @@ const NAV_SECTIONS: NavSection[] = [
             {
                 key: 'customers',
                 label: 'All Customers',
-                href: '/admin/customers',
+                href: '/customer',
                 icon: Users,
-                routeName: 'customers.index',
+                routeName: 'customer',
             },
         ],
     },
