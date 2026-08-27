@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { MapPin } from "lucide-react";
-import { type PipelineStatus } from "@/Pages/Customer/Partials/CustomerColumn";
+import { type PipelineStatus } from "@/Pages/Customer/_Partials/CustomerColumn";
 
 // ─── Types (exported for reuse by parent pages) ─────────────────────────────────
 
