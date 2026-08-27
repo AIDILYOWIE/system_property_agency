@@ -2,7 +2,7 @@
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import { Check, UserPlus } from "lucide-react";
-import CustomerForm from "./Partials/CustomerForm";
+import CustomerForm from "./_Partials/CustomerForm";
 
 export default function AddCustomer() {
     function handleSaveDraft() {

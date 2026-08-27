@@ -1,6 +1,6 @@
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import { Plus, Download } from "lucide-react";
-import CustomerTable from "./Partials/CustomerTable";
+import CustomerTable from "./_Partials/CustomerTable";
 import { router } from "@inertiajs/react";
 
 export default function Customer() {

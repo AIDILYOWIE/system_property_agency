@@ -30,11 +30,11 @@ import {
     Activity,
     FileText,
 } from "lucide-react";
-import { type PipelineStatus, type CustomerType } from "./Partials/CustomerColumn";
-import PipelineTracker from "./Partials/PipelineTracker";
+import { type PipelineStatus, type CustomerType } from "./_Partials/CustomerColumn";
+import PipelineTracker from "../BuyerPipeline/_Partials/pipeline/PipelineTracker";
 import PropertyInterestCard, { type PropertyInterestItem } from "@/Components/PropertyInterestCard";
-import PropertyPickerModal from "./Partials/PropertyPickerModal";
-import { type InventoryProperty } from "./Partials/PropertyInterestRepeater";
+import PropertyPickerModal from "./_Partials/PropertyPickerModal";
+import { type InventoryProperty } from "./_Partials/PropertyInterestRepeater";
 
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -266,13 +266,13 @@ export default function DetailCustomer() {
             action={
                 <div className="flex gap-2">
 
-                    <button
-                        type="button"
+                    <Link
+                        href={`/customer/edit/${customer.id}`}
                         className="btn btn-secondary flex items-center gap-2"
                     >
                         <Edit2 className="w-4 h-4 stroke-[2.5]" />
                         Edit
-                    </button>
+                    </Link>
                     <button
                         onClick={() => window.open(`https://wa.me/${waNumber}?text=${waMessage}`, "_blank")}
                         rel="noopener noreferrer"

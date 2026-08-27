@@ -14,7 +14,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
+Route::get('/', function () {
     return Inertia::render('Dashboard');
 })->name('dashboard');
 
@@ -48,7 +48,16 @@ Route::prefix('/customer')->group(function () {
     Route::get('/detail/{id}', function ($id) {
         return Inertia::render('Customer/DetailCustomer', ['id' => $id]);
     })->name('customer.detail');
+
+    Route::get('/edit/{id}', function ($id) {
+        return Inertia::render('Customer/EditCustomer', ['id' => $id]);
+    })->name('customer.edit');
 });
+
+Route::get('/buyer-pipeline', function () {
+    return Inertia::render('BuyerPipeline/BuyerPipeline');
+})->name('buyer-pipeline');
+
 
 // Route::get('/inventory', function () {
 //     return Inertia::render('Inventory/Inventory');
