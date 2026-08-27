@@ -58,6 +58,12 @@ Route::get('/buyer-pipeline', function () {
     return Inertia::render('BuyerPipeline/BuyerPipeline');
 })->name('buyer-pipeline');
 
+// ── Dossier (Public — no auth) ─────────────────────────────────────────
+Route::get('/dossier/preview', function () {
+    return Inertia::render('Dossier/DossierPage');
+})->name('dossier.preview');
+
+
 
 // Route::get('/inventory', function () {
 //     return Inertia::render('Inventory/Inventory');
