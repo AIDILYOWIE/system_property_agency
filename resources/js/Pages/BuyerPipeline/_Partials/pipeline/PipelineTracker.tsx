@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle, ChevronRight } from "lucide-react";
-import { type PipelineStatus, type CustomerType } from "./CustomerColumn";
+import { type PipelineStatus, type CustomerType } from "../../../Customer/_Partials/CustomerColumn";
 
 // ─── Stage Config (hoisted — never re-created on render) ───────────────────────
 

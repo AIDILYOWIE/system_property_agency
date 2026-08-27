@@ -67,9 +67,9 @@ const NAV_SECTIONS: NavSection[] = [
             {
                 key: 'crm-buyers',
                 label: 'Buyer Pipeline',
-                href: '/admin/crm/buyers',
+                href: '/buyer-pipeline',
                 icon: TrendingUp,
-                routeName: 'crm.buyers',
+                routeName: 'buyer-pipeline',
             },
             {
                 key: 'crm-partners',
