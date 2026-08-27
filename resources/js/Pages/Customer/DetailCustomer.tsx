@@ -1,6 +1,7 @@
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import { useState, useMemo, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 import { Link } from "@inertiajs/react";
 import {
     Breadcrumb,
@@ -229,14 +230,15 @@ export default function DetailCustomer() {
     const pipelineConfig = PIPELINE_CONFIG[customer.pipeline_status];
     const typeConfig = CUSTOMER_TYPE_CONFIG[customer.customer_type];
 
-    const waNumber = customer.phone.startsWith("0")
-        ? "62" + customer.phone.slice(1)
-        : customer.phone;
-
-    const waMessage =
-        customer.customer_type === "property_owner"
-            ? encodeURIComponent(`Halo ${customer.name}, saya Chris dari Chris Property Signature. Saya telah menerima pengajuan kemitraan untuk properti Anda. Boleh saya minta beberapa foto tambahan?`)
-            : encodeURIComponent(`Halo ${customer.name}, saya Chris dari Chris Property Signature. Terima kasih atas ketertarikan Anda. Apakah ada waktu untuk berdiskusi lebih lanjut?`);
+    const waUrl = getWhatsAppUrl({
+        phone: customer.phone,
+        clientName: customer.name,
+        customerType: customer.customer_type,
+        // property_owner tidak menyertakan propertyName — template kemitraan dipilih otomatis
+        propertyName: customer.customer_type !== "property_owner"
+            ? customer.properties.find((p) => p.pipelineStatus !== "lost")?.title
+            : undefined,
+    });
 
     const initials = useMemo(
         () =>
@@ -273,14 +275,15 @@ export default function DetailCustomer() {
                         <Edit2 className="w-4 h-4 stroke-[2.5]" />
                         Edit
                     </Link>
-                    <button
-                        onClick={() => window.open(`https://wa.me/${waNumber}?text=${waMessage}`, "_blank")}
+                    <a
+                        href={waUrl}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-primary flex items-center gap-2"
                     >
                         <MessageCircle className="w-4 h-4 stroke-[2.5]" />
                         One-Click WA
-                    </button>
+                    </a>
                 </div>
             }
         >

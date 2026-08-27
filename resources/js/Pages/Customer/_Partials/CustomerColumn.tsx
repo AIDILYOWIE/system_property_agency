@@ -3,6 +3,7 @@
 import { createColumnHelper } from "@tanstack/react-table"
 import { type DataTableFeatures } from "@/Components/ui/table-data-features"
 import { cn } from "@/lib/utils"
+import { getWhatsAppUrl } from "@/lib/whatsapp"
 import {
     MessageCircle,
     Eye,
@@ -20,7 +21,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu"
-import { Button } from "@/Components/ui/button"  
+import { Button } from "@/Components/ui/button"
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -235,24 +236,19 @@ export const CustomerColumns = columnHelper.columns([
         header: () => <div className="w-max">Action</div>,
         cell: (info: any) => {
             const customer = info.row.original
-            const waNumber = customer.phone.startsWith("0")
-                ? "62" + customer.phone.slice(1)
-                : customer.phone
 
-            const waMessage =
-                customer.customer_type === "property_owner"
-                    ? encodeURIComponent(
-                        `Halo ${customer.name}, saya Chris dari Chris Property Signature. Saya telah menerima pengajuan kemitraan untuk properti Anda. Boleh saya minta beberapa foto tambahan?`
-                    )
-                    : encodeURIComponent(
-                        `Halo ${customer.name}, saya Chris dari Chris Property Signature. Terima kasih atas ketertarikan Anda${customer.interested_property ? ` pada ${customer.interested_property}` : ""}. Apakah ada waktu untuk berdiskusi lebih lanjut?`
-                    )
+            const waUrl = getWhatsAppUrl({
+                phone: customer.phone,
+                clientName: customer.name,
+                customerType: customer.customer_type,
+                propertyName: customer.interested_property,
+            })
 
             return (
                 <div className="flex items-center justify-center gap-2 px-6 py-4 w-max h-full">
                     {/* One-Click WA Button */}
                     <a
-                        href={`https://wa.me/${waNumber}?text=${waMessage}`}
+                        href={waUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}

@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { Link } from "@inertiajs/react";
 import { cn } from "@/lib/utils";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 import { MapPin, MessageCircle, Eye, Calendar, GripVertical } from "lucide-react";
 import { STAGE_CONFIG } from "./pipelineConstants";
 import { type PipelineLead, type BuyerPipelineStatus } from "./pipelineTypes";
@@ -66,12 +67,11 @@ const PipelineLeadCard = memo(function PipelineLeadCard({
 }: PipelineLeadCardProps) {
     const isLost = lead.status === "lost";
 
-    const waNumber = lead.phone.startsWith("0")
-        ? "62" + lead.phone.slice(1)
-        : lead.phone;
-    const waMessage = encodeURIComponent(
-        `Halo ${lead.name}, saya Chris dari Chris Property Signature. Terima kasih atas ketertarikan Anda pada ${lead.propertyName}. Apakah ada waktu untuk berdiskusi lebih lanjut?`
-    );
+    const waUrl = getWhatsAppUrl({
+        phone: lead.phone,
+        clientName: lead.name,
+        propertyName: lead.propertyName,
+    });
 
     const initials = lead.name
         .split(" ")
@@ -164,7 +164,7 @@ const PipelineLeadCard = memo(function PipelineLeadCard({
                                 <Eye size={12} />
                             </Link>
                             <a
-                                href={`https://wa.me/${waNumber}?text=${waMessage}`}
+                                href={waUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
@@ -225,7 +225,7 @@ const PipelineLeadCard = memo(function PipelineLeadCard({
                             <Eye size={13} />
                         </Link>
                         <a
-                            href={`https://wa.me/${waNumber}?text=${waMessage}`}
+                            href={waUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 hover:bg-emerald-100 transition-colors"
