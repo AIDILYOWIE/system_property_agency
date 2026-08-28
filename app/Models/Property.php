@@ -51,4 +51,19 @@ class Property extends Model
     {
         return $this->hasOne(PropertyImage::class)->where('is_main_thumbnail', true);
     }
+
+    // public function inquiries(): HasMany
+    // {
+    //     return $this->hasMany(Inquiry::class);
+    // }
+
+    public function getDaysOnMarketAttribute(): int
+    {
+        if (!$this->published_at) {
+            return 0;
+        }
+        return (int) $this->published_at->diffInDays(now());
+    }
+
+    protected $appends = ['days_on_market'];
 }

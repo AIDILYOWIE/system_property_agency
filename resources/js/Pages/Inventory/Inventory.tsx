@@ -3,7 +3,7 @@ import { Plus, Share } from "lucide-react";
 import InventoryTable from "./Partials/InventoryTable";
 import { router } from "@inertiajs/react";
 
-export default function Inventory() {
+export default function Inventory({ properties, filters }: { properties: any, filters: any }) {
     return (
         <DashboardLayout
             pageTitle="Inventory"
@@ -22,7 +22,7 @@ export default function Inventory() {
             }
         >
             <div className="flex flex-col h-full space-y-6 pt-2">
-                <InventoryTable />
+                <InventoryTable properties={properties} initialFilters={filters} />
             </div>
         </DashboardLayout>
     );

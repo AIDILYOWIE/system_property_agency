@@ -21,6 +21,7 @@ import {
 
 // ─── Filter state type ─────────────────────────────────────────────────────────
 type FilterState = {
+    search?: string | null;
     category: string | null;
     listingType: string | null;
     status: string | null;
@@ -28,125 +29,49 @@ type FilterState = {
     partnership: string | null;
 };
 
-const mockProperties: PropertyData[] = [
-    {
-        id: "prop-1",
-        title: "Modern Villa Ubud",
-        location: "Ubud, Bali",
-        price: 850000,
-        currency: "USD",
-        category: "Villa",
-        listingType: "For Sale",
-        status: "available",
-        leads: 0,
-        days_on_market: 61,
-        thumbnail:
-            "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-    },
-    {
-        id: "prop-2",
-        title: "Modern Villa Ubud",
-        location: "Ubud, Bali",
-        price: 850000,
-        currency: "USD",
-        category: "Villa",
-        listingType: "For Rent",
-        status: "available",
-        leads: 0,
-        days_on_market: 101,
-        thumbnail:
-            "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-    },
-    {
-        id: "prop-2",
-        title: "Modern Villa Ubud",
-        location: "Ubud, Bali",
-        price: 850000,
-        currency: "USD",
-        category: "Villa",
-        listingType: "For Rent",
-        status: "available",
-        leads: 40,
-        days_on_market: 10,
-        thumbnail:
-            "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-    },
-    {
-        id: "prop-2",
-        title: "Minimalist Villa Canggu",
-        location: "Canggu, Bali",
-        price: 35000,
-        currency: "USD",
-        category: "Villa",
-        listingType: "For Rent",
-        status: "rented",
-        leads: 10,
-        days_on_market: 20,
-        thumbnail:
-            "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-    },
-    {
-        id: "prop-3",
-        title: "Beachfront Premium House",
-        location: "Seminyak, Bali",
-        price: 2100000,
-        currency: "USD",
-        category: "Premium House",
-        listingType: "For Sale",
-        status: "sold",
-        leads: 40,
-        days_on_market: 20,
-        thumbnail:
-            "https://images.unsplash.com/photo-1613490908592-fd5a12130325?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-    },
-    {
-        id: "prop-4",
-        title: "Beachfront Premium House",
-        location: "Seminyak, Bali",
-        price: 2100000,
-        currency: "USD",
-        category: "Premium House",
-        listingType: "For Sale",
-        status: "draft",
-        leads: 0,
-        days_on_market: 0,
-        thumbnail:
-            "https://images.unsplash.com/photo-1613490908592-fd5a12130325?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-    },
-];
+interface InventoryTableProps {
+    properties: {
+        data: PropertyData[];
+        links: any[]; // Pagination links
+    };
+    initialFilters: any;
+}
 
-export default function InventoryTable() {
+export default function InventoryTable({ properties, initialFilters }: InventoryTableProps) {
     const [filters, setFilters] = useState<FilterState>({
-        category: "All Categories",
-        listingType: "All Listing Types",
-        status: "All Status",
-        visibility: "All Visibilities",
-        partnership: "All Partnerships",
+        search: initialFilters?.search || "",
+        category: initialFilters?.category || "All Categories",
+        listingType: initialFilters?.listingType || "All Listing Types",
+        status: initialFilters?.status || "All Status",
+        visibility: initialFilters?.visibility || "All Visibilities",
+        partnership: initialFilters?.partnership || "All Partnerships",
     });
 
-    // set category
-    const setCategory = (val: string | null) => {
-        setFilters((prev) => ({ ...prev, category: val }));
+    // Helper to fetch data via Inertia
+    const applyFilters = (newFilters: FilterState) => {
+        router.get(route('inventory'), newFilters as any, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true
+        });
     };
 
-    // set listing type
-    const setListingType = (val: string | null) => {
-        setFilters((prev) => ({ ...prev, listingType: val }));
+    const handleFilterChange = (key: keyof FilterState, val: string | null) => {
+        const nextFilters = { ...filters, [key]: val };
+        setFilters(nextFilters);
+        applyFilters(nextFilters);
     };
 
-    // set status
-    const setStatus = (val: string | null) => {
-        setFilters((prev) => ({ ...prev, status: val }));
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const nextFilters = { ...filters, search: e.target.value };
+        setFilters(nextFilters);
+        // Debounce can be implemented here if desired; for now, relying on enter key or standard behavior.
     };
 
-    // set visibility
-    const setVisibility = (val: string | null) => {
-        setFilters((prev) => ({ ...prev, visibility: val }));
-    };
-
-    // set partnership
-    const setPartnership = (val: string | null) => {
-        setFilters((prev) => ({ ...prev, partnership: val }));
+    const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            applyFilters(filters);
+        }
     };
 
     // Count active filters for badge indicator
@@ -167,7 +92,10 @@ export default function InventoryTable() {
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                     <Input
                         type="text"
-                        placeholder="Search properties..."
+                        placeholder="Search properties (Press Enter)..."
+                        value={filters.search || ""}
+                        onChange={handleSearch}
+                        onKeyDown={handleSearchSubmit}
                         className="w-full !bg-white border border-border-base rounded-lg py-3 pl-10 pr-4 text-sm focus:border-border-base transition-colors text-text-primary h-auto"
                     />
                 </div>
@@ -196,19 +124,16 @@ export default function InventoryTable() {
                                 </DropdownMenuLabel>
                                 {/* Stop propagation so clicking select doesn't immediately close dropdown menu incorrectly */}
                                 <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                                    <Select value={filters.category} onValueChange={(val) => setCategory(val)}>
+                                    <Select value={filters.category || ""} onValueChange={(val) => handleFilterChange('category', val)}>
                                         <SelectTrigger className="w-full h-8 text-xs bg-canvas hover:bg-canvas/80 border-border-base transition-colors">
                                             <SelectValue placeholder="Category" />
                                         </SelectTrigger>
                                         <SelectContent sideOffset={4} className="font-sans">
                                             <SelectItem value="All Categories">All Categories</SelectItem>
-                                            <SelectItem value="Villa">Villa</SelectItem>
-                                            <SelectItem value="Land">Land</SelectItem>
-                                            <SelectItem value="Commercial">Commercial</SelectItem>
-                                            <SelectItem value="Premium House">Premium House</SelectItem>
-                                            <SelectItem value="Apartment">Apartment</SelectItem>
-                                            <SelectItem value="Townhouse">Townhouse</SelectItem>
-                                            <SelectItem value="Warehouse">Warehouse</SelectItem>
+                                            <SelectItem value="villas">Villa</SelectItem>
+                                            <SelectItem value="strategic_land">Land</SelectItem>
+                                            <SelectItem value="commercial">Commercial</SelectItem>
+                                            <SelectItem value="premium_houses">Premium House</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -220,7 +145,7 @@ export default function InventoryTable() {
                                     Listing Type
                                 </DropdownMenuLabel>
                                 <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                                    <Select value={filters.listingType || ""} onValueChange={(val) => setListingType(val)}>
+                                    <Select value={filters.listingType || ""} onValueChange={(val) => handleFilterChange('listingType', val)}>
                                         <SelectTrigger className="w-full h-8 text-xs bg-canvas hover:bg-canvas/80 border-border-base transition-colors">
                                             <SelectValue placeholder="Listing Type" />
                                         </SelectTrigger>
@@ -239,15 +164,15 @@ export default function InventoryTable() {
                                     Status
                                 </DropdownMenuLabel>
                                 <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                                    <Select value={filters.status || ""} onValueChange={(val) => setStatus(val)}>
+                                    <Select value={filters.status || ""} onValueChange={(val) => handleFilterChange('status', val)}>
                                         <SelectTrigger className="w-full h-8 text-xs bg-canvas hover:bg-canvas/80 border-border-base transition-colors">
                                             <SelectValue placeholder="Status" />
                                         </SelectTrigger>
                                         <SelectContent sideOffset={4} className="font-sans">
                                             <SelectItem value="All Status">All Status</SelectItem>
-                                            <SelectItem value="Available">Available</SelectItem>
-                                            <SelectItem value="Sold">Sold</SelectItem>
-                                            <SelectItem value="Rented">Rented</SelectItem>
+                                            <SelectItem value="available">Available</SelectItem>
+                                            <SelectItem value="sold">Sold</SelectItem>
+                                            <SelectItem value="rented">Rented</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -259,33 +184,14 @@ export default function InventoryTable() {
                                     Visibility
                                 </DropdownMenuLabel>
                                 <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                                    <Select value={filters.visibility || ""} onValueChange={(val) => setVisibility(val)}>
+                                    <Select value={filters.visibility || ""} onValueChange={(val) => handleFilterChange('visibility', val)}>
                                         <SelectTrigger className="w-full h-8 text-xs bg-canvas hover:bg-canvas/80 border-border-base transition-colors">
                                             <SelectValue placeholder="Visibility" />
                                         </SelectTrigger>
                                         <SelectContent sideOffset={4} className="font-sans">
                                             <SelectItem value="All Visibilities">All Visibilities</SelectItem>
-                                            <SelectItem value="Published">Published</SelectItem>
-                                            <SelectItem value="Draft">Draft</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </DropdownMenuGroup>
-
-                            {/* Partnership */}
-                            <DropdownMenuGroup className="pb-2">
-                                <DropdownMenuLabel className="text-text-muted uppercase tracking-wider text-[10px] px-0 pb-1.5 pt-0">
-                                    Partnership
-                                </DropdownMenuLabel>
-                                <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                                    <Select value={filters.partnership || ""} onValueChange={(val) => setPartnership(val)}>
-                                        <SelectTrigger className="w-full h-8 text-xs bg-canvas hover:bg-canvas/80 border-border-base transition-colors">
-                                            <SelectValue placeholder="Partnership" />
-                                        </SelectTrigger>
-                                        <SelectContent sideOffset={4} className="font-sans">
-                                            <SelectItem value="All Partnerships">All Partnerships</SelectItem>
-                                            <SelectItem value="Open Listing">Open Listing</SelectItem>
-                                            <SelectItem value="Exclusive">Exclusive</SelectItem>
+                                            <SelectItem value="published">Published</SelectItem>
+                                            <SelectItem value="draft">Draft</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -299,7 +205,7 @@ export default function InventoryTable() {
             {/* Reusable Data Table Component */}
             <DataTable
                 columns={columns}
-                data={mockProperties}
+                data={properties.data}
                 onRowClick={(row) => router.visit(route('inventory.detail', { id: row.id }))}
             />
         </div>

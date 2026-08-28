@@ -21,12 +21,9 @@ Route::get('/', function () {
 })->name('dashboard');
 
 Route::prefix('/inventory')->group(function () {
-    // Route controller backend
     Route::post('/', [PropertyController::class, 'store'])->name('inventory.store');
 
-    Route::get('/', function () {
-        return Inertia::render('Inventory/Inventory');
-    })->name('inventory');
+    Route::get('/', [PropertyController::class, 'index'])->name('inventory');
 
     Route::get('/add', function () {
         return Inertia::render('Inventory/AddInventory');
