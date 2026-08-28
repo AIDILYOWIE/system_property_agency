@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\NewLeadController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PropertyController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,6 +21,9 @@ Route::get('/', function () {
 })->name('dashboard');
 
 Route::prefix('/inventory')->group(function () {
+    // Route controller backend
+    Route::post('/', [PropertyController::class, 'store'])->name('inventory.store');
+
     Route::get('/', function () {
         return Inertia::render('Inventory/Inventory');
     })->name('inventory');
@@ -62,6 +67,8 @@ Route::get('/buyer-pipeline', function () {
 Route::get('/dossier/preview', function () {
     return Inertia::render('Dossier/DossierPage');
 })->name('dossier.preview');
+
+Route::get('/new-lead', [NewLeadController::class, 'index'])->name('new-lead');
 
 
 

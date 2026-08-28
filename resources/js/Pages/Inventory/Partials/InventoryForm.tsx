@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import DashboardLayout from "@/Layouts/DashboardLayout";
-import { router, Link } from "@inertiajs/react";
+import { router, Link, useForm } from "@inertiajs/react";
+import { toast } from "@/Components/ui/toast";
 import { cn } from "@/lib/utils";
 import {
     Info,
@@ -19,7 +19,7 @@ import {
     PlusCircle,
 } from "lucide-react";
 import { Input } from "@/Components/ui/input";
-import { FieldLabel, FieldDescription, Field } from "@/Components/ui/field";
+import { FieldLabel, FieldDescription, Field, FieldError } from "@/Components/ui/field";
 import {
     InputGroup,
     InputGroupAddon,
@@ -58,12 +58,6 @@ type Category =
     | "";
 type TitleStatus = "freehold" | "leasehold" | "";
 type Currency = "IDR" | "USD";
-type Partnership =
-    | "commission"
-    | "open_slot_1"
-    | "open_slot_2"
-    | "open_slot_3"
-    | "";
 type Zoning = "yellow" | "commercial" | "green" | "pink" | "";
 
 interface FormState {
@@ -72,7 +66,6 @@ interface FormState {
     description: string;
     price: string;
     currency: Currency;
-    partnership: Partnership;
     landSize: string;
     buildingSize: string;
     bedrooms: string;
@@ -87,30 +80,10 @@ interface FormState {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-//  Data
-const PARTNERSHIPTYPE = [
-
-    {
-        value: "commission",
-        label: "Commission",
-    },
-    {
-        value: "open_slot_1",
-        label: "Open Slot 1",
-    },
-    {
-        value: "open_slot_2",
-        label: "Open Slot 2",
-    },
-    {
-        value: "open_slot_3",
-        label: "Open Slot 3",
-    },
-];
 
 const CURRENCY = [
-    { label: "US Dollar", value: "$" },
-    { label: "Indonesian Rupiah", value: "Rp" },
+    { label: "US Dollar", value: "USD" },
+    { label: "Indonesian Rupiah", value: "IDR" },
 ];
 
 
@@ -142,55 +115,62 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
     );
     const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
-    const [form, setForm] = useState<FormState>({
+    const { data, setData, post, processing, errors } = useForm({
         title: initialData?.title ?? "",
-        location: initialData?.location ?? "",
+        location_area: initialData?.location ?? "",
         description: initialData?.description ?? "",
         price: initialData?.price ?? "",
-        currency: initialData?.currency ?? "USD",
-        partnership: initialData?.partnership ?? "",
-        landSize: initialData?.landSize ?? "",
-        buildingSize: initialData?.buildingSize ?? "",
+        currency: initialData?.currency ?? "IDR",
+        land_size_sqm: initialData?.landSize ?? "",
+        building_size_sqm: initialData?.buildingSize ?? "",
         bedrooms: initialData?.bedrooms ?? "",
         bathrooms: initialData?.bathrooms ?? "",
-        listingType: initialData?.listingType ?? "sale",
+        listing_type: initialData?.listingType ?? "sale",
         category: initialData?.category ?? "",
-        titleStatus: initialData?.titleStatus ?? "",
-        leaseholdYears: initialData?.leaseholdYears ?? "",
-        projectedRoi: initialData?.projectedRoi ?? "",
+        tenure_type: initialData?.titleStatus ?? "",
+        leasehold_years: initialData?.leaseholdYears ?? "",
+        projected_roi: initialData?.projectedRoi ?? "",
         zoning: initialData?.zoning ?? "",
+        main_thumbnail: null as File | null,
+        gallery: [] as File[],
     });
 
-    const isLand = form.category === "strategic_land";
-    const isLeasehold = form.titleStatus === "leasehold";
-
-    function set<K extends keyof FormState>(key: K, value: FormState[K]) {
-        setForm((prev) => ({ ...prev, [key]: value }));
-    }
+    const isLand = data.category === "strategic_land";
+    const isLeasehold = data.tenure_type === "leasehold";
 
     function handleThumbnailChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (file) {
+            setData("main_thumbnail", file);
             setThumbnailPreview(URL.createObjectURL(file));
         }
     }
 
     function handleGalleryChange(e: React.ChangeEvent<HTMLInputElement>) {
         const files = Array.from(e.target.files ?? []);
-        const previews = files.map((f) => URL.createObjectURL(f));
-        setGalleryPreviews((prev) => [...prev, ...previews]);
-    }
-
-    function handleSaveDraft() {
-        // TODO: submit as draft
-        console.log("Save as Draft", { ...form, status: "draft" });
+        if (files.length > 0) {
+            setData("gallery", [...data.gallery, ...files]);
+            const previews = files.map((f) => URL.createObjectURL(f));
+            setGalleryPreviews((prev) => [...prev, ...previews]);
+        }
     }
 
     function handlePublish(e: React.FormEvent) {
         e.preventDefault();
-        // TODO: submit via Inertia router.post
-        console.log("Publish Listing", { ...form, status: "available" });
+
+        post(route('inventory.store'), {
+            forceFormData: true,
+            onError: (err) => {
+                toast.add({
+                    title: "Validation Error",
+                    description: "Please check the highlighted fields.",
+                    type: "error"
+                });
+                console.error(err);
+            }
+        });
     }
+
     return (
         <div className="flex flex-col gap-4">
             <Breadcrumb>
@@ -221,7 +201,7 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <form onSubmit={handlePublish}>
+            <form id="inventory-form" onSubmit={handlePublish}>
                 {/* ── Two-column grid ──────────────────────────────────── */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* ── LEFT: Main Details ─────────────────── */}
@@ -234,23 +214,26 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                             <div className="flex flex-col gap-5">
                                 {/* Property Title */}
                                 <div className="">
-                                    <Field>
+                                    <Field data-invalid={!!errors.title} >
                                         <FieldLabel required>
                                             Property Title
                                         </FieldLabel>
                                         <Input
                                             type="text"
                                             placeholder="e.g., Beachfront Modern Villa Seminyak"
-                                            value={form.title}
+                                            value={data.title}
                                             onChange={(e) =>
-                                                set(
+                                                setData(
                                                     "title",
                                                     e.target.value as string,
                                                 )
                                             }
                                             required
-                                            className="!bg-canvas"
+                                            aria-invalid={!!errors.title}
                                         />
+                                        {errors.title && (
+                                            <FieldError>{errors.title}</FieldError>
+                                        )}
                                     </Field>
                                 </div>
 
@@ -259,10 +242,10 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                     <FieldLabel required>Location Area</FieldLabel>
                                     <InputGroup className="!focus:ring-0">
                                         <InputGroupInput
-                                            value={form.location}
+                                            value={data.location_area}
                                             onChange={(e) =>
-                                                set(
-                                                    "location",
+                                                setData(
+                                                    "location_area",
                                                     e.target.value as string,
                                                 )
                                             }
@@ -285,9 +268,9 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                     <FieldLabel optional>Description</FieldLabel>
                                     <Textarea
                                         rows={6}
-                                        value={form.description}
+                                        value={data.description}
                                         onChange={(e) =>
-                                            set(
+                                            setData(
                                                 "description",
                                                 e.target.value as string,
                                             )
@@ -311,9 +294,9 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                         <ButtonGroup>
                                             <Select
                                                 items={CURRENCY}
-                                                value={form.currency}
+                                                value={data.currency}
                                                 onValueChange={(value) =>
-                                                    set(
+                                                    setData(
                                                         "currency",
                                                         value as Currency,
                                                     )
@@ -324,7 +307,7 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                                         "!w-max text-base !rounded-tr-none !rounded-br-none !p-0 !px-2"
                                                     }
                                                 >
-                                                    {form.currency}
+                                                    {data.currency}
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
@@ -343,6 +326,8 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                                 </SelectContent>
                                             </Select>
                                             <Input
+                                                value={data.price}
+                                                onChange={(e) => setData("price", e.target.value)}
                                                 className="!bg-canvas !rounded-lg !rounded-tl-none !rounded-bl-none "
                                                 placeholder="Enter your price"
                                             />
@@ -350,40 +335,6 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                     </Field>
                                 </div>
 
-                                {/* Partnership Type */}
-                                <div className="col-span-2 sm:col-span-1">
-                                    <Field>
-                                        <FieldLabel required>
-                                            Partnership Type
-                                        </FieldLabel>
-                                        <Select
-                                            items={PARTNERSHIPTYPE}
-                                            value={form.partnership}
-                                            onValueChange={(value) =>
-                                                set(
-                                                    "partnership",
-                                                    value as Partnership,
-                                                )
-                                            }
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select partnership type" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectGroup>
-                                                    {PARTNERSHIPTYPE.map((item) => (
-                                                        <SelectItem
-                                                            key={item.value}
-                                                            value={item.value}
-                                                        >
-                                                            {item.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
-                                    </Field>
-                                </div>
 
                                 {/* Land Size */}
                                 <Field>
@@ -392,10 +343,10 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                     </FieldLabel>
                                     <InputGroup className="!focus:ring-0">
                                         <InputGroupInput
-                                            value={form.landSize}
+                                            value={data.land_size_sqm}
                                             onChange={(e) =>
-                                                set(
-                                                    "landSize",
+                                                setData(
+                                                    "land_size_sqm",
                                                     e.target.value as string,
                                                 )
                                             }
@@ -418,10 +369,10 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                     </FieldLabel>
                                     <InputGroup className="!focus:ring-0">
                                         <InputGroupInput
-                                            value={form.buildingSize}
+                                            value={data.building_size_sqm}
                                             onChange={(e) =>
-                                                set(
-                                                    "buildingSize",
+                                                setData(
+                                                    "building_size_sqm",
                                                     e.target.value as string,
                                                 )
                                             }
@@ -448,9 +399,9 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                                 <BedDouble size={15} />
                                             </InputGroupAddon>
                                             <InputGroupInput
-                                                value={form.bedrooms}
+                                                value={data.bedrooms}
                                                 onChange={(e) =>
-                                                    set(
+                                                    setData(
                                                         "bedrooms",
                                                         e.target.value as string,
                                                     )
@@ -468,9 +419,9 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                                 <Bath size={15} />
                                             </InputGroupAddon>
                                             <InputGroupInput
-                                                value={form.bathrooms}
+                                                value={data.bathrooms}
                                                 onChange={(e) =>
-                                                    set(
+                                                    setData(
                                                         "bathrooms",
                                                         e.target.value as string,
                                                     )
@@ -504,11 +455,11 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                                     key={type}
                                                     type="button"
                                                     onClick={() =>
-                                                        set("listingType", type)
+                                                        setData("listing_type", type)
                                                     }
                                                     className={cn(
                                                         "flex-1 py-2 text-sm font-medium rounded-lg transition-all",
-                                                        form.listingType === type
+                                                        data.listing_type === type
                                                             ? "bg-white shadow-sm text-primary"
                                                             : "text-text-muted hover:text-text-primary",
                                                     )}
@@ -547,9 +498,9 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                     <FieldLabel required>Category</FieldLabel>
                                     <Select
                                         items={CATEGORYS}
-                                        value={form.category}
+                                        value={data.category}
                                         onValueChange={(value) =>
-                                            set("category", value as Category)
+                                            setData("category", value as Category)
                                         }
                                     >
                                         <SelectTrigger>
@@ -702,9 +653,9 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                     <FieldLabel>Title Status</FieldLabel>
                                     <Select
                                         items={TITLESTATUS}
-                                        value={form.titleStatus}
+                                        value={data.tenure_type}
                                         onValueChange={(value) =>
-                                            set("titleStatus", value as TitleStatus)
+                                            setData("tenure_type", value as TitleStatus)
                                         }
                                     >
                                         <SelectTrigger
@@ -738,12 +689,12 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                         <InputGroup className="!focus:ring-0 !bg-white/10 !border-white/20">
                                             <InputGroupInput
                                                 type="number"
-                                                value={form.leaseholdYears}
+                                                value={data.leasehold_years}
                                                 className="!text-white !placeholder-white/30"
                                                 placeholder="e.g., 25"
                                                 onChange={(e) =>
-                                                    set(
-                                                        "leaseholdYears",
+                                                    setData(
+                                                        "leasehold_years",
                                                         e.target.value,
                                                     )
                                                 }
@@ -767,10 +718,10 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                         <InputGroup className="!focus:ring-0 !bg-white/10 !border-white/20">
                                             <InputGroupInput
                                                 type="number"
-                                                value={form.projectedRoi}
+                                                value={data.projected_roi}
                                                 onChange={(e) =>
-                                                    set(
-                                                        "projectedRoi",
+                                                    setData(
+                                                        "projected_roi",
                                                         e.target.value,
                                                     )
                                                 }
@@ -794,9 +745,9 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                         <FieldLabel>Zoning</FieldLabel>
                                         <Select
                                             items={ZOONING}
-                                            value={form.zoning}
+                                            value={data.zoning}
                                             onValueChange={(value) =>
-                                                set("zoning", value as Zoning)
+                                                setData("zoning", value as Zoning)
                                             }
                                         >
                                             <SelectTrigger
