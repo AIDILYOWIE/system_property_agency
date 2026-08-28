@@ -11,12 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('activity_logs', function (Blueprint $table) {
+        Schema::create('customer_activity_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('customer_id')->constrained('customers')->onDelete('cascade');
-            $table->string('action');
+            $table->foreignId('inquiry_id')->nullable()->constrained('inquiries')->onDelete('cascade');
+            $table->string('action_type');
             $table->text('description')->nullable();
-            $table->timestamp('created_at')->nullable();
+            $table->jsonb('old_values')->nullable();
+            $table->jsonb('new_values')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -25,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('activity_logs');
+        Schema::dropIfExists('customer_activity_logs');
     }
 };
