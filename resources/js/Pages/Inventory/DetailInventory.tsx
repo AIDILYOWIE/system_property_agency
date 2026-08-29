@@ -13,6 +13,7 @@ import {
     LockKeyhole,
     TrendingUp,
     UserX,
+    Plus,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -101,6 +102,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
     const [isPublic, setIsPublic] = useState(property?.visibility === 'published');
     const [galleryOpen, setGalleryOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
     // Fallback safe rendering incase property is undefined during hydration errors
     if (!property) {
@@ -321,8 +323,8 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                                 memproses properti ini.
                                             </p>
                                         </div>
-                                        <button className="text-xs font-semibold text-primary bg-[#EAF3EF] px-3 py-1.5 rounded-md hover:bg-[#EAF3EF]/80 transition-colors">
-                                            + Tambah Client
+                                        <button className="text-xs flex gap-1 items-center font-semibold text-primary bg-[#EAF3EF] px-3 py-1.5 rounded-md hover:bg-[#EAF3EF]/80 transition-colors">
+                                            <Plus size={14} className="font-medium" /> Tambah
                                         </button>
                                     </div>
                                 }
@@ -429,12 +431,22 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                     <h4 className="text-sm font-bold text-text-primary">
                                         Description
                                     </h4>
-                                    <p className="text-xs text-text-muted leading-relaxed line-clamp-4">
-                                        {property.description}
+                                    <p className="text-xs text-text-muted leading-relaxed whitespace-pre-wrap">
+                                        {isDescriptionExpanded
+                                            ? property.description
+                                            : property.description.length > 100
+                                                ? `${property.description.substring(0, 100)}...`
+                                                : property.description
+                                        }
                                     </p>
-                                    <button className="text-xs font-semibold text-primary hover:underline">
-                                        Baca Selengkapnya
-                                    </button>
+                                    {property.description.length > 100 && (
+                                        <button
+                                            onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                                            className="text-xs font-semibold text-primary hover:underline"
+                                        >
+                                            {isDescriptionExpanded ? "Tutup" : "Baca Selengkapnya"}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -461,10 +473,10 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                     </div>
                                     <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-3">
                                         <span className="text-xs text-white/70">
-                                            Projected ROI
+                                            Projected ROI   
                                         </span>
                                         <span className="text-sm font-bold text-[#52A77A]">
-                                            {property.dossier.roi}
+                                            {property.dossier.roi} % / Year
                                         </span>
                                     </div>
                                     <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-3">
