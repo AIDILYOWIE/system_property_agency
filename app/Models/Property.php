@@ -52,10 +52,10 @@ class Property extends Model
         return $this->hasOne(PropertyImage::class)->where('is_main_thumbnail', true);
     }
 
-    // public function inquiries(): HasMany
-    // {
-    //     return $this->hasMany(Inquiry::class);
-    // }
+    public function inquiries(): HasMany
+    {
+        return $this->hasMany(Inquiry::class);
+    }
 
     public function getDaysOnMarketAttribute(): int
     {

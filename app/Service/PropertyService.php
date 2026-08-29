@@ -31,7 +31,7 @@ class PropertyService
         $this->applySearchAndFilters($query, $params);
         $this->applySorting($query, $params);
 
-        return $query->paginate(10)->through(fn($item) => $this->formatPropertyData($item));
+        return $query->paginate(10);
     }
 
     /**
@@ -96,36 +96,14 @@ class PropertyService
     }
 
     /**
-     * Format the property model instance into a client-safe DTO/Array representation.
+     * Retrieve detailed data of a single property (US 1.2)
      *
-     * @param Property $item
-     * @return array
+     * @param string|int $id
+     * @return Property
      */
-    private function formatPropertyData($item): array
+    public function getPropertyDetails($id): Property
     {
-        $listingType = $item->listing_type === 'sale' ? 'For Sale' : 'For Rent';
-
-        $categoryMap = [
-            'villas' => 'Villas',
-            'premium_houses' => 'Premium Houses',
-            'strategic_land' => 'Strategic Land',
-            'commercial' => 'Commercial'
-        ];
-
-        return [
-            'id' => $item->id,
-            'title' => $item->title,
-            'location' => $item->location_area,
-            'price' => $item->price,
-            'currency' => $item->currency,
-            'category' => $categoryMap[$item->category] ?? ucfirst(str_replace('_', ' ', $item->category)),
-            'listingType' => $listingType,
-            'status' => $item->status,
-            'visibility' => $item->visibility,
-            'leads' => $item->inquiries_count ?? 0,
-            'days_on_market' => $item->days_on_market,
-            'thumbnail' => Storage::url($item->mainImage->image_path),
-        ];
+        return Property::with(['images'])->withCount('inquiries')->findOrFail($id);
     }
 
     /**

@@ -61,18 +61,49 @@ const clientColumns: ColumnDef<DataTableFeatures, ClientData>[] = [
     }
 ];
 
-export default function DetailInventory() {
-    const [isPublic, setIsPublic] = useState(true);
+interface DetailInventoryProps {
+    property: {
+        id: string;
+        title: string;
+        location: string;
+        price_string: string;
+        category: string;
+        listingType: string;
+        status: string;
+        visibility: string;
+        leads: number;
+        days_on_market: number;
+        added_date_human: string;
+        views: number;
+        images: string[];
+        description: string;
+        specification: {
+            bedrooms: number;
+            bathrooms: number;
+            land_size: number;
+            building_size: number;
+        };
+        dossier: {
+            tenure: string;
+            roi: string;
+            zoning: string;
+            partnership: string;
+        };
+    }
+}
+
+export default function DetailInventory({ property }: DetailInventoryProps) {
+    // Wait for later step to refactor toggle functionality 
+    const [isPublic, setIsPublic] = useState(property?.visibility === 'published');
     const [galleryOpen, setGalleryOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    const propertyImages = [
-        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-        "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-        "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
-    ];
+    // Fallback safe rendering incase property is undefined during hydration errors
+    if (!property) {
+        return <DashboardLayout pageTitle="Loading..." action={<></>}><div className="p-8">Loading property details...</div></DashboardLayout>;
+    }
+
+    const propertyImages = property.images;
 
     const openGallery = (index: number) => {
         setCurrentImageIndex(index);
@@ -102,7 +133,7 @@ export default function DetailInventory() {
             description: checked
                 ? "Properti ini sekarang dapat dilihat oleh publik."
                 : "Properti ini diturunkan (Draft) dan disembunyikan.",
-            type: checked ? "success" : "info" as any, // fallback for typescript checking
+            type: checked ? "success" : "info" as any,
         });
     };
 
@@ -120,10 +151,13 @@ export default function DetailInventory() {
         };
     }, [galleryOpen]);
 
+    const isStale = property.days_on_market > 60 && property.leads === 0;
+
     return (
         <>
-            <DashboardLayout pageTitle="Modern Villa Ubud"
-                pageDescription="Ubud, Bali • Ditambahkan 65 hari yang lalu"
+            <DashboardLayout
+                pageTitle={property.title}
+                pageDescription={`${property.location} • Ditambahkan ${property.added_date_human}`}
                 action={
                     <div className="flex gap-2">
                         <div className="flex gap-2 items-center w-[100px]">
@@ -136,6 +170,7 @@ export default function DetailInventory() {
                         </div>
                         <button
                             type="button"
+                            // NOTE: this edit feature is pending PRD updates
                             onClick={() => router.visit(route('inventory.edit'))}
                             className="btn btn-secondary"
                         >
@@ -165,24 +200,26 @@ export default function DetailInventory() {
                     </Breadcrumb>
 
                     {/* Stale Property Alert Banner */}
-                    <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between shadow-sm animate-fade-in">
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0">
-                                <AlertCircle className="w-5 h-5 fill-current text-red-100 stroke-red-600" />
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-bold text-red-800">
-                                    Stale Listing Detected
-                                </h4>
-                                <p className="text-xs text-red-600 mt-0.5">
-                                    Properti ini telah tayang lebih dari 60 hari
-                                    namun belum mendapatkan lead sama sekali (0 Lead).
-                                    Pertimbangkan untuk mengevaluasi strategi
-                                    pemasaran.
-                                </p>
+                    {isStale && (
+                        <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between shadow-sm animate-fade-in">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0">
+                                    <AlertCircle className="w-5 h-5 fill-current text-red-100 stroke-red-600" />
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-bold text-red-800">
+                                        Stale Listing Detected
+                                    </h4>
+                                    <p className="text-xs text-red-600 mt-0.5">
+                                        Properti ini telah tayang lebih dari 60 hari
+                                        namun belum mendapatkan lead sama sekali ({property.leads} Lead).
+                                        Pertimbangkan untuk mengevaluasi strategi
+                                        pemasaran.
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Left Column: Media & Clients */}
@@ -196,7 +233,7 @@ export default function DetailInventory() {
                                     >
                                         <img
                                             src={propertyImages[0]}
-                                            alt="Villa"
+                                            alt="Cover"
                                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                         />
                                         <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
@@ -208,7 +245,7 @@ export default function DetailInventory() {
                                     >
                                         <img
                                             src={propertyImages[1]}
-                                            alt="Interior"
+                                            alt="Interior 1"
                                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                         />
                                     </div>
@@ -218,7 +255,7 @@ export default function DetailInventory() {
                                     >
                                         <img
                                             src={propertyImages[2]}
-                                            alt="Pool"
+                                            alt="Interior 2"
                                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                         />
                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-semibold text-sm backdrop-blur-[1px] hover:bg-black/50 transition-colors">
@@ -235,7 +272,7 @@ export default function DetailInventory() {
                                         Total Leads
                                     </p>
                                     <p className="text-2xl font-bold text-red-600 leading-none">
-                                        0
+                                        {property.leads}
                                     </p>
                                 </div>
                                 <div className="w-px h-10 bg-border-base"></div>
@@ -244,7 +281,7 @@ export default function DetailInventory() {
                                         Days on Market
                                     </p>
                                     <p className="text-2xl font-bold text-red-600 leading-none">
-                                        65
+                                        {property.days_on_market}
                                     </p>
                                 </div>
                                 <div className="w-px h-10 bg-border-base"></div>
@@ -253,7 +290,7 @@ export default function DetailInventory() {
                                         Views
                                     </p>
                                     <p className="text-2xl font-bold text-text-primary leading-none">
-                                        42
+                                        {property.views}
                                     </p>
                                 </div>
                             </div>
@@ -290,7 +327,7 @@ export default function DetailInventory() {
                                         Total Leads
                                     </p>
                                     <p className="text-2xl font-bold text-red-600 leading-none">
-                                        0
+                                        {property.leads}
                                     </p>
                                 </div>
                                 <div className="w-px h-10 bg-border-base"></div>
@@ -299,7 +336,7 @@ export default function DetailInventory() {
                                         Days on Market
                                     </p>
                                     <p className="text-2xl font-bold text-red-600 leading-none">
-                                        65
+                                        {property.days_on_market}
                                     </p>
                                 </div>
                                 <div className="w-px h-10 bg-border-base"></div>
@@ -308,7 +345,7 @@ export default function DetailInventory() {
                                         Views
                                     </p>
                                     <p className="text-2xl font-bold text-text-primary leading-none">
-                                        42
+                                        {property.views}
                                     </p>
                                 </div>
                             </div>
@@ -316,24 +353,19 @@ export default function DetailInventory() {
                             <div className="bg-white rounded-2xl p-6 shadow-card border border-border-base flex flex-col gap-6">
                                 <div className="w-full flex justify-between items-center">
                                     <h3 className="text-[28px] font-bold text-text-primary mb-1">
-                                        $850,000
+                                        {property.price_string}
                                     </h3>
                                     <div className="flex gap-2">
                                         <span className="flex w-max h-max items-center gap-1.5 px-3 py-1 text-[10px] rounded-md font-bold bg-[#EAF3EF] text-[#2B805A] uppercase   ">
                                             <div className="w-1.5 h-1.5 rounded-full bg-[#2B805A]"></div>{" "}
-                                            Available
+                                            {property.status}
                                         </span>
 
                                         <span className="bg-gray-100 h-max w-max text-gray-500 text-[10px] px-3 py-1 rounded-md font-bold uppercase">
-                                            For Sale
+                                            {property.listingType}
                                         </span>
                                     </div>
                                 </div>
-                                {/* 
-                                <p className="text-sm text-text-muted font-medium mb-6 flex items-center gap-2">
-                                    IDR 13,200,000,000{" "}
-
-                                </p> */}
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-border-base">
@@ -343,7 +375,7 @@ export default function DetailInventory() {
                                                 Bedrooms
                                             </p>
                                             <p className="text-sm font-bold text-text-primary">
-                                                3 Beds
+                                                {property.specification.bedrooms} Beds
                                             </p>
                                         </div>
                                     </div>
@@ -354,7 +386,7 @@ export default function DetailInventory() {
                                                 Bathrooms
                                             </p>
                                             <p className="text-sm font-bold text-text-primary">
-                                                3.5 Baths
+                                                {property.specification.bathrooms} Baths
                                             </p>
                                         </div>
                                     </div>
@@ -365,7 +397,7 @@ export default function DetailInventory() {
                                                 Land Size
                                             </p>
                                             <p className="text-sm font-bold text-text-primary">
-                                                350 m²
+                                                {property.specification.land_size} m²
                                             </p>
                                         </div>
                                     </div>
@@ -376,7 +408,7 @@ export default function DetailInventory() {
                                                 Building
                                             </p>
                                             <p className="text-sm font-bold text-text-primary">
-                                                200 m²
+                                                {property.specification.building_size} m²
                                             </p>
                                         </div>
                                     </div>
@@ -387,18 +419,12 @@ export default function DetailInventory() {
                                         Description
                                     </h4>
                                     <p className="text-xs text-text-muted leading-relaxed line-clamp-4">
-                                        Experience luxury living in the heart of Ubud.
-                                        This modern villa features a spacious open-plan
-                                        living area, a private infinity pool overlooking
-                                        the jungle, and fully equipped modern kitchen.
-                                        Built with premium materials, smart home
-                                        integration, and sustainable design.
+                                        {property.description}
                                     </p>
                                     <button className="text-xs font-semibold text-primary hover:underline">
                                         Baca Selengkapnya
                                     </button>
                                 </div>
-
                             </div>
 
                             {/* Investor Dossier */}
@@ -418,32 +444,32 @@ export default function DetailInventory() {
                                         <span className="text-xs text-white/70">
                                             Title Status
                                         </span>
-                                        <span className="text-sm font-semibold">
-                                            Leasehold (25 Years)
+                                        <span className="text-sm font-semibold text-white">
+                                            {property.dossier.tenure}
                                         </span>
                                     </div>
-                                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                    <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-3">
                                         <span className="text-xs text-white/70">
                                             Projected ROI
                                         </span>
                                         <span className="text-sm font-bold text-[#52A77A]">
-                                            12.5% / Year
+                                            {property.dossier.roi}
                                         </span>
                                     </div>
-                                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                    <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-3">
                                         <span className="text-xs text-white/70">
                                             Zoning
                                         </span>
-                                        <span className="text-sm font-semibold">
-                                            Yellow (Residential)
+                                        <span className="text-sm font-semibold text-white">
+                                            {property.dossier.zoning}
                                         </span>
                                     </div>
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-between mt-3">
                                         <span className="text-xs text-white/70">
                                             Partnership
                                         </span>
-                                        <span className="text-sm font-semibold">
-                                            Open Slot 1
+                                        <span className="text-sm font-semibold text-white">
+                                            {property.dossier.partnership}
                                         </span>
                                     </div>
                                 </CardPrimaryContent>

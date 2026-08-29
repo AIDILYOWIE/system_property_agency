@@ -25,13 +25,12 @@ Route::prefix('/inventory')->group(function () {
 
     Route::get('/', [PropertyController::class, 'index'])->name('inventory');
 
+    Route::get('/detail/{id}', [PropertyController::class, 'show'])->name('inventory.detail');
+    
     Route::get('/add', function () {
         return Inertia::render('Inventory/AddInventory');
     })->name('inventory.add');
 
-    Route::get('/detail', function () {
-        return Inertia::render('Inventory/DetailInventory');
-    })->name('inventory.detail');
 
     Route::get('/edit', function () {
         return Inertia::render('Inventory/EditInventory');

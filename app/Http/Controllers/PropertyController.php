@@ -6,8 +6,11 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StorePropertyRequest;
 use App\Models\Property;
 use App\Service\PropertyService;
+use Faker\Core\Uuid;
 use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
+use App\Http\Resources\PropertyDetailResource;
+use App\Http\Resources\PropertyResource;
 
 class PropertyController extends Controller
 {
@@ -23,10 +26,24 @@ class PropertyController extends Controller
         $properties = $this->propertyService->getAllProperties($request->all());
 
         return Inertia::render('Inventory/Inventory', [
-            'properties' => $properties,
+            'properties' => $properties->through(fn($item) => (new PropertyResource($item))->resolve()),
             'filters' => $request->only(['search', 'category', 'listingType', 'status', 'visibility', 'sort', 'direction'])
         ]);
     }
+
+    /**
+     * Display the specified property detail.
+     * US 1.2 View & Detail Control Center
+     */
+    public function show(string $id)
+    {
+        $property = $this->propertyService->getPropertyDetails($id);
+
+        return Inertia::render('Inventory/DetailInventory', [
+            'property' => (new PropertyDetailResource($property))->resolve()
+        ]);
+    }
+
     /**
      * Store a newly created property in storage.
      * US 1.1 Create Property
