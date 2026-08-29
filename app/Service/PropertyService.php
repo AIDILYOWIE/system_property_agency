@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class PropertyService
 {
@@ -166,5 +167,35 @@ class PropertyService
         // TODO: Implement actual image compression and crop (e.g. using Spatie Image or Intervention Image)
         // For now, we utilize the standard storage.
         return $file->store($directory, 'public');
+    }
+
+    /**
+     * Toggle property visibility (US 1.5)
+     *
+     * @param string|int $id
+     * @param string $visibility ('published' or 'draft')
+     * @return array
+     */
+    public function toggleVisibility($id, string $visibility): array
+    {
+        $property = Property::findOrFail($id);
+
+        if (!$property) {
+            Log::error('Property not found');
+            throw new Exception('Property not found');
+        }
+
+        $property->visibility = $visibility;
+        $property->save();
+
+        // Check for active leads based on pipeline_status
+        $activeLeadsCount = $property->inquiries()
+            ->whereIn('pipeline_status', ['viewing', 'negotiation'])
+            ->count();
+
+        return [
+            'property' => $property,
+            'active_leads_count' => $activeLeadsCount
+        ];
     }
 }

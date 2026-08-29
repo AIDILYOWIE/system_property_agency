@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\StorePropertyRequest;
-use App\Models\Property;
 use App\Service\PropertyService;
-use Faker\Core\Uuid;
-use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
 use App\Http\Resources\PropertyDetailResource;
 use App\Http\Resources\PropertyResource;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class PropertyController extends Controller
 {
@@ -60,7 +59,36 @@ class PropertyController extends Controller
 
             return redirect()->route('inventory')->with('success', 'Property "' . $property->title . '" created successfully.');
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return redirect()->back()->with('error', 'Failed to create property: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Toggle the visibility (published/draft) of a property.
+     * US 1.5 Toggle Invisibility
+     */
+    public function toggleVisibility(Request $request, string $id)
+    {
+
+        try {
+            $request->validate([
+                'visibility' => 'required|in:published,draft',
+            ]);
+
+            $result = $this->propertyService->toggleVisibility($id, $request->visibility);
+            
+            $message = "Properti berhasil diubah menjadi {$request->visibility}.";
+
+            if ($request->visibility === 'draft' && $result['active_leads_count'] > 0) {
+                $message = "Properti disembunyikan. Properti ini memiliki {$result['active_leads_count']} prospek aktif (Viewing/Negotiation). Data prospek tidak akan terhapus dari CRM.";
+            }
+
+            return redirect()->back()->with('success', $message);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->back()->with('Terjadi Kesalahan', 'Gagal mengubah status visibilitas properti.');
+
         }
     }
 }

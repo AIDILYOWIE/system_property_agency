@@ -127,13 +127,13 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
     };
 
     const handlePublicToggle = (checked: boolean) => {
+        const previousState = isPublic;
         setIsPublic(checked);
-        toast.add({
-            title: checked ? "Berhasil dipublikasikan" : "Status diubah",
-            description: checked
-                ? "Properti ini sekarang dapat dilihat oleh publik."
-                : "Properti ini diturunkan (Draft) dan disembunyikan.",
-            type: checked ? "success" : "info" as any,
+
+        router.patch(`/inventory/${property.id}/visibility`, {
+            visibility: checked ? 'published' : 'draft'
+        }, {
+            preserveScroll: true,
         });
     };
 
@@ -478,59 +478,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                     </div>
                 </div>
 
-                {/* <div className="flex items-center justify-between mb-8">
-                <div>
-                    <div className="flex flex-wrap items-center gap-3 mb-1">
-                        <h1 className="text-2xl font-bold text-text-primary leading-tight">
-                            Modern Villa Ubud
-                        </h1>
 
-
-                        <label
-                            className="flex items-center gap-2 cursor-pointer ml-2 border-l border-border-base pl-3"
-                            title="Toggle Public Visibility"
-                        >
-                            <div className="relative">
-                                <input
-                                    type="checkbox"
-                                    className="sr-only peer"
-                                    checked={isPublic}
-                                    onChange={(e) =>
-                                        setIsPublic(e.target.checked)
-                                    }
-                                />
-                                <div className="w-8 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
-                            </div>
-                            <span
-                                className={cn(
-                                    "text-[11px] font-semibold transition-colors",
-                                    isPublic
-                                        ? "text-primary"
-                                        : "text-text-muted"
-                                )}
-                            >
-                                Visible to Public
-                            </span>
-                        </label>
-                    </div>
-                    <p className="text-sm text-text-muted flex items-center gap-1">
-                        <MapPin className="w-4 h-4" /> Ubud, Bali •
-                        Ditambahkan 65 hari yang lalu
-                    </p>
-                </div>
-                <div className="flex gap-3">
-                    <Link
-                        href="/inventory/add"
-                        className="px-4 py-2.5 rounded-xl text-sm font-semibold text-text-primary bg-white border border-border-base hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2"
-                    >
-                        <Edit2 className="w-4 h-4 stroke-[2.5]" /> Edit
-                    </Link>
-                    <button className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary-hover transition-colors shadow-sm flex items-center gap-2">
-                        <LinkIcon className="w-4 h-4 stroke-[2.5]" /> Salin Secret
-                        Link
-                    </button>
-                </div>
-            </div> */}
             </DashboardLayout>
 
             {/* Gallery Modal */}

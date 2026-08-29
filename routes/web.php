@@ -25,8 +25,10 @@ Route::prefix('/inventory')->group(function () {
 
     Route::get('/', [PropertyController::class, 'index'])->name('inventory');
 
+    Route::patch('/{id}/visibility', [PropertyController::class, 'toggleVisibility'])->name('inventory.visibility');
+
     Route::get('/detail/{id}', [PropertyController::class, 'show'])->name('inventory.detail');
-    
+
     Route::get('/add', function () {
         return Inertia::render('Inventory/AddInventory');
     })->name('inventory.add');
