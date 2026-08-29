@@ -37,6 +37,9 @@ class PropertyDetailResource extends JsonResource
         $formattedPrice = number_format($this->price, 0, ',', '.');
         $priceString = $this->currency === 'USD' ? '$' . $formattedPrice : 'IDR ' . $formattedPrice;
 
+        $leadsCount = $this->inquiries_count ?? 0;
+        $isNormal = !($this->days_on_market >= 30 && $leadsCount === 0);
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -46,8 +49,11 @@ class PropertyDetailResource extends JsonResource
             'listingType' => $this->listing_type === 'sale' ? 'For Sale' : 'For Rent',
             'status' => $this->status,
             'visibility' => $this->visibility,
-            'leads' => $this->inquiries_count ?? 0,
-            'days_on_market' => $this->days_on_market,
+            'normal' => [
+                'leads' => $leadsCount,
+                'days_on_market' => $this->days_on_market,
+                'is_normal' => $isNormal
+            ],
             'added_date' => $this->created_at ? $this->created_at->toDateTimeString() : null,
             'added_date_human' => $this->created_at ? $this->created_at->diffForHumans() : '',
             'views' => 42,
@@ -63,7 +69,6 @@ class PropertyDetailResource extends JsonResource
                 'tenure' => $this->tenure_type === 'leasehold' ? 'Leasehold (' . $this->leasehold_years . ' Years)' : 'Freehold',
                 'roi' => $this->projected_roi ? $this->projected_roi . '% / Year' : 'N/A',
                 'zoning' => 'Yellow (Residential)',
-                'partnership' => 'Open Slot'
             ]
         ];
     }

@@ -71,8 +71,11 @@ interface DetailInventoryProps {
         listingType: string;
         status: string;
         visibility: string;
-        leads: number;
-        days_on_market: number;
+        normal: {
+            leads: number;
+            days_on_market: number;
+            is_normal: boolean;
+        };
         added_date_human: string;
         views: number;
         images: string[];
@@ -87,7 +90,6 @@ interface DetailInventoryProps {
             tenure: string;
             roi: string;
             zoning: string;
-            partnership: string;
         };
     }
 }
@@ -152,7 +154,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
         };
     }, [galleryOpen]);
 
-    const isStale = property.days_on_market > 60 && property.leads === 0;
+    const isStale = !property.normal.is_normal;
 
     return (
         <>
@@ -213,7 +215,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                     </h4>
                                     <p className="text-xs text-red-600 mt-0.5">
                                         Properti ini telah tayang lebih dari 60 hari
-                                        namun belum mendapatkan lead sama sekali ({property.leads} Lead).
+                                        namun belum mendapatkan lead sama sekali ({property.normal.leads} Lead).
                                         Pertimbangkan untuk mengevaluasi strategi
                                         pemasaran.
                                     </p>
@@ -275,20 +277,20 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                             {/* Performance Analytic Card (Mobile View) */}
                             <div className="bg-white rounded-2xl p-5 shadow-card border border-border-base flex lg:hidden items-center justify-between">
                                 <div>
-                                    <p className="text-[11px] text-red-500 uppercase font-semibold mb-1">
+                                    <p className={cn("text-[11px] uppercase font-semibold mb-1", property.normal.is_normal ? "text-text-muted" : "text-red-500")}>
                                         Total Leads
                                     </p>
-                                    <p className="text-2xl font-bold text-red-600 leading-none">
-                                        {property.leads}
+                                    <p className={cn("text-2xl font-bold leading-none", property.normal.is_normal ? "text-text-primary" : "text-red-600")}>
+                                        {property.normal.leads}
                                     </p>
                                 </div>
                                 <div className="w-px h-10 bg-border-base"></div>
                                 <div>
-                                    <p className="text-[11px] text-red-500 uppercase font-semibold mb-1">
+                                    <p className={cn("text-[11px] uppercase font-semibold mb-1", property.normal.is_normal ? "text-text-muted" : "text-red-500")}>
                                         Days on Market
                                     </p>
-                                    <p className="text-2xl font-bold text-red-600 leading-none">
-                                        {property.days_on_market}
+                                    <p className={cn("text-2xl font-bold leading-none", property.normal.is_normal ? "text-text-primary" : "text-red-600")}>
+                                        {property.normal.days_on_market}
                                     </p>
                                 </div>
                                 <div className="w-px h-10 bg-border-base"></div>
@@ -330,20 +332,20 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                             {/* Performance Analytic Card (Desktop View) */}
                             <div className="bg-white rounded-2xl p-5 shadow-card border border-border-base hidden lg:flex items-center justify-between">
                                 <div>
-                                    <p className="text-[11px] text-red-500 uppercase font-semibold mb-1">
+                                    <p className={cn("text-[11px] uppercase font-semibold mb-1", property.normal.is_normal ? "text-text-muted" : "text-red-500")}>
                                         Total Leads
                                     </p>
-                                    <p className="text-2xl font-bold text-red-600 leading-none">
-                                        {property.leads}
+                                    <p className={cn("text-2xl font-bold leading-none", property.normal.is_normal ? "text-text-primary" : "text-red-600")}>
+                                        {property.normal.leads}
                                     </p>
                                 </div>
                                 <div className="w-px h-10 bg-border-base"></div>
                                 <div>
-                                    <p className="text-[11px] text-red-500 uppercase font-semibold mb-1">
+                                    <p className={cn("text-[11px] uppercase font-semibold mb-1", property.normal.is_normal ? "text-text-muted" : "text-red-500")}>
                                         Days on Market
                                     </p>
-                                    <p className="text-2xl font-bold text-red-600 leading-none">
-                                        {property.days_on_market}
+                                    <p className={cn("text-2xl font-bold leading-none", property.normal.is_normal ? "text-text-primary" : "text-red-600")}>
+                                        {property.normal.days_on_market}
                                     </p>
                                 </div>
                                 <div className="w-px h-10 bg-border-base"></div>
@@ -471,14 +473,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                             {property.dossier.zoning}
                                         </span>
                                     </div>
-                                    <div className="flex items-center justify-between mt-3">
-                                        <span className="text-xs text-white/70">
-                                            Partnership
-                                        </span>
-                                        <span className="text-sm font-semibold text-white">
-                                            {property.dossier.partnership}
-                                        </span>
-                                    </div>
+
                                 </CardPrimaryContent>
                             </CardPrimary>
                         </div>
