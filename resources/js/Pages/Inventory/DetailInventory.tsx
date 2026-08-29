@@ -104,6 +104,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
     }
 
     const propertyImages = property.images;
+    console.log(propertyImages)
 
     const openGallery = (index: number) => {
         setCurrentImageIndex(index);
@@ -239,29 +240,35 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                         <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
                                     </div>
                                     {/* Thumbnails */}
-                                    <div
-                                        className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
-                                        onClick={() => openGallery(1)}
-                                    >
-                                        <img
-                                            src={propertyImages[1]}
-                                            alt="Interior 1"
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                    </div>
-                                    <div
-                                        className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
-                                        onClick={() => openGallery(2)}
-                                    >
-                                        <img
-                                            src={propertyImages[2]}
-                                            alt="Interior 2"
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-semibold text-sm backdrop-blur-[1px] hover:bg-black/50 transition-colors">
-                                            +{Math.max(0, propertyImages.length - 2)}
+                                    {propertyImages[1] && (
+                                        <div
+                                            className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
+                                            onClick={() => openGallery(1)}
+                                        >
+                                            <img
+                                                src={propertyImages[1]}
+                                                alt="Interior 1"
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
                                         </div>
-                                    </div>
+                                    )}
+                                    {propertyImages[2] && (
+                                        <div
+                                            className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
+                                            onClick={() => openGallery(2)}
+                                        >
+                                            <img
+                                                src={propertyImages[2]}
+                                                alt="Interior 2"
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
+                                            {propertyImages.length > 3 && (
+                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-semibold text-sm backdrop-blur-[1px] hover:bg-black/50 transition-colors">
+                                                    +{propertyImages.length - 3}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

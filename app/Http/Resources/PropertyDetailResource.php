@@ -26,17 +26,13 @@ class PropertyDetailResource extends JsonResource
         $mainImage = $this->images->where('is_main_thumbnail', true)->first();
         $galleryImages = $this->images->where('is_main_thumbnail', false)->sortBy('sort_order')->values();
 
-        $mainImageUrl = $mainImage ? Storage::url($mainImage->image_path) : 'https://placehold.co/1200x800?text=No+Image';
+        $mainImageUrl = Storage::url($mainImage->image_path);
 
         $imageUrls = [$mainImageUrl];
         foreach ($galleryImages as $img) {
             $imageUrls[] = Storage::url($img->image_path);
         }
 
-        // Fill array to ensure at least 5 images for the hero grid if not enough
-        while (count($imageUrls) < 5) {
-            $imageUrls[] = 'https://placehold.co/1200x800?text=No+Image';
-        }
 
         $formattedPrice = number_format($this->price, 0, ',', '.');
         $priceString = $this->currency === 'USD' ? '$' . $formattedPrice : 'IDR ' . $formattedPrice;
