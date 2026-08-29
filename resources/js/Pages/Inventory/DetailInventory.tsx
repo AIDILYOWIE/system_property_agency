@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/format";
 import { X, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { CardPrimary, CardPrimaryHeader, CardPrimaryContent } from "@/Components/CardPrimary";
 import { DataTable } from "@/Components/ui/data-table";
@@ -66,7 +67,8 @@ interface DetailInventoryProps {
         id: string;
         title: string;
         location: string;
-        price_string: string;
+        price: number;
+        currency: string;
         category: string;
         listingType: string;
         status: string;
@@ -362,7 +364,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                             <div className="bg-white rounded-2xl p-6 shadow-card border border-border-base flex flex-col gap-6">
                                 <div className="w-full flex justify-between items-center">
                                     <h3 className="text-[28px] font-bold text-text-primary mb-1">
-                                        {property.price_string}
+                                        {formatCurrency(property.price, property.currency)}
                                     </h3>
                                     <div className="flex gap-2">
                                         <span className="flex w-max h-max items-center gap-1.5 px-3 py-1 text-[10px] rounded-md font-bold bg-[#EAF3EF] text-[#2B805A] uppercase   ">

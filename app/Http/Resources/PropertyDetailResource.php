@@ -34,9 +34,6 @@ class PropertyDetailResource extends JsonResource
         }
 
 
-        $formattedPrice = number_format($this->price, 0, ',', '.');
-        $priceString = $this->currency === 'USD' ? '$' . $formattedPrice : 'IDR ' . $formattedPrice;
-
         $leadsCount = $this->inquiries_count ?? 0;
         $isNormal = !($this->days_on_market >= 30 && $leadsCount === 0);
 
@@ -44,7 +41,8 @@ class PropertyDetailResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'location' => $this->location_area,
-            'price_string' => $priceString,
+            'price' => $this->price,
+            'currency' => $this->currency,
             'category' => $categoryMap[$this->category] ?? ucfirst(str_replace('_', ' ', $this->category)),
             'listingType' => $this->listing_type === 'sale' ? 'For Sale' : 'For Rent',
             'status' => $this->status,
