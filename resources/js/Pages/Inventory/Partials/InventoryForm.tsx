@@ -76,6 +76,7 @@ interface FormState {
     leaseholdYears: string;
     projectedRoi: string;
     zoning: Zoning;
+    images?: string[];
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -107,13 +108,15 @@ const ZOONING = [
     { label: "Pink (Tourism)", value: "pink" },
 ]
 
-export default function InventoryForm({ initialData, isEdit }: { initialData?: Partial<FormState>, isEdit?: boolean }) {
+export default function InventoryForm({ initialData, isEdit, propertyId }: { initialData?: Partial<FormState>, isEdit?: boolean, propertyId?: string | number }) {
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
-        null,
+        initialData?.images?.[0] || null
     );
-    const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+    const existingGallery = initialData?.images?.slice(1) || [];
+    const [galleryPreviews, setGalleryPreviews] = useState<string[]>(existingGallery);
+    const [deletedImages, setDeletedImages] = useState<string[]>([]);
 
     const { data, setData, post, processing, errors } = useForm({
         title: initialData?.title ?? "",
@@ -133,6 +136,8 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
         zoning: initialData?.zoning ?? "",
         main_thumbnail: null as File | null,
         gallery: [] as File[],
+        deleted_images: [] as string[],
+        _method: isEdit ? 'patch' : 'post'
     });
 
     const isLand = data.category === "strategic_land";
@@ -158,7 +163,14 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
     function handlePublish(e: React.FormEvent) {
         e.preventDefault();
 
-        post(route('inventory.store'), {
+        // sync deleted_images before post
+        data.deleted_images = deletedImages;
+
+        const targetRoute = isEdit && propertyId
+            ? route('inventory.update', propertyId)
+            : route('inventory.store');
+
+        post(targetRoute, {
             forceFormData: true,
             onError: (err) => {
                 toast.add({
@@ -603,16 +615,17 @@ export default function InventoryForm({ initialData, isEdit }: { initialData?: P
                                                     />
                                                     <button
                                                         type="button"
-                                                        onClick={() =>
-                                                            setGalleryPreviews(
-                                                                (prev) =>
-                                                                    prev.filter(
-                                                                        (_, i) =>
-                                                                            i !==
-                                                                            idx,
-                                                                    ),
-                                                            )
-                                                        }
+                                                        onClick={() => {
+                                                            // if src starts with blob:, it's a new file. if not, it's an existing image.
+                                                            if (!src.startsWith('blob:')) {
+                                                                // add the relative path to deleted images. 
+                                                                // src is likely /storage/properties/...
+                                                                // the backend just needs the path.
+                                                                const path = src.replace('/storage/', '');
+                                                                setDeletedImages(prev => [...prev, path]);
+                                                            }
+                                                            setGalleryPreviews((prev) => prev.filter((_, i) => i !== idx));
+                                                        }}
                                                         className="absolute top-1 right-1 w-5 h-5 rounded-full bg-white/90 border border-border-base flex items-center justify-center text-text-muted hover:text-red-500 transition-colors text-[10px]"
                                                     >
                                                         ✕

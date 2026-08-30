@@ -239,7 +239,7 @@ export const columns = columnHelper.columns([
                             )}
                             <DropdownMenuItem className="cursor-pointer" onClick={() => {
                                 import("@inertiajs/react").then(({ router }) => {
-                                    router.visit(`/inventory/edit`);
+                                    router.visit(`/inventory/edit/${info.row.original.id}`);
                                 });
                             }}>
                                 <Edit2 className="mr-2 h-4 w-4" />

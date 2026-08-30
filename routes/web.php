@@ -34,9 +34,8 @@ Route::prefix('/inventory')->group(function () {
     })->name('inventory.add');
 
 
-    Route::get('/edit', function () {
-        return Inertia::render('Inventory/EditInventory');
-    })->name('inventory.edit');
+    Route::get('/edit/{id}', [PropertyController::class, 'edit'])->name('inventory.edit');
+    Route::patch('/{id}', [PropertyController::class, 'update'])->name('inventory.update');
 });
 
 Route::prefix('/customer')->group(function () {

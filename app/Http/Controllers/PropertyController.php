@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\StorePropertyRequest;
+use App\Http\Requests\UpdatePropertyRequest;
 use App\Service\PropertyService;
 use Inertia\Inertia;
 use App\Http\Resources\PropertyDetailResource;
@@ -65,6 +66,40 @@ class PropertyController extends Controller
     }
 
     /**
+     * Show the form for editing the specified property.
+     */
+    public function edit(string $id)
+    {
+        $property = $this->propertyService->getPropertyDetails($id);
+
+        return Inertia::render('Inventory/EditInventory', [
+            'property' => (new PropertyDetailResource($property))->resolve()
+        ]);
+    }
+
+    /**
+     * Update the specified property in storage.
+     * US 1.3 Edit Property
+     */
+    public function update(UpdatePropertyRequest $request, string $id)
+    {
+        try {
+            $data = $request->validated();
+
+            $mainThumbnail = $request->file('main_thumbnail');
+            $gallery = $request->file('gallery', []);
+            $deletedImages = $request->input('deleted_images', []);
+
+            $property = $this->propertyService->updateProperty($id, $data, $mainThumbnail, $gallery, $deletedImages);
+
+            return redirect()->route('inventory.detail', $property->id)->with('success', 'Property "' . $property->title . '" updated successfully.');
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update property: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Toggle the visibility (published/draft) of a property.
      * US 1.5 Toggle Invisibility
      */
@@ -77,7 +112,7 @@ class PropertyController extends Controller
             ]);
 
             $result = $this->propertyService->toggleVisibility($id, $request->visibility);
-            
+
             $message = "Properti berhasil diubah menjadi {$request->visibility}.";
 
             if ($request->visibility === 'draft' && $result['active_leads_count'] > 0) {
@@ -88,7 +123,6 @@ class PropertyController extends Controller
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->with('Terjadi Kesalahan', 'Gagal mengubah status visibilitas properti.');
-
         }
     }
 }

@@ -177,8 +177,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                         </div>
                         <button
                             type="button"
-                            // NOTE: this edit feature is pending PRD updates
-                            onClick={() => router.visit(route('inventory.edit'))}
+                            onClick={() => router.visit(route('inventory.edit', property.id))}
                             className="btn btn-secondary"
                         >
                             <Edit2 className="w-4 h-4 stroke-[2.5]" />
@@ -323,9 +322,9 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                                 memproses properti ini.
                                             </p>
                                         </div>
-                                        <button className="text-xs flex gap-1 items-center font-semibold text-primary bg-[#EAF3EF] px-3 py-1.5 rounded-md hover:bg-[#EAF3EF]/80 transition-colors">
+                                        {/* <button className="text-xs flex gap-1 items-center font-semibold text-primary bg-[#EAF3EF] px-3 py-1.5 rounded-md hover:bg-[#EAF3EF]/80 transition-colors">
                                             <Plus size={14} className="font-medium" /> Tambah
-                                        </button>
+                                        </button> */}
                                     </div>
                                 }
                             />
@@ -473,7 +472,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                     </div>
                                     <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-3">
                                         <span className="text-xs text-white/70">
-                                            Projected ROI   
+                                            Projected ROI
                                         </span>
                                         <span className="text-sm font-bold text-[#52A77A]">
                                             {property.dossier.roi} % / Year

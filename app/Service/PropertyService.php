@@ -160,6 +160,80 @@ class PropertyService
     }
 
     /**
+     * Update a property with its images.
+     *
+     * @param string|int $id
+     * @param array $data
+     * @param UploadedFile|null $mainThumbnail
+     * @param array<UploadedFile>|null $gallery
+     * @param array $deletedImages Paths of images to drop
+     * @return Property
+     */
+    public function updateProperty($id, array $data, ?UploadedFile $mainThumbnail, ?array $gallery = [], array $deletedImages = []): Property
+    {
+        try {
+            DB::beginTransaction();
+
+            $property = Property::findOrFail($id);
+
+            if (isset($data['category']) && $data['category'] === 'strategic_land') {
+                $data['bedrooms'] = null;
+                $data['bathrooms'] = null;
+            }
+
+            $property->update($data);
+
+            if ($mainThumbnail) {
+                $oldMain = $property->images()->where('is_main_thumbnail', true)->first();
+                if ($oldMain) {
+                    Storage::disk('public')->delete($oldMain->image_path);
+                    $oldMain->delete();
+                }
+
+                $mainImagePath = $this->uploadAndProcessImage($mainThumbnail, 'properties/' . $property->id);
+                $property->images()->create([
+                    'image_path' => $mainImagePath,
+                    'is_main_thumbnail' => true,
+                    'sort_order' => 0
+                ]);
+            }
+
+            if (!empty($deletedImages)) {
+                $imagesToDelete = $property->images()
+                    ->whereIn('image_path', $deletedImages)
+                    ->where('is_main_thumbnail', false) // Safety rule 3: never delete main
+                    ->get();
+
+                foreach ($imagesToDelete as $img) {
+                    Storage::disk('public')->delete($img->image_path);
+                    $img->delete();
+                }
+            }
+
+            if (!empty($gallery)) {
+                $maxSortOrder = $property->images()->max('sort_order') ?? 0;
+                foreach ($gallery as $index => $image) {
+                    if ($image instanceof UploadedFile) {
+                        $imagePath = $this->uploadAndProcessImage($image, 'properties/' . $property->id);
+                        $property->images()->create([
+                            'image_path' => $imagePath,
+                            'is_main_thumbnail' => false,
+                            'sort_order' => $maxSortOrder + $index + 1
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return $property;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * Process image upload (Storage + Pseudo Compression/Auto-Crop)
      */
     private function uploadAndProcessImage(UploadedFile $file, string $directory): string

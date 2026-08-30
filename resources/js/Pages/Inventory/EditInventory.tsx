@@ -5,33 +5,29 @@ import DashboardLayout from "@/Layouts/DashboardLayout";
 import { Check } from "lucide-react";
 import InventoryForm from "./Partials/InventoryForm";
 
-export default function EditInventory() {
-    function handleSaveDraft() {
-        console.log("Save as Draft");
-    }
+export default function EditInventory({ property }: { property: any }) {
 
-    function handlePublish(e: React.FormEvent) {
-        e.preventDefault();
-        console.log("Update Listing");
-    }
-
-    const mockPropertyData = {
-        title: "Modern Villa Ubud",
-        location: "Ubud, Bali",
-        description: "Experience luxury living in the heart of Ubud. This modern villa features a spacious open-plan living area, a private infinity pool overlooking the jungle, and fully equipped modern kitchen. Built with premium materials, smart home integration, and sustainable design elements.",
-        price: "850000",
-        currency: "USD" as const,
-        partnership: "open_slot_1" as any,
-        landSize: "350",
-        buildingSize: "200",
-        bedrooms: "3",
-        bathrooms: "3.5",
-        listingType: "sale" as const,
-        category: "villas" as any,
-        titleStatus: "freehold" as any,
-        leaseholdYears: "",
-        projectedRoi: "12",
-        zoning: "yellow" as any,
+    const mappedInitialData = {
+        id: property.id,
+        title: property.title,
+        location: property.location,
+        description: property.description,
+        price: property.price?.toString() ?? "",
+        currency: property.currency,
+        landSize: property.specification?.land_size?.toString() ?? "",
+        buildingSize: property.specification?.building_size?.toString() ?? "",
+        bedrooms: property.specification?.bedrooms?.toString() ?? "",
+        bathrooms: property.specification?.bathrooms?.toString() ?? "",
+        listingType: (property.listingType === "For Sale" ? "sale" : "rent") as any,
+        category: (property.category?.toLowerCase().replace(/ /g, "_") || "") as any,
+        titleStatus: (property.dossier?.tenure?.toLowerCase().includes("leasehold") ? "leasehold" : "freehold") as any,
+        leaseholdYears: property.dossier?.tenure?.replace(/[^0-9]/g, "") ?? "",
+        projectedRoi: property.dossier?.roi ? property.dossier.roi.toString() : "",
+        zoning: (property.dossier?.zoning?.toLowerCase().includes("yellow") ? "yellow"
+            : property.dossier?.zoning?.toLowerCase().includes("commercial") ? "commercial"
+                : property.dossier?.zoning?.toLowerCase().includes("green") ? "green"
+                    : property.dossier?.zoning?.toLowerCase().includes("pink") ? "pink" : "") as any,
+        images: property.images || [],
     };
 
     return (
@@ -39,22 +35,19 @@ export default function EditInventory() {
             pageTitle="Edit Property"
             pageDescription="Update the details of your property listing."
             action={
-                <div className="flex gap-2">
+                <div className="flex" >
                     <button
-                        type="button"
-                        onClick={handleSaveDraft}
-                        className="btn btn-secondary"
+                        type="submit"
+                        form="inventory-form"
+                        className="btn btn-primary"
                     >
-                        Save as Draft
-                    </button>
-                    <button type="submit" className="btn btn-primary" onClick={handlePublish}>
-                        <Check size={15} strokeWidth={2.5} />
-                        Update Property
+                        <Check className="w-4 h-4 stroke-[2.5]" />
+                        Save
                     </button>
                 </div>
             }
         >
-            <InventoryForm initialData={mockPropertyData} isEdit={true} />
+            <InventoryForm initialData={mappedInitialData} isEdit={true} propertyId={property.id} />
         </DashboardLayout>
     );
 }
