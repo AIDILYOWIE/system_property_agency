@@ -376,30 +376,32 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                 </Field>
 
                                 {/* Building Size */}
-                                <Field>
-                                    <FieldLabel required>
-                                        Building Size (sqm)
-                                    </FieldLabel>
-                                    <InputGroup className="!focus:ring-0">
-                                        <InputGroupInput
-                                            value={data.building_size_sqm}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "building_size_sqm",
-                                                    e.target.value as string,
-                                                )
-                                            }
-                                            type="number"
-                                            className="!bg-canvas"
-                                            placeholder="0"
-                                        />
-                                        <InputGroupAddon align={"inline-end"}>
-                                            <InputGroupText className="text-sm text-text-primary">
-                                                m²
-                                            </InputGroupText>
-                                        </InputGroupAddon>
-                                    </InputGroup>
-                                </Field>
+                                {!isLand && (
+                                    <Field>
+                                        <FieldLabel required>
+                                            Building Size (sqm)
+                                        </FieldLabel>
+                                        <InputGroup className="!focus:ring-0">
+                                            <InputGroupInput
+                                                value={data.building_size_sqm}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "building_size_sqm",
+                                                        e.target.value as string,
+                                                    )
+                                                }
+                                                type="number"
+                                                className="!bg-canvas"
+                                                placeholder="0"
+                                            />
+                                            <InputGroupAddon align={"inline-end"}>
+                                                <InputGroupText className="text-sm text-text-primary">
+                                                    m²
+                                                </InputGroupText>
+                                            </InputGroupAddon>
+                                        </InputGroup>
+                                    </Field>
+                                )}
                             </div>
 
                             {/* Bed / Bath — hidden for Land */}
@@ -458,63 +460,26 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                             title="Classification"
                         >
                             <div className="flex flex-col gap-4">
-                                {/* Listing Type — toggle pill */}
-                                <Field>
-                                    <FieldLabel required>Listing Type</FieldLabel>
-                                    <div className="flex bg-canvas border border-border-base p-1 rounded-lg">
-                                        {(["sale", "rent"] as ListingType[]).map(
-                                            (type) => (
-                                                <button
-                                                    key={type}
-                                                    type="button"
-                                                    onClick={() =>
-                                                        setData("listing_type", type)
-                                                    }
-                                                    className={cn(
-                                                        "flex-1 py-2 text-sm font-medium rounded-lg transition-all",
-                                                        data.listing_type === type
-                                                            ? "bg-white shadow-sm text-primary"
-                                                            : "text-text-muted hover:text-text-primary",
-                                                    )}
-                                                >
-                                                    {type === "sale"
-                                                        ? "For Sale"
-                                                        : "For Rent"}
-                                                </button>
-                                            ),
-                                        )}
-                                        {/* <Tabs
-                                                value={form.listingType}
-                                                onValueChange={(val) => set("listingType", val as ListingType)}
-                                                className="w-full"
-                                            >
-                                                <TabsList className="flex w-full bg-canvas border border-border-base p-1 rounded-xl h-auto !bg-canvas">
-                                                    <TabsTrigger
-                                                        value="sale"
-                                                        className="flex-1 py-2 text-sm font-medium rounded-lg transition-all h-auto data-active:bg-white data-active:shadow-sm data-active:text-primary text-text-muted hover:text-text-primary"
-                                                    >
-                                                        For Sale
-                                                    </TabsTrigger>
-                                                    <TabsTrigger
-                                                        value="rent"
-                                                        className="flex-1 py-2 text-sm font-medium rounded-lg transition-all h-auto data-active:bg-white data-active:shadow-sm data-active:text-primary text-text-muted hover:text-text-primary"
-                                                    >
-                                                        For Rent
-                                                    </TabsTrigger>
-                                                </TabsList>
-                                            </Tabs> */}
-                                    </div>
-                                </Field>
-
                                 {/* Category */}
                                 <Field>
                                     <FieldLabel required>Category</FieldLabel>
                                     <Select
                                         items={CATEGORYS}
                                         value={data.category}
-                                        onValueChange={(value) =>
-                                            setData("category", value as Category)
-                                        }
+                                        onValueChange={(value) => {
+                                            if (value === "strategic_land") {
+                                                setData(prev => ({
+                                                    ...prev,
+                                                    category: value as Category,
+                                                    listing_type: "sale",
+                                                    bedrooms: "",
+                                                    bathrooms: "",
+                                                    building_size_sqm: ""
+                                                }));
+                                            } else {
+                                                setData("category", value as Category);
+                                            }
+                                        }}
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select Category" />
@@ -533,11 +498,41 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                         </SelectContent>
                                     </Select>
                                 </Field>
+                                {/* Listing Type — toggle pill */}
+                                <Field>
+                                    <FieldLabel required>Listing Type</FieldLabel>
+                                    <div className="flex bg-canvas border border-border-base p-1 rounded-lg">
+                                        {(["sale", "rent"] as ListingType[]).map(
+                                            (type) => (
+                                                <button
+                                                    key={type}
+                                                    type="button"
+                                                    disabled={isLand && type === "rent"}
+                                                    onClick={() =>
+                                                        setData("listing_type", type)
+                                                    }
+                                                    className={cn(
+                                                        "flex-1 py-2 text-sm font-medium rounded-lg transition-all",
+                                                        data.listing_type === type
+                                                            ? "bg-white shadow-sm text-primary"
+                                                            : "text-text-muted hover:text-text-primary",
+                                                        (isLand && type === "rent") && "opacity-50 cursor-not-allowed"
+                                                    )}
+                                                >
+                                                    {type === "sale"
+                                                        ? "For Sale"
+                                                        : "For Rent"}
+                                                </button>
+                                            ),
+                                        )}
+                                    </div>
+                                </Field>
+
                             </div>
-                        </SectionCard>
+                        </SectionCard >
 
                         {/* Media Upload */}
-                        <SectionCard icon={<ImageIcon size={16} />} title="Media">
+                        < SectionCard icon={< ImageIcon size={16} />} title="Media" >
                             <div className="flex flex-col gap-4">
                                 {/* Main Thumbnail */}
                                 <Field data-invalid={!!errors.main_thumbnail}>
@@ -666,10 +661,10 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                     )}
                                 </Field>
                             </div>
-                        </SectionCard>
+                        </SectionCard >
 
                         {/* Investor Dossier */}
-                        <CardPrimary>
+                        < CardPrimary >
                             <CardPrimaryHeader
                                 icon={<LockKeyhole size={16} />}
                                 title="Investor Dossier Fields"
@@ -678,7 +673,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                             <CardPrimaryContent className="flex flex-col gap-4 !bg-transparent !space-y-0">
                                 {/* Title Status */}
                                 <Field>
-                                    <FieldLabel>Title Status</FieldLabel>
+                                    <FieldLabel optional>Title Status</FieldLabel>
                                     <Select
                                         items={TITLESTATUS}
                                         value={data.tenure_type}
@@ -711,7 +706,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                 {/* Leasehold Years (conditional) */}
                                 {isLeasehold && (
                                     <Field>
-                                        <FieldLabel>
+                                        <FieldLabel required>
                                             Leasehold Years Remaining
                                         </FieldLabel>
                                         <InputGroup className="!focus:ring-0 !bg-white/10 !border-white/20">
@@ -742,7 +737,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                 <div className="grid grid-cols-2 gap-4">
                                     {/* Projected ROI */}
                                     <Field>
-                                        <FieldLabel>Projected ROI</FieldLabel>
+                                        <FieldLabel optional>Projected ROI</FieldLabel>
                                         <InputGroup className="!focus:ring-0 !bg-white/10 !border-white/20">
                                             <InputGroupInput
                                                 type="number"
@@ -770,7 +765,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
 
                                     {/* Zoning */}
                                     <Field>
-                                        <FieldLabel>Zoning</FieldLabel>
+                                        <FieldLabel optional>Zoning</FieldLabel>
                                         <Select
                                             items={ZOONING}
                                             value={data.zoning}
@@ -801,10 +796,10 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                     </Field>
                                 </div>
                             </CardPrimaryContent>
-                        </CardPrimary>
-                    </div>
-                </div>
-            </form>
-        </div>
+                        </CardPrimary >
+                    </div >
+                </div >
+            </form >
+        </div >
     );
 }
