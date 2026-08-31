@@ -134,7 +134,6 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
     };
 
     const handlePublicToggle = (checked: boolean) => {
-        const previousState = isPublic;
         setIsPublic(checked);
 
         router.patch(`/inventory/${property.id}/visibility`, {
