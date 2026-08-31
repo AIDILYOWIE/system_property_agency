@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\NewLeadController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PropertyController;
@@ -39,21 +40,11 @@ Route::prefix('/inventory')->group(function () {
 });
 
 Route::prefix('/customer')->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('Customer/Customer');
-    })->name('customer');
-
-    Route::get('/add', function () {
-        return Inertia::render('Customer/AddCustomer');
-    })->name('customer.add');
-
-    Route::get('/detail/{id}', function ($id) {
-        return Inertia::render('Customer/DetailCustomer', ['id' => $id]);
-    })->name('customer.detail');
-
-    Route::get('/edit/{id}', function ($id) {
-        return Inertia::render('Customer/EditCustomer', ['id' => $id]);
-    })->name('customer.edit');
+    Route::get('/', [ClientController::class, 'index'])->name('customer');
+    Route::post('/', [ClientController::class, 'store'])->name('customer.store');
+    Route::get('/add', [ClientController::class, 'create'])->name('customer.add');
+    Route::get('/detail/{id}', [ClientController::class, 'show'])->name('customer.detail');
+    Route::get('/edit/{id}', [ClientController::class, 'edit'])->name('customer.edit');
 });
 
 Route::get('/buyer-pipeline', function () {

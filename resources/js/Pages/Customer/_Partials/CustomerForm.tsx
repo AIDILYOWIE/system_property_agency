@@ -36,10 +36,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/Components/ui/breadcrumb";
-import PropertyInterestRepeater, {
-    type PropertyInterest,
-    defaultEntry,
-} from "./PropertyInterestRepeater";
+import SelectSearch, { type PropertyItem } from "@/Components/SelectSearch";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -59,7 +56,7 @@ interface FormState {
     email: string;
     source: Source;
     note: string;
-    propertyInterests: PropertyInterest[];
+    property_id: string; // 1 client only has 1 property
 }
 
 // ─── Source options ────────────────────────────────────────────────────────────
@@ -68,43 +65,46 @@ const SOURCE_OPTIONS = [
     { label: "Website", value: "website" },
     { label: "Instagram", value: "instagram" },
     { label: "TikTok", value: "tiktok" },
-    { label: "Google", value: "google" },
-    { label: "Referral", value: "referral" },
-    { label: "WhatsApp", value: "whatsapp" },
-    { label: "Manual Entry", value: "manual" },
+    { label: "Walk In", value: "walk-in" },
+    { label: "Other", value: "other" },
 ];
 
 // ─── CustomerForm ─────────────────────────────────────────────────────────────
+
+import { useForm } from "@inertiajs/react";
 
 export default function CustomerForm({
     initialData,
     isEdit,
     formId,
+    properties = [],
 }: {
     initialData?: Partial<FormState>;
     isEdit?: boolean;
     formId?: string;
+    properties?: PropertyItem[];
 }) {
-    const [form, setForm] = useState<FormState>({
+    const { data: form, setData: setForm, post, processing, errors } = useForm<FormState>({
         fullName: initialData?.fullName ?? "",
         phone: initialData?.phone ?? "",
         email: initialData?.email ?? "",
         source: initialData?.source ?? "",
         note: initialData?.note ?? "",
-        propertyInterests: initialData?.propertyInterests ?? [defaultEntry()],
+        property_id: initialData?.property_id ?? "",
     });
 
     function set<K extends keyof FormState>(key: K, value: FormState[K]) {
-        setForm((prev) => ({ ...prev, [key]: value }));
-    }
-
-    function handleSaveDraft() {
-        console.log("Save as Draft", { ...form, status: "draft" });
+        setForm(key, value as any);
     }
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        console.log("Submit Customer", form);
+        post(route('customer.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                console.log("Customer Added");
+            },
+        });
     }
 
     return (
@@ -210,25 +210,24 @@ export default function CustomerForm({
                             </div>
                         </SectionCard>
 
-                        {/* ── Property Interests (Dynamic Repeater) ─────── */}
+                        {/* ── Property Interests (SelectSearch) ─────── */}
                         <SectionCard
                             icon={<Building2 size={16} />}
-                            title="Property Interest(s)"
+                            title="Property Interest"
                         >
                             {/* Context hint */}
-                            <p className="text-xs text-text-muted mb-5 -mt-2 leading-relaxed">
-                                A customer may be interested in multiple properties — each entry
-                                creates its own pipeline record. Property Owners are routed to the{" "}
-                                <strong className="text-text-primary">Open Slot Partners</strong>{" "}
-                                pipeline; Buyers & Renters go to the{" "}
-                                <strong className="text-text-primary">Buyer Pipeline</strong>.
+                            <p className="text-xs text-text-muted mb-5 leading-relaxed">
+                                A client typically focuses on one active property at a time. Select the property they are inquiring about.
                             </p>
 
-                            <PropertyInterestRepeater
-                                value={form.propertyInterests}
-                                onChange={(entries) => set("propertyInterests", entries)}
-                                maxEntries={5}
-                            />
+                            <Field>
+                                <FieldLabel required>Interested Property</FieldLabel>
+                                <SelectSearch
+                                    items={properties}
+                                    value={form.property_id}
+                                    onChange={(val) => set("property_id", val || "")}
+                                />
+                            </Field>
                         </SectionCard>
                     </div>
 

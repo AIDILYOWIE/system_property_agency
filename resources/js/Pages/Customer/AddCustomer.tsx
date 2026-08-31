@@ -4,7 +4,7 @@ import DashboardLayout from "@/Layouts/DashboardLayout";
 import { Check, UserPlus } from "lucide-react";
 import CustomerForm from "./_Partials/CustomerForm";
 
-export default function AddCustomer() {
+export default function AddCustomer({ properties }: { properties: any[] }) {
     function handleSaveDraft() {
         console.log("Save customer as Draft");
     }
@@ -20,7 +20,7 @@ export default function AddCustomer() {
                         onClick={handleSaveDraft}
                         className="btn btn-secondary"
                     >
-                        Save as Draft
+                        Save Draft
                     </button>
                     <button
                         type="submit"
@@ -28,12 +28,12 @@ export default function AddCustomer() {
                         className="btn btn-primary"
                     >
                         <Check size={15} strokeWidth={2.5} />
-                        Save Customer
+                        Save
                     </button>
                 </div>
             }
         >
-            <CustomerForm />
+            <CustomerForm properties={properties} formId="customer-form" />
         </DashboardLayout>
     );
 }
