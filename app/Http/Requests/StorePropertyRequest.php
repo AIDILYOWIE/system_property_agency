@@ -37,7 +37,7 @@ class StorePropertyRequest extends FormRequest
             'leasehold_years' => 'nullable|required_if:tenure_type,leasehold|integer|min:1',
             'projected_roi' => 'nullable|numeric|min:0|max:100',
             'main_thumbnail' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB max
-            'gallery' => 'nullable|array',
+            'gallery' => 'required|array',
             'gallery.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ];
     }

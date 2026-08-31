@@ -17,6 +17,7 @@ import {
     Check,
     UploadCloud,
     PlusCircle,
+    X,
 } from "lucide-react";
 import { Input } from "@/Components/ui/input";
 import { FieldLabel, FieldDescription, Field, FieldError } from "@/Components/ui/field";
@@ -539,7 +540,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                         <SectionCard icon={<ImageIcon size={16} />} title="Media">
                             <div className="flex flex-col gap-4">
                                 {/* Main Thumbnail */}
-                                <Field>
+                                <Field data-invalid={!!errors.main_thumbnail}>
                                     <FieldLabel required>Main Thumbnail</FieldLabel>
                                     <Input
                                         ref={thumbnailInputRef}
@@ -559,14 +560,18 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                             <button
                                                 type="button"
                                                 onClick={() => {
+                                                    if (thumbnailPreview && !thumbnailPreview.startsWith('blob:')) {
+                                                        const path = thumbnailPreview.replace('/storage/', '');
+                                                        setDeletedImages(prev => [...prev, path]);
+                                                    }
                                                     setThumbnailPreview(null);
+                                                    setData("main_thumbnail", null);
                                                     if (thumbnailInputRef.current)
-                                                        thumbnailInputRef.current.value =
-                                                            "";
+                                                        thumbnailInputRef.current.value = "";
                                                 }}
-                                                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 border border-border-base flex items-center justify-center text-text-muted hover:text-red-500 transition-colors text-xs"
+                                                className="absolute top-2 right-2 rounded-full bg-white/90 border border-border-base flex items-center justify-center text-text-muted hover:text-red-500 transition-colors text-xs"
                                             >
-                                                ✕
+                                                <X size={18} />
                                             </button>
                                         </div>
                                     ) : (
@@ -575,7 +580,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                             onClick={() =>
                                                 thumbnailInputRef.current?.click()
                                             }
-                                            className="w-full border-2 border-dashed border-border-base bg-canvas hover:bg-white rounded-lg p-6 text-center cursor-pointer transition-colors group flex flex-col items-center justify-center"
+                                            className={`w-full border-2 border-dashed  bg-canvas hover:bg-white rounded-lg p-6 text-center cursor-pointer transition-colors group flex flex-col items-center justify-center ${!!errors.main_thumbnail ? "border-red" : "border-border-base"}`}
                                         >
                                             <div className="w-11 h-11 rounded-full bg-white shadow-sm border border-border-base flex items-center justify-center text-text-primary mb-3 transition-transform">
                                                 <UploadCloud size={18} />
@@ -588,10 +593,13 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                             </p>
                                         </button>
                                     )}
+                                    {errors.main_thumbnail && (
+                                        <FieldError>{errors.main_thumbnail}</FieldError>
+                                    )}
                                 </Field>
 
                                 {/* Gallery */}
-                                <Field>
+                                <Field data-invalid={!!errors.gallery}>
                                     <FieldLabel required>Gallery Images</FieldLabel>
                                     <Input
                                         ref={galleryInputRef}
@@ -606,7 +614,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                             {galleryPreviews.map((src, idx) => (
                                                 <div
                                                     key={idx}
-                                                    className="relative rounded-lg overflow-hidden border border-border-base aspect-square"
+                                                    className="relative rounded-lg overflow-hidden border border-border-base aspect-square group"
                                                 >
                                                     <img
                                                         src={src}
@@ -616,19 +624,23 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                                     <button
                                                         type="button"
                                                         onClick={() => {
-                                                            // if src starts with blob:, it's a new file. if not, it's an existing image.
                                                             if (!src.startsWith('blob:')) {
-                                                                // add the relative path to deleted images. 
-                                                                // src is likely /storage/properties/...
-                                                                // the backend just needs the path.
                                                                 const path = src.replace('/storage/', '');
                                                                 setDeletedImages(prev => [...prev, path]);
+                                                            } else {
+                                                                let newImageIndex = 0;
+                                                                for (let i = 0; i < idx; i++) {
+                                                                    if (galleryPreviews[i].startsWith('blob:')) newImageIndex++;
+                                                                }
+                                                                const newGallery = [...data.gallery];
+                                                                newGallery.splice(newImageIndex, 1);
+                                                                setData("gallery", newGallery);
                                                             }
                                                             setGalleryPreviews((prev) => prev.filter((_, i) => i !== idx));
                                                         }}
-                                                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-white/90 border border-border-base flex items-center justify-center text-text-muted hover:text-red-500 transition-colors text-[10px]"
+                                                        className="absolute top-1 right-1 rounded-full bg-white/90 border border-border-base flex items-center justify-center text-text-muted hover:text-red-500 transition-colors text-xs p-0.5"
                                                     >
-                                                        ✕
+                                                        <X size={14} />
                                                     </button>
                                                 </div>
                                             ))}
@@ -639,7 +651,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                         onClick={() =>
                                             galleryInputRef.current?.click()
                                         }
-                                        className="w-full border-2 border-dashed border-border-base bg-canvas hover:bg-white rounded-lg p-4 text-center cursor-pointer transition-colors flex items-center justify-center gap-2 group"
+                                        className={`w-full border-2 border-dashed bg-canvas hover:bg-white rounded-lg p-4 text-center cursor-pointer transition-colors flex items-center justify-center gap-2 group ${!!errors.gallery ? "border-red" : "border-border-base"}`}
                                     >
                                         <PlusCircle
                                             size={16}
@@ -649,6 +661,9 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                             Add more photos
                                         </span>
                                     </button>
+                                    {errors.gallery && (
+                                        <FieldError>{errors.gallery}</FieldError>
+                                    )}
                                 </Field>
                             </div>
                         </SectionCard>
