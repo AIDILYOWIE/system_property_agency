@@ -1,6 +1,7 @@
 "use client"
 
 import { useTable, type ColumnDef, type RowData } from "@tanstack/react-table"
+import { cn } from "@/lib/utils"
 
 import {
     Table,
@@ -74,15 +75,17 @@ export function DataTable<TData extends RowData>({
                 <TableBody>
                     {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => {
-                            // Custom dimming for draft rows (if 'status' exists and is 'draft')
-                            const isDraft = (row.original as any).status === "draft";
+                            // Custom dimming for draft rows
+                            const isDraft = (row.original as any).visibility === "draft";
                             return (
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
                                     onClick={() => onRowClick && onRowClick(row.original)}
-                                    className={`hover:bg-gray-50 hover:cursor-pointer transition-colors group ${isDraft ? "opacity-60 grayscale-[10%]" : ""
-                                        }`}
+                                    className={cn(
+                                        "hover:bg-gray-50 hover:cursor-pointer transition-all group",
+                                        isDraft && "opacity-50 bg-gray-50/50 grayscale-[50%]"
+                                    )}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="p-0">

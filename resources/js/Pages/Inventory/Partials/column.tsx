@@ -194,7 +194,7 @@ export const columns = columnHelper.columns([
             </div>
         ),
         cell: (info: any) => {
-            const isDraft = info.row.original.status === "draft"
+            const isDraft = info.row.original.visibility === "draft"
             return (
                 <div
                     className="flex items-center justify-center gap-2 px-6 py-4 w-max h-full"
