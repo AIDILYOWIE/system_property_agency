@@ -15,13 +15,13 @@ export default function AddCustomer({ properties }: { properties: any[] }) {
             pageDescription="Register a new customer and assign them to the correct CRM pipeline."
             action={
                 <div className="flex gap-2">
-                    <button
+                    {/* <button
                         type="button"
                         onClick={handleSaveDraft}
                         className="btn btn-secondary"
                     >
                         Save Draft
-                    </button>
+                    </button> */}
                     <button
                         type="submit"
                         form="customer-form"
