@@ -27,98 +27,9 @@ type FilterState = {
     source: string;
 };
 
-// ─── Mock Data ─────────────────────────────────────────────────────────────────
-
-const mockCustomers: CustomerData[] = [
-    {
-        id: "cust-1",
-        name: "Budi Santoso",
-        phone: "08123456789",
-        email: "budi.santoso@email.com",
-        customer_type: "buyer",
-        pipeline_status: "viewing",
-        interested_property: "Modern Villa Ubud",
-        source: "Website",
-        created_at: "2026-08-01T10:00:00Z",
-        last_contacted: "2026-08-20T09:00:00Z",
-    },
-    {
-        id: "cust-2",
-        name: "Sarah Wijaya",
-        phone: "08198765432",
-        email: "sarah.w@gmail.com",
-        customer_type: "renter",
-        pipeline_status: "negotiation",
-        interested_property: "Minimalist Villa Canggu",
-        source: "Instagram",
-        created_at: "2026-08-03T14:30:00Z",
-    },
-    {
-        id: "cust-3",
-        name: "Pak Hartono",
-        phone: "08112345678",
-        customer_type: "property_owner",
-        pipeline_status: "awaiting_payment",
-        source: "Referral",
-        created_at: "2026-08-05T09:15:00Z",
-    },
-    {
-        id: "cust-4",
-        name: "Mega Putri Lestari",
-        phone: "08234567890",
-        email: "mega.putri@outlook.com",
-        customer_type: "buyer",
-        pipeline_status: "new_lead",
-        interested_property: "Beachfront Premium House Seminyak",
-        source: "Website",
-        created_at: "2026-08-10T16:45:00Z",
-    },
-    {
-        id: "cust-5",
-        name: "Reza Aditya",
-        phone: "08567891234",
-        customer_type: "buyer",
-        pipeline_status: "contacted",
-        interested_property: "Modern Villa Ubud",
-        source: "Google",
-        created_at: "2026-08-12T11:00:00Z",
-    },
-    {
-        id: "cust-6",
-        name: "Ibu Dewi Kusuma",
-        phone: "08911234567",
-        email: "dewi.kusuma@gmail.com",
-        customer_type: "property_owner",
-        pipeline_status: "qualifying",
-        source: "WhatsApp",
-        created_at: "2026-08-14T08:00:00Z",
-    },
-    {
-        id: "cust-7",
-        name: "Jonathan Tan",
-        phone: "6281298765432",
-        email: "jontan@corp.co",
-        customer_type: "buyer",
-        pipeline_status: "won",
-        interested_property: "Beachfront Premium House Seminyak",
-        source: "Referral",
-        created_at: "2026-07-20T10:00:00Z",
-    },
-    {
-        id: "cust-8",
-        name: "Rina Marlina",
-        phone: "08312345679",
-        customer_type: "renter",
-        pipeline_status: "lost",
-        source: "Instagram",
-        notes: "Moved to competitor agency",
-        created_at: "2026-07-28T13:00:00Z",
-    },
-];
-
 // ─── CustomerTable Component ────────────────────────────────────────────────────
 
-export default function CustomerTable() {
+export default function CustomerTable({ data }: { data: CustomerData[] }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [filters, setFilters] = useState<FilterState>({
         customerType: "All Types",
@@ -142,7 +53,7 @@ export default function CustomerTable() {
     ].filter(Boolean).length;
 
     // ── Client-side filtering ─────────────────────────────────────────────────
-    const filteredData = mockCustomers.filter((c) => {
+    const filteredData = data.filter((c) => {
         const matchesSearch =
             !searchQuery ||
             c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

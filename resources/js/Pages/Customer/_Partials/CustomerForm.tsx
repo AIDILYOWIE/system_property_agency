@@ -72,6 +72,7 @@ const SOURCE_OPTIONS = [
 // ─── CustomerForm ─────────────────────────────────────────────────────────────
 
 import { useForm } from "@inertiajs/react";
+import { toast } from "@/Components/ui/toast";
 
 export default function CustomerForm({
     initialData,
@@ -99,11 +100,16 @@ export default function CustomerForm({
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+
         post(route('customer.store'), {
             preserveScroll: true,
-            onSuccess: () => {
-                console.log("Customer Added");
-            },
+            onError: (err) => {
+                toast.add({
+                    title: "Validation Error",
+                    description: "Please check the highlighted fields.",
+                    type: "error"
+                });
+            }
         });
     }
 
@@ -149,7 +155,7 @@ export default function CustomerForm({
                         <SectionCard icon={<Info size={16} />} title="Basic Information">
                             <div className="flex flex-col gap-5">
                                 {/* Full Name */}
-                                <Field>
+                                <Field data-invalid={!!errors.fullName} >
                                     <FieldLabel htmlFor="full_name" required>
                                         Full Name
                                     </FieldLabel>
@@ -162,10 +168,15 @@ export default function CustomerForm({
                                         required
                                         className="!bg-canvas"
                                     />
+                                    {errors.fullName && (
+                                        <FieldDescription className="text-error-base">
+                                            {errors.fullName}
+                                        </FieldDescription>
+                                    )}
                                 </Field>
 
                                 {/* WhatsApp */}
-                                <Field>
+                                <Field data-invalid={!!errors.phone} >
                                     <FieldLabel htmlFor="phone" required>
                                         WhatsApp
                                     </FieldLabel>
@@ -181,9 +192,11 @@ export default function CustomerForm({
                                             <Phone size={18} />
                                         </InputGroupAddon>
                                     </InputGroup>
-                                    <FieldDescription>
+                                    {errors.phone ? (<FieldDescription className="text-error-base">
+                                        {errors.phone}
+                                    </FieldDescription>) : (<FieldDescription>
                                         Numbers starting with 08 are auto-converted to 628 format.
-                                    </FieldDescription>
+                                    </FieldDescription>)}
                                 </Field>
 
                                 {/* Email */}
@@ -220,13 +233,18 @@ export default function CustomerForm({
                                 A client typically focuses on one active property at a time. Select the property they are inquiring about.
                             </p>
 
-                            <Field>
+                            <Field data-invalid={!!errors.property_id} >
                                 <FieldLabel required>Interested Property</FieldLabel>
                                 <SelectSearch
                                     items={properties}
                                     value={form.property_id}
                                     onChange={(val) => set("property_id", val || "")}
                                 />
+                                {errors.property_id && (
+                                    <FieldDescription className="text-error-base">
+                                        {errors.property_id}
+                                    </FieldDescription>
+                                )}
                             </Field>
                         </SectionCard>
                     </div>
@@ -236,7 +254,7 @@ export default function CustomerForm({
                         <SectionCard icon={<Tag size={16} />} title="Source & Note">
                             <div className="flex flex-col gap-4">
                                 {/* Source */}
-                                <Field>
+                                <Field data-invalid={!!errors.source} >
                                     <FieldLabel required htmlFor="source">
                                         Source
                                     </FieldLabel>
@@ -263,6 +281,11 @@ export default function CustomerForm({
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
+                                    {errors.source && (
+                                        <FieldDescription className="text-error-base">
+                                            {errors.source}
+                                        </FieldDescription>
+                                    )}  
                                 </Field>
 
                                 {/* Notes */}

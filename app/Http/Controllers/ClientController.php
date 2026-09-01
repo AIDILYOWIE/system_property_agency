@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Client\StoreClientRequest;
+use App\Models\Client;
 use App\Service\ClientService;
 use App\Models\Property;
 use Exception;
@@ -14,7 +15,26 @@ class ClientController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Customer/Customer');
+        $customers = Client::with(['inquiries.property'])->orderBy('last_active_at', 'desc')->get()->map(function ($client) {
+            $primaryInquiry = $client->inquiries->first();
+            $property = $primaryInquiry ? $primaryInquiry->property : null;
+
+            return [
+                'id' => $client->id,
+                'name' => $client->full_name,
+                'phone' => $client->phone,
+                'email' => $client->email,
+                'customer_type' => $property ? ($property->listing_type === 'sale' ? 'buyer' : 'renter') : 'buyer',
+                'pipeline_status' => $primaryInquiry ? $primaryInquiry->pipeline_status : 'new_lead',
+                'interested_property' => $property ? $property->title : null,
+                'source' => $client->source,
+                'notes' => $client->notes,
+                'created_at' => $client->created_at->toIso8601String(),
+                'last_contacted' => $client->last_active_at ? $client->last_active_at->toIso8601String() : null,
+            ];
+        });
+
+        return Inertia::render('Customer/Customer', ['customers' => $customers]);
     }
 
     public function create()

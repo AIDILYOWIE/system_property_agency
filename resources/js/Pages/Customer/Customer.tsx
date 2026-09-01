@@ -3,7 +3,7 @@ import { Plus, Download } from "lucide-react";
 import CustomerTable from "./_Partials/CustomerTable";
 import { router } from "@inertiajs/react";
 
-export default function Customer() {
+export default function Customer({ customers }: { customers: any[] }) {
     return (
         <DashboardLayout
             pageTitle="Customers"
@@ -25,7 +25,7 @@ export default function Customer() {
             }
         >
             <div className="flex flex-col h-full space-y-6 pt-2">
-                <CustomerTable />
+                <CustomerTable data={customers} />
             </div>
         </DashboardLayout>
     );
