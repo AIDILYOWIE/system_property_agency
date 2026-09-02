@@ -68,79 +68,6 @@ interface Customer {
     timeline: TimelineEvent[];
 }
 
-// ─── Mock Data ──────────────────────────────────────────────────────────────────
-
-const MOCK_CUSTOMER: Customer = {
-    id: "cust-001",
-    name: "Pak Anton Wijaya",
-    phone: "628123456789",
-    email: "anton.wijaya@email.com",
-    customer_type: "buyer",
-    pipeline_status: "viewing",
-    source: "Instagram",
-    notes: "Pak Anton sangat tertarik dengan vila bergaya modern minimalis. Budget fleksibel hingga $1M. Lebih suka lokasi Ubud atau Canggu, tidak mau Kuta. Hubungi pagi hari, jam 9–11.",
-    created_at: "2026-07-10T09:30:00Z",
-    last_contacted: "2026-08-20T14:15:00Z",
-    properties: [
-        {
-            id: "prop-1",
-            title: "Modern Villa Ubud",
-            location: "Ubud, Bali",
-            price: 850000,
-            currency: "USD",
-            thumbnail: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-            listingType: "For Sale",
-            status: "available",
-            pipelineStatus: "viewing",
-        },
-        {
-            id: "prop-2",
-            title: "Minimalist Villa Canggu",
-            location: "Canggu, Bali",
-            price: 420000,
-            currency: "USD",
-            thumbnail: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-            listingType: "For Sale",
-            status: "sold",
-            pipelineStatus: "lost",
-        },
-    ],
-    timeline: [
-        {
-            id: "tl-1",
-            date: "25 Agu 2026",
-            time: "10:30",
-            event: "Status diubah ke Viewing",
-            detail: "Jadwal kunjungan ke Modern Villa Ubud dikonfirmasi.",
-            type: "status_change",
-        },
-        {
-            id: "tl-2",
-            date: "20 Agu 2026",
-            time: "14:15",
-            event: "Follow-up via WhatsApp",
-            detail: "Klien merespons dan tertarik dengan spesifikasi bangunan.",
-            type: "contact",
-        },
-        {
-            id: "tl-3",
-            date: "15 Agu 2026",
-            time: "09:05",
-            event: "Status diubah ke Contacted",
-            detail: "Owner menghubungi pertama kali via WhatsApp.",
-            type: "status_change",
-        },
-        {
-            id: "tl-4",
-            date: "10 Jul 2026",
-            time: "09:30",
-            event: "Lead masuk dari Instagram",
-            detail: "Klien mengisi form interest melalui story Instagram @chrispropertysg.",
-            type: "created",
-        },
-    ],
-};
-
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatPhone(phone: string): string {
@@ -191,9 +118,7 @@ const TIMELINE_DOT: Record<TimelineEvent["type"], string> = {
 
 // ─── Component ──────────────────────────────────────────────────────────────────
 
-export default function DetailCustomer() {
-    const customer = MOCK_CUSTOMER;
-
+export default function DetailCustomer({ customer }: { customer: Customer }) {
     const [notes, setNotes] = useState(customer.notes);
     const [editingNotes, setEditingNotes] = useState(false);
     const [draftNotes, setDraftNotes] = useState(customer.notes);

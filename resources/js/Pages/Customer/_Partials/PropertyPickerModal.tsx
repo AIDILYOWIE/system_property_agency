@@ -31,6 +31,8 @@ interface PropertyPickerModalProps {
 
 // ─── Component ──────────────────────────────────────────────────────────────────
 
+import { usePage } from "@inertiajs/react";
+
 export default function PropertyPickerModal({
     open,
     onClose,
@@ -38,6 +40,9 @@ export default function PropertyPickerModal({
     selectedId,
     disabledIds,
 }: PropertyPickerModalProps) {
+    const { properties } = usePage().props as any;
+    const availableProperties: InventoryProperty[] = properties || MOCK_PROPERTIES;
+
     const [query, setQuery] = useState("");
     const searchRef = useRef<HTMLInputElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
@@ -61,7 +66,7 @@ export default function PropertyPickerModal({
 
     if (!open) return null;
 
-    const filtered = MOCK_PROPERTIES.filter(
+    const filtered = availableProperties.filter(
         (p) =>
             p.title.toLowerCase().includes(query.toLowerCase()) ||
             p.location.toLowerCase().includes(query.toLowerCase()) ||

@@ -37,6 +37,9 @@ import {
     BreadcrumbSeparator,
 } from "@/Components/ui/breadcrumb";
 import SelectSearch, { type PropertyItem } from "@/Components/SelectSearch";
+import PropertyPickerModal from "./PropertyPickerModal";
+import PropertyInterestCard, { type PropertyInterestItem } from "@/Components/PropertyInterestCard";
+import { type InventoryProperty } from "./PropertyInterestRepeater";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -56,7 +59,7 @@ interface FormState {
     email: string;
     source: Source;
     note: string;
-    property_id: string; // 1 client only has 1 property
+    property_ids: string[];
 }
 
 // ─── Source options ────────────────────────────────────────────────────────────
@@ -91,12 +94,26 @@ export default function CustomerForm({
         email: initialData?.email ?? "",
         source: initialData?.source ?? "",
         note: initialData?.note ?? "",
-        property_id: initialData?.property_id ?? "",
+        property_ids: initialData?.property_ids ?? [],
     });
+
+    const [pickerOpen, setPickerOpen] = useState(false);
 
     function set<K extends keyof FormState>(key: K, value: FormState[K]) {
         setForm(key, value as any);
     }
+
+    const handlePropertySelect = (inv: InventoryProperty) => {
+        setForm("property_ids", [...form.property_ids, inv.id]);
+    };
+
+    const handlePropertyRemove = (idToRemove: string) => {
+        setForm("property_ids", form.property_ids.filter((id) => id !== idToRemove));
+    };
+
+    const selectedPropertiesDetails = form.property_ids
+        .map(id => (properties as any[]).find(p => p.id === id))
+        .filter(Boolean) as any[];
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -223,29 +240,73 @@ export default function CustomerForm({
                             </div>
                         </SectionCard>
 
-                        {/* ── Property Interests (SelectSearch) ─────── */}
+                        {/* ── Property Interests (PropertyPickerModal) ─────── */}
                         <SectionCard
                             icon={<Building2 size={16} />}
                             title="Property Interest"
                         >
-                            {/* Context hint */}
-                            <p className="text-xs text-text-muted mb-5 leading-relaxed">
-                                A client typically focuses on one active property at a time. Select the property they are inquiring about.
-                            </p>
+                            <div className="flex items-center justify-between mb-5">
+                                <p className="text-xs text-text-muted leading-relaxed max-w-[85%]">
+                                    Pilih properti yang diminati oleh client. Kamu dapat menambahkan lebih dari satu properti.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => setPickerOpen(true)}
+                                    className="text-xs font-semibold text-primary bg-[#EAF3EF] px-3 py-1.5 rounded-md hover:bg-[#EAF3EF]/80 transition-colors flex-shrink-0"
+                                >
+                                    + Tambah
+                                </button>
+                            </div>
 
-                            <Field data-invalid={!!errors.property_id} >
-                                <FieldLabel required>Interested Property</FieldLabel>
-                                <SelectSearch
-                                    items={properties}
-                                    value={form.property_id}
-                                    onChange={(val) => set("property_id", val || "")}
-                                />
-                                {errors.property_id && (
-                                    <FieldDescription className="text-error-base">
-                                        {errors.property_id}
+                            <Field data-invalid={!!errors.property_ids} >
+                                <div className="divide-y divide-border-base border border-border-base rounded-xl overflow-hidden">
+                                    {selectedPropertiesDetails.length === 0 ? (
+                                        <div className="py-8 flex flex-col items-center text-center bg-canvas">
+                                            <Building2 size={24} className="text-border-base mb-2" />
+                                            <p className="text-sm font-medium text-text-muted">Belum ada properti</p>
+                                        </div>
+                                    ) : (
+                                        selectedPropertiesDetails.map((property) => {
+                                            const mappedProps: PropertyInterestItem = {
+                                                id: property.id,
+                                                title: property.title,
+                                                location: property.location,
+                                                price: property.price,
+                                                currency: property.currency,
+                                                thumbnail: property.thumbnail,
+                                                listingType: property.listingType,
+                                                status: property.status === "draft" ? "available" : property.status,
+                                                pipelineStatus: "new_lead",
+                                            };
+                                            return (
+                                                <div key={property.id} className="relative group">
+                                                    <PropertyInterestCard property={mappedProps} />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handlePropertyRemove(property.id)}
+                                                        className="absolute top-4 right-4 w-7 h-7 bg-white border border-red-200 text-red-500 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                                                    >
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                                    </button>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                                {errors.property_ids && (
+                                    <FieldDescription className="text-error-base mt-2">
+                                        {errors.property_ids}
                                     </FieldDescription>
                                 )}
                             </Field>
+
+                            <PropertyPickerModal
+                                open={pickerOpen}
+                                onClose={() => setPickerOpen(false)}
+                                onSelect={handlePropertySelect}
+                                selectedId={null}
+                                disabledIds={form.property_ids}
+                            />
                         </SectionCard>
                     </div>
 
@@ -285,7 +346,7 @@ export default function CustomerForm({
                                         <FieldDescription className="text-error-base">
                                             {errors.source}
                                         </FieldDescription>
-                                    )}  
+                                    )}
                                 </Field>
 
                                 {/* Notes */}

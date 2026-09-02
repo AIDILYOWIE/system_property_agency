@@ -37,24 +37,21 @@ class ClientController extends Controller
         return Inertia::render('Customer/Customer', ['customers' => $customers]);
     }
 
-    public function create()
+    public function create(ClientService $service)
     {
-        $properties = Property::with('mainImage')->where('status', 'available')->get()->map(function ($prop) {
-            return [
-                'id' => $prop->id,
-                'title' => $prop->title,
-                'price' => (float)$prop->price,
-                'currency' => $prop->currency,
-                'listingType' => $prop->listing_type === 'sale' ? 'For Sale' : 'For Rent',
-                'thumbnail' => Storage::url($prop->mainImage->image_path)
-            ];
-        });
+        $properties = $service->getAvailableProperties();
         return Inertia::render('Customer/AddCustomer', ['properties' => $properties]);
     }
 
-    public function show($id)
+    public function show($id, ClientService $service)
     {
-        return Inertia::render('Customer/DetailCustomer', ['id' => $id]);
+        $customer = $service->getCustomerDetail($id);
+        $properties = $service->getAvailableProperties();
+
+        return Inertia::render('Customer/DetailCustomer', [
+            'customer' => $customer,
+            'properties' => $properties
+        ]);
     }
 
     public function edit($id)

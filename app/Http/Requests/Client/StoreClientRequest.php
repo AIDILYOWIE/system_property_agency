@@ -46,7 +46,8 @@ class StoreClientRequest extends FormRequest
             'email' => 'nullable|email|max:255',
             'source' => 'required|string',
             'note' => 'nullable|string',
-            'property_id' => 'required|uuid|exists:properties,id',
+            'property_ids' => 'required|array|min:1',
+            'property_ids.*' => 'required|uuid|exists:properties,id',
         ];
     }
 
