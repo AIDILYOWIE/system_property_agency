@@ -53,7 +53,7 @@ type Source =
     | "manual"
     | "";
 
-interface FormState {
+export interface FormState {
     fullName: string;
     phone: string;
     email: string;
@@ -81,14 +81,16 @@ export default function CustomerForm({
     initialData,
     isEdit,
     formId,
+    customerId,
     properties = [],
 }: {
     initialData?: Partial<FormState>;
     isEdit?: boolean;
     formId?: string;
+    customerId?: string;
     properties?: PropertyItem[];
 }) {
-    const { data: form, setData: setForm, post, processing, errors } = useForm<FormState>({
+    const { data: form, setData: setForm, post, put, processing, errors } = useForm<FormState>({
         fullName: initialData?.fullName ?? "",
         phone: initialData?.phone ?? "",
         email: initialData?.email ?? "",
@@ -118,16 +120,22 @@ export default function CustomerForm({
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        post(route('customer.store'), {
+        const submitOptions = {
             preserveScroll: true,
-            onError: (err) => {
+            onError: (err: any) => {
                 toast.add({
                     title: "Validation Error",
                     description: "Please check the highlighted fields.",
                     type: "error"
                 });
             }
-        });
+        };
+
+        if (isEdit && customerId) {
+            put(route('customer.update', customerId), submitOptions);
+        } else {
+            post(route('customer.store'), submitOptions);
+        }
     }
 
     return (

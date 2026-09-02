@@ -2,25 +2,23 @@
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import { Check, UserCog } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { Link } from "@inertiajs/react";
-import CustomerForm from "./_Partials/CustomerForm";
+import CustomerForm, { type FormState } from "./_Partials/CustomerForm";
+import { type PropertyItem } from "@/Components/SelectSearch";
 
-// ─── Mock: in production this would be fetched via usePage().props ──────────────
+export default function EditCustomer({ customer, properties }: { customer: any, properties: PropertyItem[] }) {
 
-const MOCK_CUSTOMER_DATA = {
-    fullName: "Pak Anton Wijaya",
-    phone: "628123456789",
-    email: "anton.wijaya@email.com",
-    source: "instagram" as const,
-    note: "Pak Anton sangat tertarik dengan vila bergaya modern minimalis. Budget fleksibel hingga $1M. Lebih suka lokasi Ubud atau Canggu, tidak mau Kuta. Hubungi pagi hari, jam 9–11.",
-    propertyInterests: [],
-};
-
-// ─── Page ───────────────────────────────────────────────────────────────────────
-
-export default function EditCustomer() {
-    const formRef = useRef<HTMLFormElement>(null);
+    const initialData = useMemo<Partial<FormState>>(() => {
+        return {
+            fullName: customer.name,
+            phone: customer.phone,
+            email: customer.email || "",
+            source: (customer.source || "").toLowerCase().replace(/\s+/g, '-'), // Basic normalization for select
+            note: customer.notes || "",
+            property_ids: customer.properties?.map((p: any) => p.id) || [],
+        };
+    }, [customer]);
 
     return (
         <DashboardLayout
@@ -29,7 +27,7 @@ export default function EditCustomer() {
             action={
                 <div className="flex gap-2">
                     <Link
-                        href="/customer/detail/cust-001"
+                        href={`/customer/detail/${customer.id}`}
                         className="btn btn-secondary"
                     >
                         Cancel
@@ -46,9 +44,11 @@ export default function EditCustomer() {
             }
         >
             <CustomerForm
-                initialData={MOCK_CUSTOMER_DATA}
+                initialData={initialData}
                 isEdit={true}
                 formId="customer-form"
+                customerId={customer.id}
+                properties={properties}
             />
         </DashboardLayout>
     );

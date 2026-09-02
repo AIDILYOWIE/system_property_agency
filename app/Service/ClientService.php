@@ -153,4 +153,61 @@ class ClientService
         $client->update(['notes' => $notes]);
         return $client;
     }
+
+    public function updateCustomer($id, array $data)
+    {
+        return DB::transaction(function () use ($id, $data) {
+            $client = Client::findOrFail($id);
+
+            // 1. Format Phone
+            $phone = preg_replace('/[^0-9]/', '', $data['phone']);
+            if (str_starts_with($phone, '08')) {
+                $phone = '628' . substr($phone, 2);
+            } elseif (str_starts_with($phone, '8')) {
+                $phone = '628' . substr($phone, 1);
+            }
+
+            // 2. Update Client Details
+            $client->update([
+                'full_name' => $data['fullName'],
+                'phone' => $phone,
+                'email' => $data['email'] ?? null,
+                'source' => $data['source'],
+                'notes' => $data['note'] ?? null,
+            ]);
+
+            // 3. Sync Properties (Inquiries)
+            if (!empty($data['property_ids'])) {
+                Inquiry::where('customer_id', $client->id)
+                    ->whereNotIn('property_id', $data['property_ids'])
+                    ->delete();
+
+                foreach ($data['property_ids'] as $propertyId) {
+                    $exists = Inquiry::where('customer_id', $client->id)
+                        ->where('property_id', $propertyId)
+                        ->exists();
+
+                    if (!$exists) {
+                        Inquiry::create([
+                            'customer_id' => $client->id,
+                            'property_id' => $propertyId,
+                            'pipeline_status' => 'new_lead'
+                        ]);
+                    }
+                }
+            } else {
+                // No properties
+                Inquiry::where('customer_id', $client->id)->whereNotNull('property_id')->delete();
+                if ($client->inquiries()->count() === 0) {
+                    Inquiry::create([
+                        'customer_id' => $client->id,
+                        'property_id' => null,
+                        'pipeline_status' => 'new_lead'
+                    ]);
+                }
+            }
+
+            return $client;
+        });
+    }
 }

@@ -46,6 +46,7 @@ Route::prefix('/customer')->group(function () {
     Route::get('/detail/{id}', [ClientController::class, 'show'])->name('customer.detail');
     Route::patch('/detail/{id}/notes', [ClientController::class, 'updateNotes'])->name('customer.update-notes');
     Route::get('/edit/{id}', [ClientController::class, 'edit'])->name('customer.edit');
+    Route::put('/{id}', [ClientController::class, 'update'])->name('customer.update');
 });
 
 Route::get('/buyer-pipeline', function () {

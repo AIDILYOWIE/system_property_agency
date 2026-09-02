@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Client\StoreClientRequest;
+use App\Http\Requests\Client\UpdateClientRequest;
 use App\Models\Client;
 use App\Service\ClientService;
 use App\Models\Property;
@@ -54,9 +55,25 @@ class ClientController extends Controller
         ]);
     }
 
-    public function edit($id)
+    public function edit($id, ClientService $service)
     {
-        return Inertia::render('Customer/EditCustomer', ['id' => $id]);
+        $customer = $service->getCustomerDetail($id);
+        $properties = $service->getAvailableProperties();
+
+        return Inertia::render('Customer/EditCustomer', [
+            'customer' => $customer,
+            'properties' => $properties
+        ]);
+    }
+
+    public function update(UpdateClientRequest $request, $id, ClientService $service)
+    {
+        try {
+            $service->updateCustomer($id, $request->validated());
+            return redirect()->route('customer.detail', $id)->with('success', 'Customer berhasil diperbarui!');
+        } catch (Exception $e) {
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     public function store(StoreClientRequest $request, ClientService $service)
