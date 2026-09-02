@@ -8,6 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class PropertyService
 {
@@ -120,12 +121,9 @@ class PropertyService
         try {
             DB::beginTransaction();
 
-            // Handle defaulting business rules
-            // $data['status'] = 'available';
-            // $data['visibility'] = 'draft';
 
             // Generate UUID for private dossier (US 3.2 logic base)
-            $data['dossier_token'] = \Illuminate\Support\Str::uuid()->toString();
+            $data['dossier_token'] = Str::uuid()->toString();
 
             // Create property
             $property = Property::create($data);
