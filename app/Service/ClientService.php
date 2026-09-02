@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Models\Client;
 use App\Models\Inquiry;
+use App\Models\Property;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -131,7 +132,7 @@ class ClientService
     }
     public function getAvailableProperties()
     {
-        return \App\Models\Property::with('mainImage')->where('status', 'available')->get()->map(function ($prop) {
+        return Property::with('mainImage')->where('status', 'available')->get()->map(function ($prop) {
             return [
                 'id' => $prop->id,
                 'title' => $prop->title,
@@ -144,5 +145,12 @@ class ClientService
                 'thumbnail' => $prop->mainImage ? \Illuminate\Support\Facades\Storage::url($prop->mainImage->image_path) : null
             ];
         });
+    }
+
+    public function updateCustomerNotes($id, $notes)
+    {
+        $client = Client::findOrFail($id);
+        $client->update(['notes' => $notes]);
+        return $client;
     }
 }

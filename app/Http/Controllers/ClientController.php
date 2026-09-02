@@ -68,4 +68,18 @@ class ClientController extends Controller
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
+
+    public function updateNotes(Request $request, $id, ClientService $service)
+    {
+        $request->validate([
+            'notes' => 'nullable|string'
+        ]);
+
+        try {
+            $service->updateCustomerNotes($id, $request->notes);
+            return redirect()->back()->with('success', 'Catatan berhasil diperbarui.');
+        } catch (Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal memperbarui catatan: ' . $e->getMessage()]);
+        }
+    }
 }

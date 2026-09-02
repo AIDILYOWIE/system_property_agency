@@ -44,6 +44,7 @@ Route::prefix('/customer')->group(function () {
     Route::post('/', [ClientController::class, 'store'])->name('customer.store');
     Route::get('/add', [ClientController::class, 'create'])->name('customer.add');
     Route::get('/detail/{id}', [ClientController::class, 'show'])->name('customer.detail');
+    Route::patch('/detail/{id}/notes', [ClientController::class, 'updateNotes'])->name('customer.update-notes');
     Route::get('/edit/{id}', [ClientController::class, 'edit'])->name('customer.edit');
 });
 

@@ -2,7 +2,7 @@ import DashboardLayout from "@/Layouts/DashboardLayout";
 import { useState, useMemo, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -177,9 +177,15 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
     );
 
     const handleSaveNotes = useCallback(() => {
-        setNotes(draftNotes);
-        setEditingNotes(false);
-    }, [draftNotes]);
+        router.patch(`/customer/detail/${customer.id}/notes`, { notes: draftNotes }, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                setNotes(draftNotes);
+                setEditingNotes(false);
+            },
+        });
+    }, [draftNotes, customer.id]);
 
     const handleCancelNotes = useCallback(() => {
         setDraftNotes(notes);
@@ -272,7 +278,7 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
                                     </span>
                                     <span className="flex items-center gap-1.5">
                                         <Calendar size={14} className="flex-shrink-0" />
-                                        Masuk {new Date(customer.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                                        {new Date(customer.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
                                     </span>
                                 </div>
                             </div>
