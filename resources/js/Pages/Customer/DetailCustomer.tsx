@@ -65,6 +65,7 @@ interface Customer {
     last_contacted?: string;
     properties: PropertyInterest[];
     timeline: TimelineEvent[];
+    total_interaction: number;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -332,7 +333,7 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
                             </div>
                             <div className="bg-canvas rounded-xl p-4 border border-border-base text-center flex flex-col justify-center">
                                 <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mb-1">Interactions</p>
-                                <p className="text-2xl font-bold text-text-primary leading-none">{customer.timeline.length}</p>
+                                <p className="text-2xl font-bold text-text-primary leading-none">{customer.total_interaction}</p>
                             </div>
                             <div className="bg-canvas rounded-xl p-4 border border-border-base text-center flex flex-col justify-center">
                                 <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mb-1">Days Active</p>

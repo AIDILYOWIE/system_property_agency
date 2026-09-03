@@ -115,6 +115,7 @@ class ClientService
 
         $timeline = CustomerActivity::where('customer_id', $client->id)
             ->orderBy('created_at', 'desc')
+            ->limit(5)
             ->get()
             ->map(function ($log) {
                 return [
@@ -126,6 +127,8 @@ class ClientService
                     'type' => $log->action_type,
                 ];
             })->values();
+
+            $total_interaction = CustomerActivity::where('customer_id', $client->id)->count();
 
         return [
             'id' => $client->id,
@@ -140,6 +143,7 @@ class ClientService
             'last_contacted' => $client->last_active_at ? $client->last_active_at->toIso8601String() : null,
             'properties' => $properties,
             'timeline' => $timeline,
+            'total_interaction' => $total_interaction,
         ];
     }
     public function getAvailableProperties()
