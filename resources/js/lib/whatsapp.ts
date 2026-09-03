@@ -17,10 +17,10 @@ export interface WhatsAppContactParams {
     /** Nama pelanggan untuk interpolasi pesan. */
     clientName: string;
     /**
-     * Nama properti yang diminati pelanggan.
+     * Nama properti yang diminati pelanggan. Bisa lebih dari satu.
      * Opsional — jika tidak diberikan, template tanpa properti digunakan.
      */
-    propertyName?: string;
+    propertyNames?: string[];
     /**
      * Tipe pelanggan — digunakan untuk memilih template pesan yang tepat.
      * "property_owner" menghasilkan template kemitraan, sisanya template follow-up biasa.
@@ -69,7 +69,7 @@ export function normalizePhoneNumber(raw: string): string {
  *
  * Prioritas template:
  *   1. `customerType === "property_owner"` → Pesan khusus kemitraan properti.
- *   2. `propertyName` disertakan → Pesan dengan sebutan nama properti.
+ *   2. `propertyNames` disertakan → Pesan dengan sebutan nama properti (mendukung jamak).
  *   3. Fallback → Pesan pembuka umum tanpa menyebut properti.
  */
 export function buildWhatsAppMessage(params: WhatsAppContactParams): string {
@@ -83,10 +83,16 @@ export function buildWhatsAppMessage(params: WhatsAppContactParams): string {
         );
     }
 
-    if (params.propertyName) {
+    if (params.propertyNames && params.propertyNames.length > 0) {
+        // Format array of names: "A", "A dan B", "A, B, dan C"
+        const formatter = new Intl.ListFormat("id", {
+            style: "long",
+            type: "conjunction",
+        });
+        const propertiesStr = formatter.format(params.propertyNames);
         return (
             `Halo ${params.clientName}, saya ${agent}. ` +
-            `Terima kasih atas ketertarikan Anda pada ${params.propertyName}. ` +
+            `Terima kasih atas ketertarikan Anda pada ${propertiesStr}. ` +
             `Apakah ada waktu untuk berdiskusi lebih lanjut?`
         );
     }
