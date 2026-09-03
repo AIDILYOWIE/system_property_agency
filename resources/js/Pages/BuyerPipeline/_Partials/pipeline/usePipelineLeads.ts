@@ -1,11 +1,18 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { router } from "@inertiajs/react";
 import { type PipelineLead, type BuyerPipelineStatus } from "./pipelineTypes";
-import { MOCK_LEADS, STAGE_ORDER } from "./pipelineConstants";
+import { STAGE_ORDER } from "./pipelineConstants";
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-export function usePipelineLeads() {
-    const [leads, setLeads] = useState<PipelineLead[]>(MOCK_LEADS);
+export function usePipelineLeads(initialLeads: PipelineLead[]) {
+    const [leads, setLeads] = useState<PipelineLead[]>(initialLeads || []);
+
+    // Sync if props change
+    useEffect(() => {
+        setLeads(initialLeads || []);
+    }, [initialLeads]);
+
     const [activeStage, setActiveStage] = useState<BuyerPipelineStatus | "all">(
         "all",
     );
@@ -53,13 +60,28 @@ export function usePipelineLeads() {
 
     const handleStatusChange = useCallback(
         (leadId: string, newStatus: BuyerPipelineStatus) => {
+            // Optimistic Update
             setLeads((prev) =>
                 prev.map((lead) =>
                     lead.id === leadId ? { ...lead, status: newStatus } : lead,
                 ),
             );
+
+            // Real-time backend sync without page load
+            router.patch(
+                route("buyer-pipeline.status", leadId),
+                { status: newStatus },
+                {
+                    preserveScroll: true,
+                    preserveState: true,
+                    onError: () => {
+                        // Revert UI if error occurs (could trigger a toast here if desired)
+                        setLeads(initialLeads || []);
+                    },
+                },
+            );
         },
-        [],
+        [initialLeads],
     );
 
     return {

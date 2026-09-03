@@ -4,6 +4,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\NewLeadController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\BuyerPipelineController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -50,9 +51,9 @@ Route::prefix('/customer')->group(function () {
     Route::put('/{id}', [ClientController::class, 'update'])->name('customer.update');
 });
 
-Route::get('/buyer-pipeline', function () {
-    return Inertia::render('BuyerPipeline/BuyerPipeline');
-})->name('buyer-pipeline');
+
+Route::get('/buyer-pipeline', [BuyerPipelineController::class, 'index'])->name('buyer-pipeline');
+Route::patch('/buyer-pipeline/{id}/status', [BuyerPipelineController::class, 'updateStatus'])->name('buyer-pipeline.status');
 
 // ── Dossier (Public — no auth) ─────────────────────────────────────────
 Route::get('/dossier/preview', function () {

@@ -12,7 +12,7 @@ import { Input } from "@/Components/ui/input";
 
 // ─── Page ───────────────────────────────────────────────────────────────────────
 
-export default function BuyerPipeline() {
+export default function BuyerPipeline({ leads: initialLeads }: { leads: any[] }) {
     const {
         leads,
         filteredLeads,
@@ -23,7 +23,7 @@ export default function BuyerPipeline() {
         searchQuery,
         setSearchQuery,
         handleStatusChange,
-    } = usePipelineLeads();
+    } = usePipelineLeads(initialLeads);
 
     // View mode — "list" default on all screens; kanban only shown on lg+ via CSS
     const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban");
