@@ -83,12 +83,14 @@ export default function CustomerForm({
     formId,
     customerId,
     properties = [],
+    customerProperties = [],
 }: {
     initialData?: Partial<FormState>;
     isEdit?: boolean;
     formId?: string;
     customerId?: string;
     properties?: PropertyItem[];
+    customerProperties?: any[];
 }) {
     const { data: form, setData: setForm, post, put, processing, errors } = useForm<FormState>({
         fullName: initialData?.fullName ?? "",
@@ -114,7 +116,15 @@ export default function CustomerForm({
     };
 
     const selectedPropertiesDetails = form.property_ids
-        .map(id => (properties as any[]).find(p => p.id === id))
+        .map(id => {
+            const prop = (properties as any[]).find(p => p.id === id);
+            if (!prop) return null;
+            const existingProp = customerProperties?.find((cp: any) => cp.id === id);
+            return {
+                ...prop,
+                pipelineStatus: existingProp?.pipelineStatus || "new_lead"
+            };
+        })
         .filter(Boolean) as any[];
 
     function handleSubmit(e: React.FormEvent) {
@@ -284,18 +294,21 @@ export default function CustomerForm({
                                                 thumbnail: property.thumbnail,
                                                 listingType: property.listingType,
                                                 status: property.status === "draft" ? "available" : property.status,
-                                                pipelineStatus: "new_lead",
+                                                pipelineStatus: property.pipelineStatus,
                                             };
+                                            const canRemove = property.pipelineStatus === "new_lead";
                                             return (
                                                 <div key={property.id} className="relative group">
                                                     <PropertyInterestCard property={mappedProps} />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handlePropertyRemove(property.id)}
-                                                        className="absolute top-4 right-4 w-7 h-7 bg-white border border-red-200 text-red-500 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
-                                                    >
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                                                    </button>
+                                                    {canRemove && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handlePropertyRemove(property.id)}
+                                                            className="absolute top-4 right-4 w-7 h-7 bg-white border border-red-200 text-red-500 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 cursor-pointer z-10"
+                                                        >
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                                        </button>
+                                                    )}
                                                 </div>
                                             );
                                         })

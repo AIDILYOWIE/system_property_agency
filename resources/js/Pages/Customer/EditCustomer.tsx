@@ -49,6 +49,7 @@ export default function EditCustomer({ customer, properties }: { customer: any, 
                 formId="customer-form"
                 customerId={customer.id}
                 properties={properties}
+                customerProperties={customer.properties}
             />
         </DashboardLayout>
     );
