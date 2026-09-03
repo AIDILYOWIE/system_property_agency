@@ -35,14 +35,13 @@ import { type PipelineStatus, type CustomerType } from "./_Partials/CustomerColu
 import PipelineTracker from "../BuyerPipeline/_Partials/pipeline/PipelineTracker";
 import PropertyInterestCard, { type PropertyInterestItem } from "@/Components/PropertyInterestCard";
 import PropertyPickerModal from "./_Partials/PropertyPickerModal";
+import WAPopupModal from "./_Partials/WAPopupModal";
 import { type InventoryProperty } from "./_Partials/PropertyInterestRepeater";
-
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 // PropertyInterest is aliased from the shared component type
 type PropertyInterest = PropertyInterestItem;
-
 
 interface TimelineEvent {
     id: string;
@@ -128,6 +127,9 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
     const [properties, setProperties] = useState<PropertyInterest[]>(customer.properties);
     const [pickerOpen, setPickerOpen] = useState(false);
 
+    // WA Modal State
+    const [waModalOpen, setWaModalOpen] = useState(false);
+
     // IDs currently in the list — passed as disabledIds to avoid double-picking
     const selectedPropertyIds = useMemo(
         () => properties.map((p) => p.id),
@@ -154,16 +156,6 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
 
     const pipelineConfig = PIPELINE_CONFIG[customer.pipeline_status];
     const typeConfig = CUSTOMER_TYPE_CONFIG[customer.customer_type];
-
-    const waUrl = getWhatsAppUrl({
-        phone: customer.phone,
-        clientName: customer.name,
-        customerType: customer.customer_type,
-        // property_owner tidak menyertakan propertyName — template kemitraan dipilih otomatis
-        propertyName: customer.customer_type !== "property_owner"
-            ? customer.properties.find((p) => p.pipelineStatus !== "lost")?.title
-            : undefined,
-    });
 
     const initials = useMemo(
         () =>
@@ -192,6 +184,27 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
         setEditingNotes(false);
     }, [notes]);
 
+    const handleWaProceed = (selectedIds: string[]) => {
+        setWaModalOpen(false);
+        const selectedProps = properties.filter(p => selectedIds.includes(p.id));
+        const propertyNames = selectedProps.map(p => p.title);
+
+        // Target WA URL
+        const waUrl = getWhatsAppUrl({
+            phone: customer.phone,
+            clientName: customer.name,
+            customerType: customer.customer_type,
+            propertyNames: customer.customer_type !== "property_owner" ? propertyNames : undefined,
+        });
+
+        // Backend Sync & redirect to WA
+        router.post(`/customer/detail/${customer.id}/follow-up`, { property_ids: selectedIds }, {
+            preserveScroll: true,
+        });
+
+        window.open(waUrl, "_blank", "noopener,noreferrer");
+    };
+
     return (
         <DashboardLayout
             pageTitle={customer.name}
@@ -206,15 +219,21 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
                         <Edit2 className="w-4 h-4 stroke-[2.5]" />
                         Edit
                     </Link>
-                    <a
-                        href={waUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-primary flex items-center gap-2"
+                    <button
+                        onClick={() => {
+                            if (customer.properties.length > 1) {
+                                setWaModalOpen(true);
+                            } else {
+                                // Default array
+                                const ids = customer.properties.filter(p => p.pipelineStatus !== "lost" && p.pipelineStatus !== "won").map(p => p.id);
+                                handleWaProceed(ids);
+                            }
+                        }}
+                        className="btn btn-primary flex items-center"
                     >
                         <MessageCircle className="w-4 h-4 stroke-[2.5]" />
                         One-Click WA
-                    </a>
+                    </button>
                 </div>
             }
         >
@@ -232,6 +251,13 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
+
+            <WAPopupModal
+                open={waModalOpen}
+                onClose={() => setWaModalOpen(false)}
+                properties={customer.properties}
+                onProceed={handleWaProceed}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 

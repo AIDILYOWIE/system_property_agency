@@ -210,4 +210,24 @@ class ClientService
             return $client;
         });
     }
+
+    public function followUpCustomer($id, array $propertyIds)
+    {
+        return DB::transaction(function () use ($id, $propertyIds) {
+            $client = Client::findOrFail($id);
+            $client->update(['last_active_at' => now()]);
+
+            $query = Inquiry::where('customer_id', $id)->where('pipeline_status', 'new_lead');
+
+            if (empty($propertyIds)) {
+                $query->whereNull('property_id');
+            } else {
+                $query->whereIn('property_id', $propertyIds);
+            }
+
+            $query->update(['pipeline_status' => 'contacted']);
+
+            return true;
+        });
+    }
 }

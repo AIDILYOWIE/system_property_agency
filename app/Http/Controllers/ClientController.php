@@ -99,4 +99,11 @@ class ClientController extends Controller
             return redirect()->back()->withErrors(['error' => 'Gagal memperbarui catatan: ' . $e->getMessage()]);
         }
     }
+
+    public function followUp(Request $request, $id, ClientService $service)
+    {
+        $request->validate(['property_ids' => 'nullable|array']);
+        $service->followUpCustomer($id, $request->property_ids ?? []);
+        return redirect()->back()->with('success', 'Status pipeline diperbarui ke contacted!');
+    }
 }

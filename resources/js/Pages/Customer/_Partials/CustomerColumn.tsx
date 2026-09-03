@@ -188,18 +188,18 @@ export const CustomerColumns = columnHelper.columns([
     }),
 
     // ── Interested Property ────────────────────────────────────────────────────
-    columnHelper.accessor("interested_property", {
-        header: () => <div>Interested Property</div>,
-        cell: (info: any) => (
-            <div className="px-6 py-4 text-text-muted font-medium text-[13px]">
-                {info.getValue() ? (
-                    <span className="line-clamp-1">{info.getValue()}</span>
-                ) : (
-                    <span className="text-text-muted/50 italic text-xs">—</span>
-                )}
-            </div>
-        ),
-    }),
+    // columnHelper.accessor("interested_property", {
+    //     header: () => <div>Interested Property</div>,
+    //     cell: (info: any) => (
+    //         <div className="px-6 py-4 text-text-muted font-medium text-[13px]">
+    //             {info.getValue() ? (
+    //                 <span className="line-clamp-1">{info.getValue()}</span>
+    //             ) : (
+    //                 <span className="text-text-muted/50 italic text-xs">—</span>
+    //             )}
+    //         </div>
+    //     ),
+    // }),
 
     // ── Source ────────────────────────────────────────────────────────────────
     columnHelper.accessor("source", {
@@ -241,12 +241,12 @@ export const CustomerColumns = columnHelper.columns([
                 phone: customer.phone,
                 clientName: customer.name,
                 customerType: customer.customer_type,
-                propertyName: customer.interested_property,
+                // propertyName: customer.interested_property,
             })
 
             return (
                 <div className="flex items-center justify-center gap-2 px-6 py-4 w-max h-full">
-                    {/* One-Click WA Button */}
+                    {/* One-Click WA Button
                     <a
                         href={waUrl}
                         target="_blank"
@@ -256,7 +256,7 @@ export const CustomerColumns = columnHelper.columns([
                         title="One-Click WhatsApp Follow-Up"
                     >
                         <MessageCircle size={14} />
-                    </a>
+                    </a> */}
 
                     {/* More Actions Dropdown */}
                     <DropdownMenu>
