@@ -11,6 +11,7 @@ export type BuyerPipelineStatus =
 
 export interface PipelineLead {
     id: string;
+    customerId: string;
     name: string;
     phone: string;
     email?: string;

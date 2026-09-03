@@ -23,6 +23,7 @@ class BuyerPipelineService
 
             return [
                 'id' => (string) $inq->id,
+                'customerId' => (string) $cust->id,
                 'name' => $cust->full_name,
                 'phone' => $cust->phone,
                 'email' => $cust->email,

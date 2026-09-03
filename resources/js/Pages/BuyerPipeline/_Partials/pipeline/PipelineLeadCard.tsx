@@ -70,7 +70,7 @@ const PipelineLeadCard = memo(function PipelineLeadCard({
     const waUrl = getWhatsAppUrl({
         phone: lead.phone,
         clientName: lead.name,
-        propertyName: lead.propertyName,
+        propertyNames: [lead.propertyName],
     });
 
     const initials = lead.name
@@ -156,7 +156,7 @@ const PipelineLeadCard = memo(function PipelineLeadCard({
                         {/* Action buttons — right side */}
                         <div className="flex items-center gap-1.5">
                             <Link
-                                href={`/customer/detail/${lead.id}`}
+                                href={`/customer/detail/${lead.customerId}`}
                                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
                                 className="w-7 h-7 rounded-lg border border-border-base flex items-center justify-center text-text-muted hover:text-primary hover:border-primary/30 transition-colors"
                                 draggable={false}
@@ -219,7 +219,7 @@ const PipelineLeadCard = memo(function PipelineLeadCard({
                             onChange={onStatusChange}
                         />
                         <Link
-                            href={`/customer/detail/${lead.id}`}
+                            href={`/customer/detail/${lead.customerId}`}
                             className="w-8 h-8 rounded-lg border border-border-base flex items-center justify-center text-text-muted hover:text-primary hover:border-primary/30 transition-colors"
                         >
                             <Eye size={13} />
