@@ -94,7 +94,19 @@ class ClientService
     {
         $client = Client::with(['inquiries.property', 'inquiries.property.mainImage'])->findOrFail($id);
 
-        $primaryInquiry = $client->inquiries->first();
+        $statusWeight = [
+            'lost' => -1,
+            'new_lead' => 0,
+            'contacted' => 1,
+            'viewing' => 2,
+            'negotiation' => 3,
+            'won' => 4,
+        ];
+
+        $primaryInquiry = $client->inquiries->sortByDesc(function ($inq) use ($statusWeight) {
+            return $statusWeight[$inq->pipeline_status] ?? 0;
+        })->first();
+
         $primaryProperty = $primaryInquiry ? $primaryInquiry->property : null;
 
         $properties = $client->inquiries->map(function ($inq) {
@@ -128,7 +140,7 @@ class ClientService
                 ];
             })->values();
 
-            $total_interaction = CustomerActivity::where('customer_id', $client->id)->count();
+        $total_interaction = CustomerActivity::where('customer_id', $client->id)->count();
 
         return [
             'id' => $client->id,
