@@ -26,7 +26,11 @@ class BuyerPipelineController extends Controller
 
     public function updateStatus(BuyerPipelineRequest $request, $id)
     {
-        $this->pipelineService->updateLeadStatus($id, $request->input('status'));
+        $this->pipelineService->updateLeadStatus(
+            $id,
+            $request->input('status'),
+            $request->input('status_reason')
+        );
 
         return redirect()->back();
     }

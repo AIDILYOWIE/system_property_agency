@@ -8,6 +8,7 @@ import { usePipelineLeads } from "./_Partials/pipeline/usePipelineLeads";
 import PipelineStageBar from "./_Partials/pipeline/PipelineStageBar";
 import PipelineKanbanBoard from "./_Partials/pipeline/PipelineKanbanBoard";
 import PipelineLeadList from "./_Partials/pipeline/PipelineLeadList";
+import StatusReasonModal from "./_Partials/pipeline/StatusReasonModal";
 import { Input } from "@/Components/ui/input";
 
 // ─── Page ───────────────────────────────────────────────────────────────────────
@@ -23,6 +24,8 @@ export default function BuyerPipeline({ leads: initialLeads }: { leads: any[] })
         searchQuery,
         setSearchQuery,
         handleStatusChange,
+        statusModalTarget,
+        setStatusModalTarget,
     } = usePipelineLeads(initialLeads);
 
     // View mode — "list" default on all screens; kanban only shown on lg+ via CSS
@@ -44,7 +47,7 @@ export default function BuyerPipeline({ leads: initialLeads }: { leads: any[] })
             <div className="flex flex-col gap-5">
 
                 {/* ── Toolbar ──────────────────────────────────────────────── */}
-                <div className="bg-white rounded-2xl border border-border-base px-5 py-4 flex flex-col gap-4">
+                <div className="flex flex-col gap-4">
 
                     {/* Top row: Stage filter tabs + View toggle */}
                     <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -126,6 +129,14 @@ export default function BuyerPipeline({ leads: initialLeads }: { leads: any[] })
                 </div>
 
             </div>
+
+            <StatusReasonModal
+                show={!!statusModalTarget}
+                leadId={statusModalTarget?.leadId || null}
+                status={statusModalTarget?.status || null}
+                onClose={() => setStatusModalTarget(null)}
+                onSubmit={handleStatusChange}
+            />
         </DashboardLayout>
     );
 }

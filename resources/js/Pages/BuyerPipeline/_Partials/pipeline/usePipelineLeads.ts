@@ -58,8 +58,30 @@ export function usePipelineLeads(initialLeads: PipelineLead[]) {
 
     // ── Actions ───────────────────────────────────────────────────────────────
 
+    // Manage which lead is currently prompting for a won/lost reason
+    interface StatusModalTarget {
+        leadId: string;
+        status: BuyerPipelineStatus;
+    }
+    const [statusModalTarget, setStatusModalTarget] =
+        useState<StatusModalTarget | null>(null);
+
     const handleStatusChange = useCallback(
-        (leadId: string, newStatus: BuyerPipelineStatus) => {
+        (
+            leadId: string,
+            newStatus: BuyerPipelineStatus,
+            statusReason?: string,
+        ) => {
+            const requiresReason = newStatus === "lost" || newStatus === "won";
+
+            if (requiresReason && !statusReason) {
+                setStatusModalTarget({ leadId, status: newStatus });
+                return; // halt and wait for modal submission
+            }
+
+            // If they are submitting the modal, we can close it immediately
+            setStatusModalTarget(null);
+
             // Optimistic Update
             setLeads((prev) =>
                 prev.map((lead) =>
@@ -70,7 +92,7 @@ export function usePipelineLeads(initialLeads: PipelineLead[]) {
             // Real-time backend sync without page load
             router.patch(
                 route("buyer-pipeline.status", leadId),
-                { status: newStatus },
+                { status: newStatus, status_reason: statusReason },
                 {
                     preserveScroll: true,
                     preserveState: true,
@@ -94,5 +116,7 @@ export function usePipelineLeads(initialLeads: PipelineLead[]) {
         searchQuery,
         setSearchQuery,
         handleStatusChange,
+        statusModalTarget,
+        setStatusModalTarget,
     };
 }

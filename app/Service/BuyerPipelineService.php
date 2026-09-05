@@ -6,6 +6,7 @@ use App\Models\Inquiry;
 use App\Models\CustomerActivity;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Validation\ValidationException;
 
 class BuyerPipelineService
 {
@@ -45,19 +46,38 @@ class BuyerPipelineService
     /**
      * Update the pipeline status of a specific inquiry lead.
      */
-    public function updateLeadStatus(string $inquiryId, string $newStatus): void
+    public function updateLeadStatus(string $inquiryId, string $newStatus, ?string $statusReason = null): void
     {
-        DB::transaction(function () use ($inquiryId, $newStatus) {
+        DB::transaction(function () use ($inquiryId, $newStatus, $statusReason) {
             $inquiry = Inquiry::findOrFail($inquiryId);
             $oldStatus = $inquiry->pipeline_status;
 
+            if (in_array($oldStatus, ['won', 'lost'])) {
+                throw ValidationException::withMessages([
+                    'status' => 'Status prospek yang sudah WON atau LOST tidak dapat diubah lagi.'
+                ]);
+            }
+
             if ($oldStatus !== $newStatus) {
-                $inquiry->update(['pipeline_status' => $newStatus]);
+                $statusUpdateArray = ['pipeline_status' => $newStatus];
+
+                if (in_array($newStatus, ['won', 'lost'])) {
+                    $statusUpdateArray['status_reason'] = $statusReason;
+                } else {
+                    $statusUpdateArray['status_reason'] = null; // Clear if moved out
+                }
+
+                $inquiry->update($statusUpdateArray);
+
+                $desc = "Status prospek untuk properti {$inquiry->property->title} diubah dari " . strtoupper($oldStatus) . " menjadi " . strtoupper($newStatus) . " via Kanban.";
+                if (in_array($newStatus, ['won', 'lost']) && $statusReason) {
+                    $desc .= " Alasan: " . $statusReason;
+                }
 
                 CustomerActivity::create([
                     'customer_id' => $inquiry->customer_id,
                     'action_type' => 'status_change',
-                    'description' => "Status prospek untuk properti {$inquiry->property->title} diubah dari " . strtoupper($oldStatus) . " menjadi " . strtoupper($newStatus) . " via Kanban.",
+                    'description' => $desc,
                     'new_values' => ['title' => 'Pembaruan Pipeline Prospek']
                 ]);
             }

@@ -66,6 +66,8 @@ const PipelineLeadCard = memo(function PipelineLeadCard({
     isShadow = false,
 }: PipelineLeadCardProps) {
     const isLost = lead.status === "lost";
+    const isWon = lead.status === "won";
+    const isLocked = isLost || isWon;
 
     const waUrl = getWhatsAppUrl({
         phone: lead.phone,
@@ -80,20 +82,23 @@ const PipelineLeadCard = memo(function PipelineLeadCard({
         .join("")
         .toUpperCase();
 
+    const canDrag = variant === "compact" && !isShadow && !isLocked;
+
     return (
         <div
-            draggable={variant === "compact" && !isShadow}
+            draggable={canDrag}
             onDragStart={
-                variant === "compact" && !isShadow
+                canDrag
                     ? (e) => onDragStart?.(e, lead.id)
                     : undefined
             }
-            onDragEnd={variant === "compact" && !isShadow ? onDragEnd : undefined}
+            onDragEnd={canDrag ? onDragEnd : undefined}
             className={cn(
                 "bg-white rounded-xl border transition-all duration-200",
-                variant === "compact" && !isShadow && "cursor-grab active:cursor-grabbing select-none hover:border-primary/20",
-                variant === "compact" && "border-border-base",
-                isLost && !isShadow && "opacity-60",
+                canDrag && "cursor-grab active:cursor-grabbing hover:border-primary/20",
+                !canDrag && variant === "compact" && !isShadow && "cursor-default",
+                variant === "compact" && "border-border-base select-none",
+                isLost && !isShadow && "opacity-60 grayscale-[0.3]",
                 variant === "full" && "flex items-center gap-4 px-5 py-4",
 
                 // Active original card fades to nothing so the shadow takes over visually
@@ -142,6 +147,7 @@ const PipelineLeadCard = memo(function PipelineLeadCard({
                             leadId={lead.id}
                             currentStatus={lead.status}
                             onChange={onStatusChange}
+                            disabled={isLocked}
                         />
                     </div>
 
@@ -217,6 +223,7 @@ const PipelineLeadCard = memo(function PipelineLeadCard({
                             leadId={lead.id}
                             currentStatus={lead.status}
                             onChange={onStatusChange}
+                            disabled={isLocked}
                         />
                         <Link
                             href={`/customer/detail/${lead.customerId}`}

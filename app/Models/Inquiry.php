@@ -11,11 +11,16 @@ class Inquiry extends Model
         'customer_id',
         'property_id',
         'pipeline_status',
-        'lost_reason',
+        'status_reason',
     ];
 
     public function property(): BelongsTo
     {
         return $this->belongsTo(Property::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'customer_id');
     }
 }

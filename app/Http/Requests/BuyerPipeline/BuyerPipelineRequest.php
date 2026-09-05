@@ -23,7 +23,8 @@ class BuyerPipelineRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|string|in:new_lead,contacted,viewing,negotiation,won,lost'
+            'status' => 'required|string|in:new_lead,contacted,viewing,negotiation,won,lost',
+            'status_reason' => 'required_if:status,lost,won|string|max:1000|nullable'
         ];
     }
 }

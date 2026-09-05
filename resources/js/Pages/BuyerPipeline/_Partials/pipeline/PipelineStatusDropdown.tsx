@@ -10,6 +10,7 @@ interface PipelineStatusDropdownProps {
     leadId: string;
     currentStatus: BuyerPipelineStatus;
     onChange: (leadId: string, newStatus: BuyerPipelineStatus) => void;
+    disabled?: boolean;
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────────
@@ -18,6 +19,7 @@ export default function PipelineStatusDropdown({
     leadId,
     currentStatus,
     onChange,
+    disabled = false,
 }: PipelineStatusDropdownProps) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -49,27 +51,31 @@ export default function PipelineStatusDropdown({
         <div ref={ref} className="relative">
             <button
                 type="button"
+                disabled={disabled}
                 onClick={(e) => {
                     e.stopPropagation();
-                    setOpen((prev) => !prev);
+                    if (!disabled) setOpen((prev) => !prev);
                 }}
                 className={cn(
-                    "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all duration-150 cursor-pointer",
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all duration-150",
+                    !disabled && "cursor-pointer hover:opacity-80",
+                    disabled && "opacity-70 cursor-not-allowed",
                     cfg.color,
                     cfg.textColor,
-                    cfg.borderColor,
-                    "hover:opacity-80"
+                    cfg.borderColor
                 )}
             >
                 <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", cfg.dotColor)} />
                 {cfg.label}
-                <ChevronDown
-                    size={10}
-                    className={cn("transition-transform duration-150", open && "rotate-180")}
-                />
+                {!disabled && (
+                    <ChevronDown
+                        size={10}
+                        className={cn("transition-transform duration-150", open && "rotate-180")}
+                    />
+                )}
             </button>
 
-            {open && (
+            {open && !disabled && (
                 <div className="absolute left-0 top-full mt-1.5 z-[9999] w-44 bg-white rounded-xl border border-border-base shadow-lg py-1 overflow-hidden">
                     {STAGE_ORDER.map((stage) => {
                         const stageCfg = STAGE_CONFIG[stage];
