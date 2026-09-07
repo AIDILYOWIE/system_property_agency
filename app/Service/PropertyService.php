@@ -105,7 +105,7 @@ class PropertyService
      */
     public function getPropertyDetails($id): Property
     {
-        return Property::with(['images'])->withCount('inquiries')->findOrFail($id);
+        return Property::with(['images', 'inquiries.customer'])->withCount('inquiries')->findOrFail($id);
     }
 
     /**

@@ -68,7 +68,17 @@ class PropertyDetailResource extends JsonResource
                 'tenure' => $this->tenure_type === 'leasehold' ? 'Leasehold (' . $this->leasehold_years . ' Years)' : 'Freehold',
                 'roi' => $this->projected_roi ? $this->projected_roi : 0,
                 'zoning' => 'Yellow (Residential)',
-            ]
+            ],
+            'clients' => $this->relationLoaded('inquiries') ? $this->inquiries->map(function ($inquiry) {
+                return [
+                    'id' => $inquiry->id,
+                    'customer_id' => $inquiry->customer_id,
+                    'client' => $inquiry->customer->full_name ?? '-',
+                    'status' => ucwords(str_replace('_', ' ', $inquiry->pipeline_status)),
+                    'source' => $inquiry->customer->source ?? '-',
+                    'lastActivity' => $inquiry->updated_at ? $inquiry->updated_at->diffForHumans() : '-',
+                ];
+            }) : [],
         ];
     }
 }

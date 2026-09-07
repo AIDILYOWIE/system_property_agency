@@ -14,8 +14,10 @@ import {
     TrendingUp,
     UserX,
     Plus,
+    MoreHorizontal,
+    Eye,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/format";
 import { X, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from "lucide-react";
@@ -23,6 +25,13 @@ import { CardPrimary, CardPrimaryHeader, CardPrimaryContent } from "@/Components
 import { DataTable } from "@/Components/ui/data-table";
 import { router, Link } from "@inertiajs/react";
 import { type ColumnDef } from "@tanstack/react-table";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/Components/ui/dropdown-menu";
 import { type DataTableFeatures } from "@/Components/ui/table-data-features";
 import { Switch } from "@/Components/ui/switch";
 import { toast } from "@/Components/ui/toast";
@@ -30,6 +39,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 
 type ClientData = {
     id: string;
+    customer_id: string;
     client: string;
     status: string;
     source: string;
@@ -37,29 +47,99 @@ type ClientData = {
     aksi?: boolean;
 }
 
-const mockClients: ClientData[] = [];
-
 const clientColumns: ColumnDef<DataTableFeatures, ClientData>[] = [
     {
         accessorKey: "client",
         header: "Client",
+        cell: ({ row }) => {
+            const initials = row.original.client.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase();
+            return (
+                <div className="flex items-center gap-4 px-6 py-4">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 font-bold text-sm select-none border border-primary/20">
+                        {initials}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <p className="font-semibold text-text-primary mb-0.5 line-clamp-1">
+                            {row.original.client}
+                        </p>
+                    </div>
+                </div>
+            )
+        }
     },
     {
         accessorKey: "status",
         header: "Status",
+        cell: ({ row }) => {
+            const getPipelineStatusStyle = (status: string) => {
+                switch (status.toLowerCase()) {
+                    case "new lead":
+                    case "new request": return "bg-blue-50 text-blue-600 border-blue-100";
+                    case "contacted":
+                    case "qualifying": return "bg-amber-50 text-amber-600 border-amber-100";
+                    case "viewing": return "bg-violet-50 text-violet-600 border-violet-100";
+                    case "negotiation": return "bg-orange-50 text-orange-600 border-orange-100";
+                    case "won": return "bg-emerald-50 text-emerald-600 border-emerald-100";
+                    case "lost": return "bg-red-50 text-red-500 border-red-100";
+                    default: return "bg-gray-50 text-gray-500 border-gray-100";
+                }
+            };
+            return (
+                <div className="px-6 py-4">
+                    <span className={cn(
+                        "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                        getPipelineStatusStyle(row.original.status)
+                    )}>
+                        {row.original.status}
+                    </span>
+                </div>
+            );
+        }
     },
     {
         accessorKey: "source",
-        header: "Source & Notes",
+        header: "Source",
+        cell: ({ row }) => (
+            <div className="px-6 py-4">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-canvas text-text-muted border border-border-base uppercase tracking-wider">
+                    {row.original.source}
+                </span>
+            </div>
+        )
     },
     {
         accessorKey: "lastActivity",
         header: "Last Activity",
+        cell: ({ row }) => (
+            <div className="px-6 py-4 text-[13px] text-text-muted font-medium">
+                {row.original.lastActivity}
+            </div>
+        )
     },
     {
         id: "aksi",
-        header: () => <div className="text-right">Aksi</div>,
-        cell: () => null,
+        header: () => <div className="w-max">Action</div>,
+        cell: ({ row }) => (
+            <div className="flex items-center justify-center gap-2 px-6 py-4 w-max h-full">
+                <DropdownMenu>
+                    <DropdownMenuTrigger
+                        className="w-8 h-8 rounded-lg border border-border-base flex items-center justify-center text-text-muted transition-colors focus:outline-none data-[state=open]:bg-primary-50 data-[state=open]:text-primary outline-none hover:bg-gray-50"
+                        title="More Options"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <MoreHorizontal size={14} />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 font-sans">
+                        <Link href={route('customer.detail', row.original.customer_id)} className="w-full inline-block">
+                            <DropdownMenuItem className="cursor-pointer">
+                                <Eye className="mr-2 h-4 w-4" />
+                                <span>View Profile</span>
+                            </DropdownMenuItem>
+                        </Link>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+        )
     }
 ];
 
@@ -95,6 +175,7 @@ interface DetailInventoryProps {
             roi: string;
             zoning: string;
         };
+        clients: ClientData[];
     }
 }
 
@@ -326,7 +407,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
 
                             <DataTable
                                 columns={clientColumns as any}
-                                data={mockClients}
+                                data={property.clients}
                                 headerSlot={
                                     <div className="p-6 flex items-center justify-between">
                                         <div>
