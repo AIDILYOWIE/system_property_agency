@@ -170,7 +170,7 @@ export default function DossierPage({ property, agent }: DossierPageProps) {
             getWhatsAppUrl({
                 phone: agentData.phone,
                 clientName: "",
-                propertyName: data.title,
+                propertyNames: [data.title],
                 agentName: agentData.name,
             }).replace(
                 /text=.*/,

@@ -90,6 +90,7 @@ interface DetailInventoryProps {
             building_size: number;
         };
         dossier: {
+            token: string;
             tenure: string;
             roi: string;
             zoning: string;
@@ -143,6 +144,23 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
         });
     };
 
+    const copySecretLink = () => {
+        const url = `${window.location.origin}/dossier/${property.dossier.token}`;
+        navigator.clipboard.writeText(url).then(() => {
+            toast.add({
+                title: "Link Tersalin!",
+                description: "Secret link untuk property ini berhasil disalin",
+                type: 'success'
+            });
+        }).catch((err) => {
+            toast.add({
+                title: "Gagal menyalin link!",
+                description: err.toString(),
+                type: 'error'
+            });
+        });
+    };
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!galleryOpen) return;
@@ -182,7 +200,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                             <Edit2 className="w-4 h-4 stroke-[2.5]" />
                             Edit
                         </button>
-                        <button type="submit" className="btn btn-primary">
+                        <button type="button" onClick={copySecretLink} className="btn btn-primary">
                             <LinkIcon className="w-4 h-4 stroke-[2.5]" />
                             Salin Secret Link
                         </button>

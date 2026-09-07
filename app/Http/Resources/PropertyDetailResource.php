@@ -64,6 +64,7 @@ class PropertyDetailResource extends JsonResource
                 'building_size' => $this->building_size_sqm ?? 0,
             ],
             'dossier' => [
+                'token' => $this->dossier_token,
                 'tenure' => $this->tenure_type === 'leasehold' ? 'Leasehold (' . $this->leasehold_years . ' Years)' : 'Freehold',
                 'roi' => $this->projected_roi ? $this->projected_roi : 0,
                 'zoning' => 'Yellow (Residential)',
