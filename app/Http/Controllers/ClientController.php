@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Client\StoreClientRequest;
 use App\Http\Requests\Client\UpdateClientRequest;
 use App\Models\Client;
+use App\Models\Inquiry;
 use App\Service\ClientService;
 use App\Models\Property;
 use Exception;
@@ -105,5 +106,37 @@ class ClientController extends Controller
         $request->validate(['property_ids' => 'nullable|array']);
         $service->followUpCustomer($id, $request->property_ids ?? []);
         return redirect()->back()->with('success', 'Status pipeline diperbarui ke contacted!');
+    }
+
+    public function trackEmailFollowUp($inquiryId, ClientService $service)
+    {
+        $inquiry = Inquiry::with(['customer', 'property'])->findOrFail($inquiryId);
+
+        if ($inquiry->pipeline_status === 'new_lead') {
+            $service->followUpCustomer($inquiry->customer_id, [$inquiry->property_id]);
+        }
+
+        $phone = preg_replace('/[^0-9]/', '', $inquiry->customer->phone);
+        if (str_starts_with($phone, '08')) {
+            $phone = '628' . substr($phone, 2);
+        } elseif (str_starts_with($phone, '8')) {
+            $phone = '628' . substr($phone, 1);
+        }
+        if (!str_starts_with($phone, '628')) {
+            $phone = $phone; // Fallback
+        }
+
+        $agent = "Chris Property Signature";
+        $clientName = $inquiry->customer->full_name;
+
+        if ($inquiry->property) {
+            $msg = "Halo {$clientName}, saya {$agent}. Terima kasih atas ketertarikan Anda pada {$inquiry->property->title}. Apakah ada waktu untuk berdiskusi lebih lanjut?";
+        } else {
+            $msg = "Halo {$clientName}, saya {$agent}. Apakah ada waktu untuk berdiskusi lebih lanjut mengenai kebutuhan properti Anda?";
+        }
+
+        $url = "https://wa.me/{$phone}?text=" . urlencode($msg);
+
+        return redirect()->away($url);
     }
 }

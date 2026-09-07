@@ -5,6 +5,7 @@ use App\Http\Controllers\NewLeadController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\BuyerPipelineController;
+use App\Http\Controllers\PublicLeadController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -59,6 +60,13 @@ Route::patch('/buyer-pipeline/{id}/status', [BuyerPipelineController::class, 'up
 Route::get('/dossier/preview', function () {
     return Inertia::render('Dossier/DossierPage');
 })->name('dossier.preview');
+
+
+// ── Email Tracking & Redirect ──────────────────────────────────────────
+Route::get('/api/follow-up/{inquiry}', [ClientController::class, 'trackEmailFollowUp'])->name('api.follow-up');
+
+// ── Public API ─────────────────────────────────────────────────────────
+Route::post('/api/leads', [PublicLeadController::class, 'store'])->name('api.leads.store');
 
 Route::get('/new-lead', [NewLeadController::class, 'index'])->name('new-lead');
 

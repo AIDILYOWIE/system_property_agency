@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Events\NewLeadCreated;
 use App\Models\Client;
 use App\Models\Inquiry;
 use App\Models\Property;
@@ -70,20 +71,24 @@ class ClientService
                         throw new Exception("Pelanggan ini sudah terdaftar untuk salah satu properti yang dipilih.");
                     }
 
-                    Inquiry::create([
+                    $newInquiry = Inquiry::create([
                         'customer_id' => $client->id,
                         'property_id' => $propertyId,
                         'pipeline_status' => 'new_lead'
                     ]);
+
+                    event(new NewLeadCreated($newInquiry, $client));
                 }
             }
 
             if ($client->inquiries()->count() === 0) {
-                Inquiry::create([
+                $newGeneralInquiry = Inquiry::create([
                     'customer_id' => $client->id,
                     'property_id' => null,
                     'pipeline_status' => 'new_lead'
                 ]);
+
+                event(new NewLeadCreated($newGeneralInquiry, $client));
             }
 
             return $client;
