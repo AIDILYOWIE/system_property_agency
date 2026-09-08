@@ -1,9 +1,10 @@
-import { type FC, type ReactNode, memo } from 'react';
+import { type FC, type ReactNode, memo, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 import type { PageProps } from '@/types';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 import Sidebar, { MobileMenuButton, NotificationBell } from '@/Components/Sidebar';
 import { Search } from 'lucide-react';
+import { Toaster, toast } from '@/Components/ui/toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -100,6 +101,27 @@ const DashboardLayoutInner: FC<DashboardLayoutProps> = ({
     badgeOverrides = {},
     action,
 }) => {
+    const { flash } = usePage().props as any;
+
+    useEffect(() => {
+        if (flash?.success) {
+            toast.add({
+                title: 'Success',
+                description: flash.success,
+                type: 'success',
+                // Assumes toast supports 'type' or just standard notification style
+            });
+        }
+        if (flash?.error) {
+            toast.add({
+                title: 'Error',
+                description: flash.error,
+                type: 'error',
+            });
+        }
+        
+    }, [flash]);
+
     return (
         <div className="flex h-screen overflow-hidden bg-canvas font-sans">
             {/* ── Sidebar ──────────────────────────────────────────── */}
@@ -135,6 +157,7 @@ const DashboardLayoutInner: FC<DashboardLayoutProps> = ({
                     {children}
                 </main>
             </div>
+            <Toaster />
         </div>
     );
 };

@@ -16,8 +16,7 @@ return new class extends Migration
             $table->string('full_name');
             $table->string('phone')->unique();
             $table->string('email')->nullable();
-            $table->string('customer_type');
-            $table->string('source')->nullable();
+            $table->enum('source', ['website', 'walk-in', 'instagram', 'tiktok', 'other'])->nullable();
             $table->text('notes')->nullable();
             $table->jsonb('extra_data')->nullable();
             $table->timestamp('last_active_at')->nullable();

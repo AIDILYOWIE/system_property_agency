@@ -30,13 +30,7 @@ export type PropertyData = {
     thumbnail: string
 }
 
-const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: currency,
-        minimumFractionDigits: 0,
-    }).format(amount)
-}
+import { formatCurrency } from "@/lib/format"
 
 const getStatusColor = (status: PropertyStatus) => {
     switch (status) {
@@ -200,54 +194,59 @@ export const columns = columnHelper.columns([
             </div>
         ),
         cell: (info: any) => {
-            const isDraft = info.row.original.status === "draft"
+            const isDraft = info.row.original.visibility === "draft"
             return (
-                <div className="flex items-center justify-center gap-2 px-6 py-4 w-max h-full">
-                    {isDraft ? (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger
-                                className="w-8 h-8 rounded-lg border border-border-base flex items-center justify-center text-text-muted transition-colors focus:outline-none data-[state=open]:bg-primary-50 data-[state=open]:text-primary outline-none"
-                                title="More Options"
+                <div
+                    className="flex items-center justify-center gap-2 px-6 py-4 w-max h-full"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <DropdownMenu>
+                        <DropdownMenuTrigger
+                            className="w-8 h-8 rounded-lg border border-border-base flex items-center justify-center text-text-muted transition-colors focus:outline-none data-[state=open]:bg-primary-50 data-[state=open]:text-primary outline-none"
+                            title="More Options"
+                        >
+                            <MoreHorizontal size={14} />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 font-sans">
+                            {/* Toggle Publish/Draft */}
+                            <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    import("@inertiajs/react").then(({ router }) => {
+                                        router.patch(`/inventory/${info.row.original.id}/visibility`, {
+                                            visibility: isDraft ? 'published' : 'draft'
+                                        }, { preserveScroll: true });
+                                    });
+                                }}
                             >
-                                <MoreHorizontal size={14} />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 font-sans">
-                                <DropdownMenuItem className="cursor-pointer">
-                                    <Upload className="mr-2 h-4 w-4" />
-                                    <span>Publish</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="cursor-pointer">
-                                    <Edit2 className="mr-2 h-4 w-4" />
-                                    <span>Edit Property</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    ) : (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger
-                                className="w-8 h-8 rounded-lg border border-border-base flex items-center justify-center text-text-muted transition-colors focus:outline-none data-[state=open]:bg-primary-50 data-[state=open]:text-primary outline-none"
-                                title="More Options"
-                            >
-                                <MoreHorizontal size={14} />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 font-sans">
-                                <DropdownMenuItem className="cursor-pointer">
-                                    <Link2 className="mr-2 h-4 w-4" />
-                                    <span>Copy Secret Link</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="cursor-pointer">
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    <span>View Analytics</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="cursor-pointer">
-                                    <Edit2 className="mr-2 h-4 w-4" />
-                                    <span>Edit Property</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    )}
+                                <Upload className="mr-2 h-4 w-4" />
+                                <span>{isDraft ? "Publish to Public" : "Hide to Draft"}</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {!isDraft && (
+                                <>
+                                    <DropdownMenuItem className="cursor-pointer">
+                                        <Link2 className="mr-2 h-4 w-4" />
+                                        <span>Copy Secret Link</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="cursor-pointer">
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        <span>View Analytics</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                </>
+                            )}
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                                import("@inertiajs/react").then(({ router }) => {
+                                    router.visit(`/inventory/edit/${info.row.original.id}`);
+                                });
+                            }}>
+                                <Edit2 className="mr-2 h-4 w-4" />
+                                <span>Edit Property</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             )
         },

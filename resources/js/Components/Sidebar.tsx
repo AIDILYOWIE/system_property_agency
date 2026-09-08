@@ -1,4 +1,4 @@
-import { memo, useCallback, type FC, type ReactNode } from 'react';
+import React, { memo, useCallback, type FC, type ReactNode } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import type { PageProps } from '@/types';
 import {
@@ -55,9 +55,9 @@ const NAV_SECTIONS: NavSection[] = [
             {
                 key: 'properties',
                 label: 'Inventory',
-                href: '//inventory',
+                href: '/inventory',
                 icon: Building2,
-                routeName: 'inventory.index',
+                routeName: 'inventory',
             },
         ],
     },
@@ -67,9 +67,9 @@ const NAV_SECTIONS: NavSection[] = [
             {
                 key: 'crm-buyers',
                 label: 'Buyer Pipeline',
-                href: '/admin/crm/buyers',
+                href: '/buyer-pipeline',
                 icon: TrendingUp,
-                routeName: 'crm.buyers',
+                routeName: 'buyer-pipeline',
             },
             {
                 key: 'crm-partners',
@@ -81,9 +81,9 @@ const NAV_SECTIONS: NavSection[] = [
             {
                 key: 'customers',
                 label: 'All Customers',
-                href: '/admin/customers',
+                href: '/customer',
                 icon: Users,
-                routeName: 'customers.index',
+                routeName: 'customer',
             },
         ],
     },
@@ -293,7 +293,19 @@ interface SidebarProps {
 
 const Sidebar: FC<SidebarProps> = memo(({ badgeOverrides = {} }) => {
     const { isCollapsed, isMobileOpen, toggleCollapsed, closeMobile, activeItem, setActiveItem } = useSidebar();
+    const { url } = usePage();
     const { auth } = usePage<PageProps>().props;
+
+    // Auto-sync active item based on current URL path
+    React.useEffect(() => {
+        const flatItems = NAV_SECTIONS.flatMap(s => s.items);
+        // Find best match. We sort by length descending to match more specific routes first (e.g. /admin/crm/buyers before /admin/crm)
+        const matchedItem = [...flatItems].sort((a, b) => b.href.length - a.href.length).find(item => url.startsWith(item.href));
+
+        if (matchedItem) {
+            setActiveItem(matchedItem.key);
+        }
+    }, [url, setActiveItem]);
 
     const handleItemClick = useCallback((key: string) => {
         setActiveItem(key);

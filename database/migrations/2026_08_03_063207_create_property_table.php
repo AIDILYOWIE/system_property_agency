@@ -13,27 +13,24 @@ return new class extends Migration
     {
         Schema::create('properties', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('title');
-            $table->string('location_area');
+            $table->string('title')->unique();
             $table->text('description')->nullable();
-            $table->enum('listing_type', ['Sale', 'Rent']);
+            $table->string('location_area');
+            $table->enum('listing_type', ['sale', 'rent']);
             $table->string('category');
-            $table->string('partnership_type');
             $table->decimal('price', 15, 2);
-            $table->string('currency', 3);
-            $table->integer('land_size')->nullable();
-            $table->integer('building_size')->nullable();
+            $table->enum('currency', ['IDR', 'USD'])->default('IDR');
+            $table->integer('land_size_sqm')->nullable();
+            $table->integer('building_size_sqm')->nullable();
             $table->integer('bedrooms')->nullable();
             $table->integer('bathrooms')->nullable();
-            $table->string('tenure_type')->nullable();
+            $table->string('tenure_type')->nullable(); // SHM, HGB, dll
             $table->integer('leasehold_years')->nullable();
             $table->decimal('projected_roi', 5, 2)->nullable();
-            $table->string('status');
-            $table->string('visibility');
+            $table->enum('status', ['available', 'sold', 'rented'])->default('available');
+            $table->enum('visibility', ['published', 'draft'])->default('draft');
+            $table->uuid('dossier_token')->nullable()->unique();
             $table->timestamp('published_at')->nullable();
-            $table->timestamp('open_slot_expiry_date')->nullable();
-            $table->integer('remaining_days_paused')->nullable();
-            $table->integer('total_leads_count')->default(0);
             $table->timestamps();
         });
     }

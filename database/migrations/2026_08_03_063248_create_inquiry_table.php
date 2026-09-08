@@ -15,10 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignUuid('customer_id')->constrained('customers')->onDelete('cascade');
             $table->foreignUuid('property_id')->nullable()->constrained('properties')->onDelete('cascade');
-            $table->string('pipeline_status');
+            $table->enum('pipeline_status', ['new_lead', 'contacted', 'viewing', 'negotiation', 'won', 'lost'])->default('new_lead');
             $table->string('lost_reason')->nullable();
-            $table->jsonb('partnership_offer_data')->nullable();
-            $table->timestamp('last_inquired_at')->nullable();
             $table->timestamps();
 
             $table->unique(['customer_id', 'property_id']);

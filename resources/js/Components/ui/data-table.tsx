@@ -1,6 +1,7 @@
 "use client"
 
 import { useTable, type ColumnDef, type RowData } from "@tanstack/react-table"
+import { cn } from "@/lib/utils"
 
 import {
     Table,
@@ -21,15 +22,20 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "./pagination"
+import { SearchX } from "lucide-react"
 
 interface DataTableProps<TData extends RowData> {
     columns: ColumnDef<DataTableFeatures, TData>[]
     data: TData[]
+    headerSlot?: React.ReactNode
+    onRowClick?: (row: TData) => void
 }
 
 export function DataTable<TData extends RowData>({
     columns,
     data,
+    headerSlot,
+    onRowClick,
 }: DataTableProps<TData>) {
     const table = useTable({
         features,
@@ -45,6 +51,11 @@ export function DataTable<TData extends RowData>({
 
     return (
         <div className="bg-white border border-border-base rounded-2xl overflow-hidden shadow-card">
+            {headerSlot && (
+                <div className="border-b border-border-base">
+                    {headerSlot}
+                </div>
+            )}
             <Table>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
@@ -64,14 +75,17 @@ export function DataTable<TData extends RowData>({
                 <TableBody>
                     {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => {
-                            // Custom dimming for draft rows (if 'status' exists and is 'draft')
-                            const isDraft = (row.original as any).status === "draft";
+                            // Custom dimming for draft rows
+                            const isDraft = (row.original as any).visibility === "draft";
                             return (
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    className={`hover:bg-gray-50 hover:cursor-pointer transition-colors group ${isDraft ? "opacity-60 grayscale-[10%]" : ""
-                                        }`}
+                                    onClick={() => onRowClick && onRowClick(row.original)}
+                                    className={cn(
+                                        "hover:bg-gray-50 hover:cursor-pointer transition-all group",
+                                        isDraft && "opacity-50 bg-gray-50/50 grayscale-[50%]"
+                                    )}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="p-0">
@@ -82,9 +96,19 @@ export function DataTable<TData extends RowData>({
                             )
                         })
                     ) : (
-                        <TableRow>
-                            <TableCell colSpan={columns.length} className="h-24 text-center text-text-muted">
-                                No results.
+                        <TableRow className="hover:bg-transparent">
+                            <TableCell colSpan={columns.length} className="h-[280px] px-6 py-12 text-center text-text-muted">
+                                <div className="flex flex-col items-center justify-center">
+                                    <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 mb-4 border border-gray-100 shadow-sm">
+                                        <SearchX size={32} />
+                                    </div>
+                                    <p className="text-sm font-semibold text-text-primary mb-1">
+                                        Data tidak ditemukan
+                                    </p>
+                                    <p className="text-xs text-text-muted text-center leading-relaxed">
+                                        Saat ini tidak ada data atau riwayat yang dapat ditampilkan pada tabel.
+                                    </p>
+                                </div>
                             </TableCell>
                         </TableRow>
                     )}
