@@ -48,7 +48,7 @@ const NAV_SECTIONS: NavSection[] = [
             {
                 key: 'dashboard',
                 label: 'Overview',
-                href: '/dashboard',
+                href: '/',
                 icon: LayoutDashboard,
                 routeName: 'dashboard',
             },
@@ -71,13 +71,13 @@ const NAV_SECTIONS: NavSection[] = [
                 icon: TrendingUp,
                 routeName: 'buyer-pipeline',
             },
-            {
-                key: 'crm-partners',
-                label: 'Open Slot Partners',
-                href: '/admin/crm/partners',
-                icon: Handshake,
-                routeName: 'crm.partners',
-            },
+            // {
+            //     key: 'crm-partners',
+            //     label: 'Open Slot Partners',
+            //     href: '/admin/crm/partners',
+            //     icon: Handshake,
+            //     routeName: 'crm.partners',
+            // },
             {
                 key: 'customers',
                 label: 'All Customers',
@@ -87,18 +87,18 @@ const NAV_SECTIONS: NavSection[] = [
             },
         ],
     },
-    {
-        title: 'ANALYTICS',
-        items: [
-            {
-                key: 'analytics',
-                label: 'Reports',
-                href: '/admin/analytics',
-                icon: BarChart3,
-                routeName: 'analytics',
-            },
-        ],
-    },
+    // {
+    //     title: 'ANALYTICS',
+    //     items: [
+    //         {
+    //             key: 'analytics',
+    //             label: 'Reports',
+    //             href: '/admin/analytics',
+    //             icon: BarChart3,
+    //             routeName: 'analytics',
+    //         },
+    //     ],
+    // },
     {
         title: 'GENERAL',
         items: [

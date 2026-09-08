@@ -26,7 +26,7 @@ class UpdatePropertyRequest extends FormRequest
         return [
             'title' => 'required|string|max:255|unique:properties,title,' . $propertyId,
             'description' => 'required|string',
-            'location_area' => 'required|string|max:255',
+            'location_area' => 'required|string|max:2000',
             'listing_type' => 'required|in:sale,rent',
             'category' => 'required|string|max:100',
             'price' => 'required|numeric|min:0',

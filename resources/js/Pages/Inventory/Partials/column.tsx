@@ -87,22 +87,6 @@ export const columns = columnHelper.columns([
                         <p className="font-semibold text-text-primary mb-0.5 transition-colors line-clamp-1">
                             {prop.title}
                         </p>
-                        <div className="flex items-center gap-3">
-                            <p className="text-[11px] text-text-muted flex items-center gap-1 font-medium">
-                                <MapPin size={11} /> {prop.location}
-                            </p>
-                            <div className="flex items-center gap-1.5 opacity-90">
-                                <div
-                                    className={cn(
-                                        "w-1.5 h-1.5 rounded-full",
-                                        getStatusColor(prop.status)
-                                    )}
-                                />
-                                <span className="text-[10px] text-text-muted font-medium capitalize">
-                                    {prop.status}
-                                </span>
-                            </div>
-                        </div>
                     </div>
                     {performance(prop.days_on_market, prop.leads) && (
                         <AlertTriangle size={18} className="text-danger" />
