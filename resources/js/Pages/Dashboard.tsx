@@ -1,5 +1,5 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { TrendingUp, Clock, Handshake, AlertTriangle, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, Clock, AlertTriangle, ArrowUpRight, PieChart } from 'lucide-react';
 import { memo, useMemo, type FC } from 'react';
 import Chart from '@/Components/Chart';
 import InventoryStatusChart from '@/Components/InventoryStatusChart';
@@ -107,7 +107,7 @@ export default function Dashboard() {
     const metrics = {
         moneyOnTable: 40,
         recurringRevenue: 3,
-        brandGatekeeper: 8,
+        conversionSnapshot: "68%",
         inventoryHealth: 2,
     };
 
@@ -154,7 +154,6 @@ export default function Dashboard() {
             pageDescription="Actionable metrics for Chris Property Signature"
             badgeOverrides={{
                 'crm-buyers': metrics.moneyOnTable,
-                'crm-partners': metrics.brandGatekeeper,
             }}
         >
 
@@ -185,17 +184,17 @@ export default function Dashboard() {
                     actionHref="/admin/properties?filter=expiring"
                 />
 
-                {/* 3. Brand Gatekeeper */}
+                {/* 3. Conversion Snapshot */}
                 <KPICard
-                    title="Brand Gatekeeper"
-                    value={metrics.brandGatekeeper}
-                    description="Pending collaboration / Open Slot partnership requests"
-                    icon={Handshake}
-                    iconBg="bg-info/10"
-                    iconColor="text-info"
+                    title="Conversion Snapshot"
+                    value={metrics.conversionSnapshot}
+                    description="Leads yang berakhir WON vs LOST 30 hari terakhir"
+                    icon={PieChart}
+                    iconBg="bg-success/10"
+                    iconColor="text-success"
                     designVariant="secondary"
-                    action="View Partner Pipeline"
-                    actionHref="/admin/crm/partners"
+                    action="View CRM"
+                    actionHref="/customer"
                 />
 
                 {/* 4. Inventory Health */}
@@ -216,14 +215,14 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                 {/* Bar Charts — each spans 2 cols on xl */}
                 <GroupColumnChart />
-                <Chart data={openSlotPurchase} title="Open Slot Purchase" />
+                <Chart data={openSlotPurchase} title="Property Lead" />
             </div>
 
             {/* ── Inventory Status + New Listings ──────────────────── */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-                <InventoryStatusChart  className='col-span-1' data={inventoryData} />
+                <InventoryStatusChart className='col-span-1' data={inventoryData} />
                 <PropertyListingCard
-                className='col-span-2'
+                    className='col-span-2'
                     listings={newListings}
                     viewAllHref="/admin/properties"
                 />

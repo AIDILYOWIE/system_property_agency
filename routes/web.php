@@ -5,6 +5,7 @@ use App\Http\Controllers\NewLeadController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\BuyerPipelineController;
+use App\Http\Controllers\DossierController;
 use App\Http\Controllers\PublicLeadController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -57,7 +58,7 @@ Route::get('/buyer-pipeline', [BuyerPipelineController::class, 'index'])->name('
 Route::patch('/buyer-pipeline/{id}/status', [BuyerPipelineController::class, 'updateStatus'])->name('buyer-pipeline.status');
 
 // ── Dossier (Public — no auth) ─────────────────────────────────────────
-Route::get('/dossier/{token}', [\App\Http\Controllers\DossierController::class, 'show'])->name('dossier.show');
+Route::get('/dossier/{token}', [DossierController::class, 'show'])->name('dossier.show');
 
 
 // ── Email Tracking & Redirect ──────────────────────────────────────────

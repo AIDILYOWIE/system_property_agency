@@ -24,7 +24,7 @@
 
     Gunakan tombol WhatsApp di atas untuk mengupdate status di sistem secara otomatis dan membuka draf chat Anda.
 
-    Jika butuh melihat detail profilnya, klik [Buka Profil Klien]({{ $crmProfileUrl }}).
+    Jika butuh melihat detail profilnya, klik Buka Profil Klien: {{ $crmProfileUrl }}.
 
     Terima kasih,<br>
     {{ config('app.name') }}
