@@ -1,4 +1,5 @@
 import DashboardLayout from "@/Layouts/DashboardLayout";
+import { MapView } from "@/Components/Map";
 import {
     ChevronLeft,
     AlertCircle,
@@ -148,6 +149,7 @@ interface DetailInventoryProps {
         id: string;
         title: string;
         location: string;
+        address?: string;
         price: number;
         currency: string;
         category: string;
@@ -262,7 +264,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
         <>
             <DashboardLayout
                 pageTitle={property.title}
-                pageDescription={`${property.location} • Ditambahkan ${property.added_date_human}`}
+                pageDescription={`Detail status properti • Ditambahkan ${property.added_date_human}`}
                 action={
                     <div className="flex gap-2">
                         <div className="flex gap-2 items-center w-[100px]">
@@ -374,6 +376,18 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                     )}
                                 </div>
                             </div>
+
+                            {/* Map Location Section */}
+                            {property.location && (
+                                <div className="bg-white rounded-2xl p-5 md:p-6 shadow-card border border-border-base">
+                                    <h2 className="text-lg font-bold text-text-primary flex items-center gap-2 mb-4">
+                                        <MapPin className="w-5 h-5 text-primary" /> Location
+                                    </h2>
+                                    <div className="w-full h-64 md:h-80 rounded-xl overflow-hidden border border-border-base bg-gray-50 flex-shrink-0 relative group">
+                                        <MapView value={property.location} className="w-full h-full" />
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Performance Analytic Card (Mobile View) */}
                             <div className="bg-white rounded-2xl p-5 shadow-card border border-border-base flex lg:hidden items-center justify-between">

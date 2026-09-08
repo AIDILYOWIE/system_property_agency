@@ -47,6 +47,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/Components/ui/breadcrumb";
+import { MapPicker } from "@/Components/Map";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -251,29 +252,20 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                 </div>
 
                                 {/* Location */}
-                                <Field>
-                                    <FieldLabel required>Location Area</FieldLabel>
-                                    <InputGroup className="!focus:ring-0">
-                                        <InputGroupInput
-                                            value={data.location_area}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "location_area",
-                                                    e.target.value as string,
-                                                )
-                                            }
-                                            className="!bg-canvas"
-                                            placeholder="Enter your location via url google map"
-                                        />
-                                        <InputGroupAddon className="">
-                                            <MapPin size={18} />
-                                        </InputGroupAddon>
-                                    </InputGroup>
-                                    <FieldDescription className="text-[11px] text-text-muted mt-1.5 flex items-center gap-1">
-                                        <Info size={11} />
-                                        For public listings, do not use exact
-                                        addresses. Only specify the general area.
-                                    </FieldDescription>
+                                <Field data-invalid={!!errors.location_area}>
+                                    <FieldLabel required>Location Area (Map Pin)</FieldLabel>
+                                    <MapPicker
+                                        value={data.location_area}
+                                        onChange={(val) => setData("location_area", val)}
+                                    />
+                                    {errors.location_area ? (
+                                        <FieldError>{errors.location_area}</FieldError>
+                                    ) : (
+                                        <FieldDescription className="text-[11px] text-text-muted mt-1.5 flex items-center gap-1">
+                                            <Info size={11} />
+                                            Geser dan klik untuk menentukan koordinat pasti dari area secara interaktif.
+                                        </FieldDescription>
+                                    )}
                                 </Field>
 
                                 {/* Description */}
