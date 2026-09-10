@@ -20,6 +20,8 @@ class Client extends Model
         'notes',
         'extra_data',
         'last_active_at',
+        'utm_medium',
+        'referrer',
     ];
 
     protected $casts = [

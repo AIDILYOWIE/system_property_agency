@@ -60,6 +60,8 @@ interface Customer {
     customer_type: CustomerType;
     pipeline_status: PipelineStatus;
     source: string;
+    utm_medium?: string | null;
+    referrer?: string | null;
     notes: string;
     created_at: string;
     last_contacted?: string;
@@ -299,11 +301,21 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
                                             {customer.email}
                                         </span>
                                     )}
-                                    <span className="flex items-center gap-1.5">
+                                    <span className="flex items-center gap-1.5 font-medium">
                                         <Globe size={14} className="flex-shrink-0" />
                                         {customer.source}
                                     </span>
-                                    <span className="flex items-center gap-1.5">
+                                    {customer.utm_medium && (
+                                        <span className="flex items-center gap-1.5 font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                            utm_medium: <span className="font-bold">{customer.utm_medium}</span>
+                                        </span>
+                                    )}
+                                    {customer.referrer && (
+                                        <span className="flex items-center gap-1.5 font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                            referrer: <span className="font-bold truncate max-w-[150px]" title={customer.referrer}>{customer.referrer}</span>
+                                        </span>
+                                    )}
+                                    <span className="flex items-center gap-1.5 font-medium">
                                         <Calendar size={14} className="flex-shrink-0" />
                                         {new Date(customer.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
                                     </span>

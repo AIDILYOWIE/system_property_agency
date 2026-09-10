@@ -20,6 +20,8 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->jsonb('extra_data')->nullable();
             $table->timestamp('last_active_at')->nullable();
+            $table->string('utm_medium')->nullable();
+            $table->string('referrer')->nullable();
             $table->timestamps();
         });
     }
