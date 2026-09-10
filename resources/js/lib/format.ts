@@ -22,5 +22,10 @@ export const formatCurrency = (amount: number, currency: string) => {
         val = val.replace(/\.00$/, "").replace(/\.(\d)0$/, ".$1");
         return `Rp ${val.replace(".", ",")} Jt`;
     }
+    if (amount >= 1_000_000) {
+        let val = (amount / 1_000_000).toFixed(2);
+        val = val.replace(/\.00$/, "").replace(/\.(\d)0$/, ".$1");
+        return `Rp ${val.replace(".", ",")} Jt`;
+    }
     return `Rp ${new Intl.NumberFormat("id-ID").format(amount)}`;
 };
