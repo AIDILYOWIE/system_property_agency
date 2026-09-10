@@ -39,6 +39,9 @@ class StorePropertyRequest extends FormRequest
             'main_thumbnail' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB max
             'gallery' => 'required|array',
             'gallery.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'marketing_start_date' => 'required|date',
+            'social_media_1' => 'nullable|url|max:255',
+            'social_media_2' => 'nullable|url|max:255',
         ];
     }
 }

@@ -28,7 +28,11 @@ class Property extends Model
         'status',
         'visibility',
         'dossier_token',
-        'published_at'
+        'published_at',
+        'marketing_start_date',
+        'social_media_1',
+        'social_media_2',
+        'sold_at'
     ];
 
     protected $casts = [
@@ -39,7 +43,9 @@ class Property extends Model
         'building_size_sqm' => 'integer',
         'bedrooms' => 'integer',
         'bathrooms' => 'integer',
-        'leasehold_years' => 'integer'
+        'leasehold_years' => 'integer',
+        'marketing_start_date' => 'date',
+        'sold_at' => 'datetime'
     ];
 
     public function images(): HasMany
@@ -59,10 +65,18 @@ class Property extends Model
 
     public function getDaysOnMarketAttribute(): int
     {
-        if (!$this->published_at) {
+        if (!$this->marketing_start_date) {
             return 0;
         }
-        return (int) $this->published_at->diffInDays(now());
+
+        if (in_array($this->status, ['sold', 'rented']) && $this->sold_at) {
+            $days = (int) $this->marketing_start_date->diffInDays($this->sold_at);
+            return max(0, $days);
+        }
+
+        $days = (int) $this->marketing_start_date->diffInDays(now());
+        // If start date is in the future, it could be negative, make it 0 at minimum
+        return max(0, $days);
     }
 
     protected $appends = ['days_on_market'];

@@ -56,6 +56,9 @@ class PropertyDetailResource extends JsonResource
             'added_date_human' => $this->created_at ? $this->created_at->diffForHumans() : '',
             'views' => 42,
             'images' => $imageUrls,
+            'social_media_1' => $this->social_media_1,
+            'social_media_2' => $this->social_media_2,
+            'marketing_start_date' => $this->marketing_start_date ? $this->marketing_start_date->format('Y-m-d') : null,
             'description' => $this->description ?? 'No description provided.',
             'specification' => [
                 'bedrooms' => $this->bedrooms ?? 0,

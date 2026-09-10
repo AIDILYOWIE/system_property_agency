@@ -31,6 +31,10 @@ return new class extends Migration
             $table->enum('visibility', ['published', 'draft'])->default('draft');
             $table->uuid('dossier_token')->nullable()->unique();
             $table->timestamp('published_at')->nullable();
+            $table->date('marketing_start_date')->nullable();
+            $table->string('social_media_1')->nullable();
+            $table->string('social_media_2')->nullable();
+            $table->timestamp('sold_at')->nullable()->after('status');
             $table->timestamps();
         });
     }

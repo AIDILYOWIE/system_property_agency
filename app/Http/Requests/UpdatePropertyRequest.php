@@ -43,7 +43,10 @@ class UpdatePropertyRequest extends FormRequest
             'gallery' => 'nullable|array',
             'gallery.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
             'deleted_images' => 'nullable|array',
-            'deleted_images.*' => 'string'
+            'deleted_images.*' => 'string',
+            'marketing_start_date' => 'required|date',
+            'social_media_1' => 'nullable|url|max:255',
+            'social_media_2' => 'nullable|url|max:255',
         ];
     }
 }
