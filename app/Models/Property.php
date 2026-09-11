@@ -14,6 +14,7 @@ class Property extends Model
         'title',
         'description',
         'location_area',
+        'full_address',
         'listing_type',
         'category',
         'price',

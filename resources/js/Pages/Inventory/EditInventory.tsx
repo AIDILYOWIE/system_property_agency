@@ -11,6 +11,7 @@ export default function EditInventory({ property }: { property: any }) {
         id: property.id,
         title: property.title,
         location: property.location,
+        full_address: property.full_address,
         description: property.description,
         price: property.price?.toString() ?? "",
         currency: property.currency,
@@ -28,6 +29,9 @@ export default function EditInventory({ property }: { property: any }) {
                 : property.dossier?.zoning?.toLowerCase().includes("green") ? "green"
                     : property.dossier?.zoning?.toLowerCase().includes("pink") ? "pink" : "") as any,
         images: property.images || [],
+        marketing_start_date: property.marketing_start_date,
+        social_media_1: property.social_media_1,
+        social_media_2: property.social_media_2,
     };
 
     return (

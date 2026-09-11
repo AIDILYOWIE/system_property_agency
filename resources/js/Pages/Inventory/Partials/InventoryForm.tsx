@@ -65,6 +65,7 @@ type Zoning = "yellow" | "commercial" | "green" | "pink" | "";
 interface FormState {
     title: string;
     location: string;
+    full_address: string;
     description: string;
     price: string;
     currency: Currency;
@@ -126,6 +127,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
     const { data, setData, post, processing, errors } = useForm({
         title: initialData?.title ?? "",
         location_area: initialData?.location ?? "",
+        full_address: initialData?.full_address ?? "",
         description: initialData?.description ?? "",
         price: initialData?.price ?? "",
         currency: initialData?.currency ?? "IDR",
@@ -253,6 +255,31 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                         />
                                         {errors.title && (
                                             <FieldError>{errors.title}</FieldError>
+                                        )}
+                                    </Field>
+                                </div>
+
+                                {/* Full Address */}
+                                <div className="">
+                                    <Field data-invalid={!!errors.full_address} >
+                                        <FieldLabel required>
+                                            Full Address
+                                        </FieldLabel>
+                                        <Textarea
+                                            placeholder="e.g., Jl. Raya Seminyak No. 14, Kuta, Bali"
+                                            value={data.full_address}
+                                            rows={2}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "full_address",
+                                                    e.target.value as string,
+                                                )
+                                            }
+                                            required
+                                            aria-invalid={!!errors.full_address}
+                                        />
+                                        {errors.full_address && (
+                                            <FieldError>{errors.full_address}</FieldError>
                                         )}
                                     </Field>
                                 </div>
