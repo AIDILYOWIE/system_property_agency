@@ -125,6 +125,10 @@ class PropertyService
             // Generate UUID for private dossier (US 3.2 logic base)
             $data['dossier_token'] = Str::uuid()->toString();
 
+            if (isset($data['status']) && in_array($data['status'], ['sold', 'rented'])) {
+                $data['sold_at'] = now();
+            }
+
             // Create property
             $property = Property::create($data);
 
@@ -177,6 +181,14 @@ class PropertyService
             if (isset($data['category']) && $data['category'] === 'strategic_land') {
                 $data['bedrooms'] = null;
                 $data['bathrooms'] = null;
+            }
+
+            if (isset($data['status'])) {
+                if (in_array($data['status'], ['sold', 'rented'])) {
+                    $data['sold_at'] = $property->sold_at ?? now();
+                } else if ($data['status'] === 'available') {
+                    $data['sold_at'] = null;
+                }
             }
 
             $property->update($data);

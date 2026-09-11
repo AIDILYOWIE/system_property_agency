@@ -1,4 +1,5 @@
 import DashboardLayout from "@/Layouts/DashboardLayout";
+import { MapView } from "@/Components/Map";
 import {
     ChevronLeft,
     AlertCircle,
@@ -16,6 +17,9 @@ import {
     Plus,
     MoreHorizontal,
     Eye,
+    Clock,
+    Activity,
+    Lock,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -148,6 +152,7 @@ interface DetailInventoryProps {
         id: string;
         title: string;
         location: string;
+        address?: string;
         price: number;
         currency: string;
         category: string;
@@ -161,6 +166,9 @@ interface DetailInventoryProps {
         };
         added_date_human: string;
         views: number;
+        social_media_1?: string | null;
+        social_media_2?: string | null;
+        marketing_start_date?: string | null;
         images: string[];
         description: string;
         specification: {
@@ -262,7 +270,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
         <>
             <DashboardLayout
                 pageTitle={property.title}
-                pageDescription={`${property.location} • Ditambahkan ${property.added_date_human}`}
+                pageDescription={`Detail status properti • ${property.added_date_human}`}
                 action={
                     <div className="flex gap-2">
                         <div className="flex gap-2 items-center w-[100px]">
@@ -375,34 +383,81 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                 </div>
                             </div>
 
+                            {/* Map Location Section */}
+                            {property.location && (
+                                <div className="bg-white rounded-2xl p-5 md:p-6 shadow-card border border-border-base">
+                                    <h2 className="text-lg font-bold text-text-primary flex items-center gap-2 mb-4">
+                                        <MapPin className="w-5 h-5 text-primary" /> Location
+                                    </h2>
+                                    <div className="w-full h-64 md:h-80 rounded-xl overflow-hidden border border-border-base bg-gray-50 flex-shrink-0 relative group">
+                                        <MapView value={property.location} className="w-full h-full" />
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Performance Analytic Card (Mobile View) */}
-                            <div className="bg-white rounded-2xl p-5 shadow-card border border-border-base flex lg:hidden items-center justify-between">
-                                <div>
-                                    <p className={cn("text-[11px] uppercase font-semibold mb-1", property.normal.is_normal ? "text-text-muted" : "text-red-500")}>
-                                        Total Leads
-                                    </p>
-                                    <p className={cn("text-2xl font-bold leading-none", property.normal.is_normal ? "text-text-primary" : "text-red-600")}>
-                                        {property.normal.leads}
-                                    </p>
+                            <div className="bg-white rounded-2xl p-5 shadow-card border border-border-base flex lg:hidden flex-col gap-5">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className={cn("flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-border-base", !property.normal.is_normal && "bg-red-50/50 border-red-200")}>
+                                        <TrendingUp className={cn("w-5 h-5 text-primary", !property.normal.is_normal && "text-red-500")} />
+                                        <div>
+                                            <p className={cn("text-[10px] text-text-muted font-medium uppercase", !property.normal.is_normal && "text-red-500")}>
+                                                Total Leads
+                                            </p>
+                                            <p className={cn("text-sm font-bold text-text-primary", !property.normal.is_normal && "text-red-600")}>
+                                                {property.normal.leads}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className={cn(
+                                        "flex gap-3 bg-gray-50 p-3 rounded-xl border",
+                                        property.status === 'sold' || property.status === 'rented'
+                                            ? "border-sky-200 bg-sky-50 opacity-90"
+                                            : (!property.normal.is_normal ? "bg-red-50/50 border-red-200" : "border-border-base")
+                                    )}>
+                                        <div className="pt-1">
+                                            <Clock className={cn(
+                                                "w-5 h-5",
+                                                property.status === 'sold' || property.status === 'rented' ? "text-sky-600" : (!property.normal.is_normal ? "text-red-500" : "text-primary")
+                                            )} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between">
+                                                <p className={cn(
+                                                    "text-[10px] font-medium uppercase",
+                                                    property.status === 'sold' || property.status === 'rented' ? "text-sky-600" : (!property.normal.is_normal ? "text-red-500" : "text-text-muted")
+                                                )}>
+                                                    Days on Market
+                                                </p>
+                                                {(property.status === 'sold' || property.status === 'rented') && (
+                                                    <span className="flex items-center gap-1 text-[8px] font-bold text-sky-600 bg-sky-100/50 px-1.5 py-0.5 rounded border border-sky-200 uppercase" title="Waktu Dibekukan (Sold/Rented)">
+                                                        <Lock size={10} /> Locked
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className={cn(
+                                                "text-sm font-bold mt-1",
+                                                property.status === 'sold' || property.status === 'rented' ? "text-sky-700" : (!property.normal.is_normal ? "text-red-600" : "text-text-primary")
+                                            )}>
+                                                {property.normal.days_on_market} Days
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="w-px h-10 bg-border-base"></div>
-                                <div>
-                                    <p className={cn("text-[11px] uppercase font-semibold mb-1", property.normal.is_normal ? "text-text-muted" : "text-red-500")}>
-                                        Days on Market
-                                    </p>
-                                    <p className={cn("text-2xl font-bold leading-none", property.normal.is_normal ? "text-text-primary" : "text-red-600")}>
-                                        {property.normal.days_on_market}
-                                    </p>
-                                </div>
-                                <div className="w-px h-10 bg-border-base"></div>
-                                <div>
-                                    <p className="text-[11px] text-text-muted uppercase font-semibold mb-1">
-                                        Views
-                                    </p>
-                                    <p className="text-2xl font-bold text-text-primary leading-none">
-                                        {property.views}
-                                    </p>
-                                </div>
+                                {(property.social_media_1 || property.social_media_2) && (
+                                    <div className={`grid gap-3 pt-5 border-t border-border-base ${property.social_media_1 && property.social_media_2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                        {property.social_media_1 && (
+                                            <a href={property.social_media_1} target="_blank" rel="noreferrer" className="btn btn-primary flex justify-center text-xs">
+                                                TikTok
+                                            </a>
+                                        )}
+                                        {property.social_media_2 && (
+                                            <a href={property.social_media_2} target="_blank" rel="noreferrer" className="btn btn-primary flex justify-center text-xs">
+                                                Instagram
+                                            </a>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             <DataTable
@@ -431,38 +486,74 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                         {/* Right Column: Property Info & Dossier */}
                         <div className="flex flex-col gap-6">
                             {/* Performance Analytic Card (Desktop View) */}
-                            <div className="bg-white rounded-2xl p-5 shadow-card border border-border-base hidden lg:flex items-center justify-between">
-                                <div>
-                                    <p className={cn("text-[11px] uppercase font-semibold mb-1", property.normal.is_normal ? "text-text-muted" : "text-red-500")}>
-                                        Total Leads
-                                    </p>
-                                    <p className={cn("text-2xl font-bold leading-none", property.normal.is_normal ? "text-text-primary" : "text-red-600")}>
-                                        {property.normal.leads}
-                                    </p>
+                            <div className="bg-white rounded-2xl p-5 shadow-card border border-border-base hidden lg:flex flex-col gap-5">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className={cn("flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-border-base", !property.normal.is_normal && "bg-red-50/50 border-red-200")}>
+                                        <TrendingUp className={cn("w-5 h-5 text-primary", !property.normal.is_normal && "text-red-500")} />
+                                        <div>
+                                            <p className={cn("text-[10px] text-text-muted font-medium uppercase", !property.normal.is_normal && "text-red-500")}>
+                                                Total Leads
+                                            </p>
+                                            <p className={cn("text-sm font-bold text-text-primary", !property.normal.is_normal && "text-red-600")}>
+                                                {property.normal.leads}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className={cn(
+                                        "flex gap-3 bg-gray-50 p-3 rounded-xl border",
+                                        property.status === 'sold' || property.status === 'rented'
+                                            ? "border-sky-200 bg-sky-50 opacity-90"
+                                            : (!property.normal.is_normal ? "bg-red-50/50 border-red-200" : "border-border-base")
+                                    )}>
+                                        <div className="pt-1">
+                                            <Clock className={cn(
+                                                "w-5 h-5",
+                                                property.status === 'sold' || property.status === 'rented' ? "text-sky-600" : (!property.normal.is_normal ? "text-red-500" : "text-primary")
+                                            )} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between">
+                                                <p className={cn(
+                                                    "text-[10px] font-medium uppercase",
+                                                    property.status === 'sold' || property.status === 'rented' ? "text-sky-600" : (!property.normal.is_normal ? "text-red-500" : "text-text-muted")
+                                                )}>
+                                                    Days on Market
+                                                </p>
+                                                {(property.status === 'sold' || property.status === 'rented') && (
+                                                    <span className="flex items-center gap-1 text-[8px] font-bold text-sky-600 bg-sky-100/50 px-1.5 py-0.5 rounded border border-sky-200 uppercase" title="Waktu Dibekukan (Sold/Rented)">
+                                                        <Lock size={10} /> Locked
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className={cn(
+                                                "text-sm font-bold mt-1",
+                                                property.status === 'sold' || property.status === 'rented' ? "text-sky-700" : (!property.normal.is_normal ? "text-red-600" : "text-text-primary")
+                                            )}>
+                                                {property.normal.days_on_market} Days
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="w-px h-10 bg-border-base"></div>
-                                <div>
-                                    <p className={cn("text-[11px] uppercase font-semibold mb-1", property.normal.is_normal ? "text-text-muted" : "text-red-500")}>
-                                        Days on Market
-                                    </p>
-                                    <p className={cn("text-2xl font-bold leading-none", property.normal.is_normal ? "text-text-primary" : "text-red-600")}>
-                                        {property.normal.days_on_market}
-                                    </p>
-                                </div>
-                                <div className="w-px h-10 bg-border-base"></div>
-                                <div>
-                                    <p className="text-[11px] text-text-muted uppercase font-semibold mb-1">
-                                        Views
-                                    </p>
-                                    <p className="text-2xl font-bold text-text-primary leading-none">
-                                        {property.views}
-                                    </p>
-                                </div>
+                                {(property.social_media_1 || property.social_media_2) && (
+                                    <div className={`grid gap-3 pt-5 border-t border-border-base ${property.social_media_1 && property.social_media_2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                        {property.social_media_1 && (
+                                            <a href={property.social_media_1} target="_blank" rel="noreferrer" className="btn btn-primary flex justify-center text-xs">
+                                                TikTok
+                                            </a>
+                                        )}
+                                        {property.social_media_2 && (
+                                            <a href={property.social_media_2} target="_blank" rel="noreferrer" className="btn btn-primary flex justify-center text-xs">
+                                                Instagram
+                                            </a>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="bg-white rounded-2xl p-6 shadow-card border border-border-base flex flex-col gap-6">
                                 <div className="w-full flex justify-between items-center">
                                     <h3 className="text-[28px] font-bold text-text-primary mb-1">
+
                                         {formatCurrency(property.price, property.currency)}
                                     </h3>
                                     <div className="flex gap-2">
@@ -576,7 +667,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                             {property.dossier.roi} % / Year
                                         </span>
                                     </div>
-                                    <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-3">
+                                    <div className="flex items-center justify-between mt-3">
                                         <span className="text-xs text-white/70">
                                             Zoning
                                         </span>

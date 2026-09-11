@@ -24,7 +24,7 @@ class StorePropertyRequest extends FormRequest
         return [
             'title' => 'required|string|max:255|unique:properties,title',
             'description' => 'required|string',
-            'location_area' => 'required|string|max:255',
+            'location_area' => 'required|string|max:2000',
             'listing_type' => 'required|in:sale,rent',
             'category' => 'required|string|max:100',
             'price' => 'required|numeric|min:0',
@@ -39,6 +39,9 @@ class StorePropertyRequest extends FormRequest
             'main_thumbnail' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB max
             'gallery' => 'required|array',
             'gallery.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'marketing_start_date' => 'required|date',
+            'social_media_1' => 'nullable|url|max:255',
+            'social_media_2' => 'nullable|url|max:255',
         ];
     }
 }

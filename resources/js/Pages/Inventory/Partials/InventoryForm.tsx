@@ -47,6 +47,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/Components/ui/breadcrumb";
+import { MapPicker } from "@/Components/Map";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -77,6 +78,9 @@ interface FormState {
     leaseholdYears: string;
     projectedRoi: string;
     zoning: Zoning;
+    marketing_start_date: string;
+    social_media_1: string;
+    social_media_2: string;
     images?: string[];
 }
 
@@ -135,6 +139,9 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
         leasehold_years: initialData?.leaseholdYears ?? "",
         projected_roi: initialData?.projectedRoi ?? "",
         zoning: initialData?.zoning ?? "",
+        marketing_start_date: initialData?.marketing_start_date ?? new Date().toISOString().split('T')[0],
+        social_media_1: initialData?.social_media_1 ?? "",
+        social_media_2: initialData?.social_media_2 ?? "",
         main_thumbnail: null as File | null,
         gallery: [] as File[],
         deleted_images: [] as string[],
@@ -251,29 +258,20 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                 </div>
 
                                 {/* Location */}
-                                <Field>
-                                    <FieldLabel required>Location Area</FieldLabel>
-                                    <InputGroup className="!focus:ring-0">
-                                        <InputGroupInput
-                                            value={data.location_area}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "location_area",
-                                                    e.target.value as string,
-                                                )
-                                            }
-                                            className="!bg-canvas"
-                                            placeholder="Enter your location via url google map"
-                                        />
-                                        <InputGroupAddon className="">
-                                            <MapPin size={18} />
-                                        </InputGroupAddon>
-                                    </InputGroup>
-                                    <FieldDescription className="text-[11px] text-text-muted mt-1.5 flex items-center gap-1">
-                                        <Info size={11} />
-                                        For public listings, do not use exact
-                                        addresses. Only specify the general area.
-                                    </FieldDescription>
+                                <Field data-invalid={!!errors.location_area}>
+                                    <FieldLabel required>Location Area (Map Pin)</FieldLabel>
+                                    <MapPicker
+                                        value={data.location_area}
+                                        onChange={(val) => setData("location_area", val)}
+                                    />
+                                    {errors.location_area ? (
+                                        <FieldError>{errors.location_area}</FieldError>
+                                    ) : (
+                                        <FieldDescription className="text-[11px] text-text-muted mt-1.5 flex items-center gap-1">
+                                            <Info size={11} />
+                                            Geser dan klik untuk menentukan koordinat pasti dari area secara interaktif.
+                                        </FieldDescription>
+                                    )}
                                 </Field>
 
                                 {/* Description */}
@@ -663,6 +661,47 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                             </div>
                         </SectionCard >
 
+                        <SectionCard
+                            icon={<span className="font-bold">@</span>}
+                            title="Marketing & Socials"
+                        >
+                            <div className="flex flex-col gap-5">
+                                <Field data-invalid={!!errors.marketing_start_date}>
+                                    <FieldLabel required>Marketing Start Date</FieldLabel>
+                                    <Input
+                                        type="date"
+                                        value={data.marketing_start_date}
+                                        onChange={(e) => setData("marketing_start_date", e.target.value)}
+                                        required
+                                    />
+                                    {errors.marketing_start_date && <FieldError>{errors.marketing_start_date}</FieldError>}
+                                    <p className="text-xs text-text-muted mt-1">Digunakan untuk menghitung jumlah hari aktif pemasaran (Days on Market).</p>
+                                </Field>
+                                <div className="grid grid-cols-1 @min-lg:grid-cols-2 gap-4">
+                                    <Field data-invalid={!!errors.social_media_1}>
+                                        <FieldLabel optional>TikTok Link (URL)</FieldLabel>
+                                        <Input
+                                            type="url"
+                                            placeholder="https://tiktok.com/@..."
+                                            value={data.social_media_1}
+                                            onChange={(e) => setData("social_media_1", e.target.value)}
+                                        />
+                                        {errors.social_media_1 && <FieldError>{errors.social_media_1}</FieldError>}
+                                    </Field>
+                                    <Field data-invalid={!!errors.social_media_2}>
+                                        <FieldLabel optional>Instagram Link (URL)</FieldLabel>
+                                        <Input
+                                            type="url"
+                                            placeholder="https://instagram.com/..."
+                                            value={data.social_media_2}
+                                            onChange={(e) => setData("social_media_2", e.target.value)}
+                                        />
+                                        {errors.social_media_2 && <FieldError>{errors.social_media_2}</FieldError>}
+                                    </Field>
+                                </div>
+                            </div>
+                        </SectionCard>
+
                         {/* Investor Dossier */}
                         < CardPrimary >
                             <CardPrimaryHeader
@@ -796,7 +835,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                     </Field>
                                 </div>
                             </CardPrimaryContent>
-                        </CardPrimary >
+                        </CardPrimary>
                     </div >
                 </div >
             </form >

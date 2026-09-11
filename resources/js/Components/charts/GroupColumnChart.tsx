@@ -31,7 +31,7 @@ const GroupColumnChart = memo(() => {
 
     return (
         <div className="bg-white rounded-2xl p-6 border border-border-base col-span-1 md:col-span-2 flex flex-col h-full">
-            <h3 className="text-base font-semibold text-text-primary mb-6">Property Lead</h3>
+            <h3 className="text-base font-semibold text-text-primary mb-6">Performance Transaction</h3>
 
             {/* Chart area matching Chart.tsx flex logic perfectly */}
             <div
@@ -56,14 +56,14 @@ const GroupColumnChart = memo(() => {
                             <div className="flex justify-between items-center mb-1 gap-3">
                                 <div className="flex items-center gap-1.5">
                                     <div className="w-1.5 h-1.5 rounded-full bg-status-sold"></div>
-                                    <span className="font-medium text-text-muted">Lead New</span>
+                                    <span className="font-medium text-text-muted">WON</span>
                                 </div>
                                 <span className="font-bold text-text-primary">{(activeItem.d1).toFixed(0)}</span>
                             </div>
                             <div className="flex justify-between items-center mb-1 gap-3">
                                 <div className="flex items-center gap-1.5">
                                     <div className="w-1.5 h-1.5 rounded-full bg-status-available"></div>
-                                    <span className="font-medium text-text-muted">Lead Viewing</span>
+                                    <span className="font-medium text-text-muted">LOST</span>
                                 </div>
                                 <span className="font-bold text-text-primary">{(activeItem.d2).toFixed(0)}</span>
                             </div>

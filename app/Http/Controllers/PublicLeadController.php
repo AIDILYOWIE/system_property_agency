@@ -40,7 +40,9 @@ class PublicLeadController extends Controller
             'phone' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'property_id' => 'required|exists:properties,id',
-            'source' => 'nullable|string'
+            'source' => 'nullable|string',
+            'utm_medium' => 'nullable|string|max:255',
+            'referrer' => 'nullable|string|max:2000'
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -63,6 +65,8 @@ class PublicLeadController extends Controller
                     'email' => $validated['email'] ?? null,
                     'source' => $source,
                     'last_active_at' => now(),
+                    'utm_medium' => $validated['utm_medium'] ?? null,
+                    'referrer' => $validated['referrer'] ?? null,
                 ]);
 
                 CustomerActivity::create([

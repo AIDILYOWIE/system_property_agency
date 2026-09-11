@@ -156,6 +156,8 @@ class ClientService
             'pipeline_status' => $primaryInquiry ? $primaryInquiry->pipeline_status : 'new_lead',
             'source' => ucwords(str_replace('-', ' ', $client->source)),
             'notes' => $client->notes ?? '',
+            'utm_medium' => $client->utm_medium,
+            'referrer' => $client->referrer,
             'created_at' => $client->created_at->toIso8601String(),
             'last_contacted' => $client->last_active_at ? $client->last_active_at->toIso8601String() : null,
             'properties' => $properties,
