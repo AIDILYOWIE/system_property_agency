@@ -18,6 +18,7 @@ export interface PipelineLead {
     /** The primary property this lead is interested in */
     propertyName: string;
     propertyLocation: string;
+    fullAddress: string;
     propertyPrice: number;
     propertyCurrency: "IDR" | "USD";
     status: BuyerPipelineStatus;
