@@ -29,7 +29,7 @@ class BuyerPipelineService
                 'phone' => $cust->phone,
                 'email' => $cust->email,
                 'propertyName' => $prop->title,
-                'propertyLocation' => $prop->location_area,
+                'fullAddress' => $prop->full_address ?? '',
                 'propertyPrice' => (float) $prop->price,
                 'propertyCurrency' => $prop->currency,
                 'status' => $inq->pipeline_status,

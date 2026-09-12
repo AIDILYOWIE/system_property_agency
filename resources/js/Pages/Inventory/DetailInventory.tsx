@@ -152,6 +152,7 @@ interface DetailInventoryProps {
         id: string;
         title: string;
         location: string;
+        full_address?: string;
         address?: string;
         price: number;
         currency: string;
@@ -270,7 +271,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
         <>
             <DashboardLayout
                 pageTitle={property.title}
-                pageDescription={`Detail status properti • ${property.added_date_human}`}
+                pageDescription={property.full_address ?? `${property.full_address} • ${property.added_date_human}`}
                 action={
                     <div className="flex gap-2">
                         <div className="flex gap-2 items-center w-[100px]">

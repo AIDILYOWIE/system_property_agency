@@ -41,6 +41,7 @@ class PropertyDetailResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'location' => $this->location_area,
+            'full_address' => $this->full_address,
             'price' => $this->price,
             'currency' => $this->currency,
             'category' => $categoryMap[$this->category] ?? ucfirst(str_replace('_', ' ', $this->category)),

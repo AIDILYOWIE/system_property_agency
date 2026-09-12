@@ -74,7 +74,7 @@ export default function BuyerPipeline({ leads: initialLeads }: { leads: any[] })
                         </div>
 
                         {/* View mode toggle — only visible on lg+ since kanban only works on lg+ */}
-                        <div className="hidden lg:flex items-center gap-1 bg-canvas rounded-lg p-1 border border-border-base flex-shrink-0 ml-auto">
+                        <div className="hidden lg:hidden flex items-center gap-1 bg-canvas rounded-lg p-1 border border-border-base flex-shrink-0 ml-auto">
                             <button
                                 type="button"
                                 onClick={() => setViewMode("kanban")}

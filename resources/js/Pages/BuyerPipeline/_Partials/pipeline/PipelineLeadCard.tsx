@@ -134,7 +134,7 @@ const PipelineLeadCard = memo(function PipelineLeadCard({
                         </p>
                         <div className="flex items-center gap-1 text-text-muted">
                             <MapPin size={10} className="flex-shrink-0" />
-                            <p className="text-[10px] line-clamp-1">{lead.propertyLocation}</p>
+                            <p className="text-[10px] line-clamp-1">{lead.fullAddress}</p>
                         </div>
                         <p className="text-[12px] font-bold text-text-primary mt-0.5">
                             {formatPrice(lead.propertyPrice, lead.propertyCurrency)}
