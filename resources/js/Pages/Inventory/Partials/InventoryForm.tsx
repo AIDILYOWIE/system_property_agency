@@ -83,6 +83,7 @@ interface FormState {
     social_media_1: string;
     social_media_2: string;
     images?: string[];
+    facilities?: number[];
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -114,7 +115,7 @@ const ZOONING = [
     { label: "Pink (Tourism)", value: "pink" },
 ]
 
-export default function InventoryForm({ initialData, isEdit, propertyId }: { initialData?: Partial<FormState>, isEdit?: boolean, propertyId?: string | number }) {
+export default function InventoryForm({ initialData, isEdit, propertyId, facilitiesMaster = [] }: { initialData?: Partial<FormState>, isEdit?: boolean, propertyId?: string | number, facilitiesMaster?: any[] }) {
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
@@ -144,6 +145,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
         marketing_start_date: initialData?.marketing_start_date ?? new Date().toISOString().split('T')[0],
         social_media_1: initialData?.social_media_1 ?? "",
         social_media_2: initialData?.social_media_2 ?? "",
+        facilities: initialData?.facilities ?? [] as number[],
         main_thumbnail: null as File | null,
         gallery: [] as File[],
         deleted_images: [] as string[],
@@ -475,6 +477,44 @@ export default function InventoryForm({ initialData, isEdit, propertyId }: { ini
                                 </div>
                             )}
                         </SectionCard>
+
+                        {/* Facilities */}
+                        {facilitiesMaster && facilitiesMaster.length > 0 && (
+                            <SectionCard icon={<LayoutGrid size={16} />} title="Facilities">
+                                <div className="flex flex-col gap-5">
+                                    {Object.entries(
+                                        facilitiesMaster.reduce((acc, facility: any) => {
+                                            acc[facility.category] = acc[facility.category] || [];
+                                            acc[facility.category].push(facility);
+                                            return acc;
+                                        }, {} as Record<string, any[]>)
+                                    ).map(([category, items]: any) => (
+                                        <div key={category}>
+                                            <h4 className="text-sm font-semibold text-gray-700 mb-2">{category}</h4>
+                                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                                                {items.map((facility: any) => (
+                                                    <label key={facility.id} className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="w-4 h-4 text-primary rounded border border-gray-300 focus:ring-primary"
+                                                            checked={data.facilities.includes(facility.id)}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) {
+                                                                    setData("facilities", [...data.facilities, facility.id]);
+                                                                } else {
+                                                                    setData("facilities", data.facilities.filter(id => id !== facility.id));
+                                                                }
+                                                            }}
+                                                        />
+                                                        {facility.name}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </SectionCard>
+                        )}
                     </div>
 
                     {/* ── RIGHT: Settings & Media ────────────── */}

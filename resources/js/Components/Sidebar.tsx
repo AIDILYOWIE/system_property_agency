@@ -105,7 +105,7 @@ const NAV_SECTIONS: NavSection[] = [
             {
                 key: 'settings',
                 label: 'Settings',
-                href: '/admin/settings',
+                href: '/settings',
                 icon: Settings,
                 routeName: 'settings',
             },

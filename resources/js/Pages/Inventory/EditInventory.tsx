@@ -5,7 +5,7 @@ import DashboardLayout from "@/Layouts/DashboardLayout";
 import { Check } from "lucide-react";
 import InventoryForm from "./Partials/InventoryForm";
 
-export default function EditInventory({ property }: { property: any }) {
+export default function EditInventory({ property, facilitiesMaster }: { property: any, facilitiesMaster: any[] }) {
 
     const mappedInitialData = {
         id: property.id,
@@ -32,6 +32,7 @@ export default function EditInventory({ property }: { property: any }) {
         marketing_start_date: property.marketing_start_date,
         social_media_1: property.social_media_1,
         social_media_2: property.social_media_2,
+        facilities: property.facilities ? Object.values(property.facilities).flat().map((f: any) => f.id) : [],
     };
 
     return (
@@ -51,7 +52,7 @@ export default function EditInventory({ property }: { property: any }) {
                 </div>
             }
         >
-            <InventoryForm initialData={mappedInitialData} isEdit={true} propertyId={property.id} />
+            <InventoryForm initialData={mappedInitialData} isEdit={true} propertyId={property.id} facilitiesMaster={facilitiesMaster} />
         </DashboardLayout>
     );
 }

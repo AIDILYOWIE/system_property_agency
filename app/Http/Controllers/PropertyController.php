@@ -9,6 +9,7 @@ use App\Service\PropertyService;
 use Inertia\Inertia;
 use App\Http\Resources\PropertyDetailResource;
 use App\Http\Resources\PropertyResource;
+use App\Models\Facility;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -44,6 +45,13 @@ class PropertyController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        return Inertia::render('Inventory/AddInventory', [
+            'facilitiesMaster' => Facility::all()
+        ]);
+    }
+
     /**
      * Store a newly created property in storage.
      * US 1.1 Create Property
@@ -73,7 +81,8 @@ class PropertyController extends Controller
         $property = $this->propertyService->getPropertyDetails($id);
 
         return Inertia::render('Inventory/EditInventory', [
-            'property' => (new PropertyDetailResource($property))->resolve()
+            'property' => (new PropertyDetailResource($property))->resolve(),
+            'facilitiesMaster' => Facility::all()
         ]);
     }
 
