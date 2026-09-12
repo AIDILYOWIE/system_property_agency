@@ -4,6 +4,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\NewLeadController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\BuyerPipelineController;
 use App\Http\Controllers\DossierController;
 use App\Http\Controllers\PublicLeadController;
@@ -33,9 +34,7 @@ Route::prefix('/inventory')->group(function () {
 
     Route::get('/detail/{id}', [PropertyController::class, 'show'])->name('inventory.detail');
 
-    Route::get('/add', function () {
-        return Inertia::render('Inventory/AddInventory');
-    })->name('inventory.add');
+    Route::get('/add', [PropertyController::class, 'create'])->name('inventory.add');
 
 
     Route::get('/edit/{id}', [PropertyController::class, 'edit'])->name('inventory.edit');
@@ -56,6 +55,13 @@ Route::prefix('/customer')->group(function () {
 
 Route::get('/buyer-pipeline', [BuyerPipelineController::class, 'index'])->name('buyer-pipeline');
 Route::patch('/buyer-pipeline/{id}/status', [BuyerPipelineController::class, 'updateStatus'])->name('buyer-pipeline.status');
+
+Route::prefix('/settings')->group(function () {
+    Route::get('/', [FacilityController::class, 'index'])->name('settings.index');
+    Route::post('/facilities', [FacilityController::class, 'store'])->name('settings.facilities.store');
+    Route::put('/facilities/{id}', [FacilityController::class, 'update'])->name('settings.facilities.update');
+    Route::delete('/facilities/{id}', [FacilityController::class, 'destroy'])->name('settings.facilities.destroy');
+});
 
 // ── Dossier (Public — no auth) ─────────────────────────────────────────
 Route::get('/dossier/{token}', [DossierController::class, 'show'])->name('dossier.show');

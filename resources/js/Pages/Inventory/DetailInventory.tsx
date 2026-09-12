@@ -20,7 +20,9 @@ import {
     Clock,
     Activity,
     Lock,
+    LayoutGrid,
 } from "lucide-react";
+import * as icons from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/format";
@@ -185,6 +187,7 @@ interface DetailInventoryProps {
             zoning: string;
         };
         clients: ClientData[];
+        facilities?: Record<string, any[]>;
     }
 }
 
@@ -638,6 +641,35 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                     )}
                                 </div>
                             </div>
+
+                            {property.facilities && Object.keys(property.facilities).length > 0 && (
+                                <div className="bg-white rounded-2xl p-6 shadow-card border border-border-base flex flex-col gap-5">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <LayoutGrid className="w-5 h-5 text-primary" />
+                                        <h3 className="text-lg font-bold text-text-primary">Facilities & Amenities</h3>
+                                    </div>
+
+                                    <div className="flex flex-col gap-6">
+                                        {Object.entries(property.facilities).map(([category, items]: [string, any]) => (
+                                            <div key={category} className="flex flex-col gap-2 pt-3 border-t border-border-base first:border-0 first:pt-0">
+                                                <h4 className="text-sm font-bold text-text-primary tracking-wide">{category}</h4>
+                                                <ul className="flex flex-wrap gap-3">
+                                                    {items.map((fac: any) => {
+                                                        // @ts-ignore
+                                                        const LucideIcon = icons[fac.icon_name];
+                                                        return (
+                                                            <li key={fac.id} className="flex items-center gap-2 text-[13px] font-medium text-gray-700 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-lg shadow-sm transition-colors cursor-default">
+                                                                {LucideIcon ? <LucideIcon className="w-4 h-4 text-primary" /> : <div className="w-4 h-4 bg-gray-200 rounded-sm" />}
+                                                                <span>{fac.name}</span>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Investor Dossier */}
                             <CardPrimary>

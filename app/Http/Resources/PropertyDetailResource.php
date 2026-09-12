@@ -36,6 +36,19 @@ class PropertyDetailResource extends JsonResource
 
         $leadsCount = $this->inquiries_count ?? 0;
         $isNormal = !($this->days_on_market >= 30 && $leadsCount === 0);
+        $facilitiesGroups = [];
+        if ($this->relationLoaded('facilities')) {
+            foreach ($this->facilities as $facility) {
+                if (!isset($facilitiesGroups[$facility->category])) {
+                    $facilitiesGroups[$facility->category] = [];
+                }
+                $facilitiesGroups[$facility->category][] = [
+                    'id' => $facility->id,
+                    'name' => $facility->name,
+                    'icon_name' => $facility->icon_name,
+                ];
+            }
+        }
 
         return [
             'id' => $this->id,
@@ -73,6 +86,7 @@ class PropertyDetailResource extends JsonResource
                 'roi' => $this->projected_roi ? $this->projected_roi : 0,
                 'zoning' => 'Yellow (Residential)',
             ],
+            'facilities' => $facilitiesGroups,
             'clients' => $this->relationLoaded('inquiries') ? $this->inquiries->map(function ($inquiry) {
                 return [
                     'id' => $inquiry->id,

@@ -64,6 +64,11 @@ class Property extends Model
         return $this->hasMany(Inquiry::class);
     }
 
+    public function facilities()
+    {
+        return $this->belongsToMany(Facility::class, 'property_facility');
+    }
+
     public function getDaysOnMarketAttribute(): int
     {
         if (!$this->marketing_start_date) {

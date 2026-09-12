@@ -48,6 +48,8 @@ class UpdatePropertyRequest extends FormRequest
             'marketing_start_date' => 'required|date',
             'social_media_1' => 'nullable|url|max:255',
             'social_media_2' => 'nullable|url|max:255',
+            'facilities' => 'nullable|array',
+            'facilities.*' => 'exists:facilities,id',
         ];
     }
 }

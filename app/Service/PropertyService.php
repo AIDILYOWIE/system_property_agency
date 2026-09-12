@@ -105,7 +105,7 @@ class PropertyService
      */
     public function getPropertyDetails($id): Property
     {
-        return Property::with(['images', 'inquiries.customer'])->withCount('inquiries')->findOrFail($id);
+        return Property::with(['images', 'inquiries.customer', 'facilities'])->withCount('inquiries')->findOrFail($id);
     }
 
     /**
@@ -131,6 +131,10 @@ class PropertyService
 
             // Create property
             $property = Property::create($data);
+
+            if (isset($data['facilities'])) {
+                $property->facilities()->sync($data['facilities']);
+            }
 
             // Process and store main thumbnail
             $mainImagePath = $this->uploadAndProcessImage($mainThumbnail, 'properties/' . $property->id);
@@ -192,6 +196,10 @@ class PropertyService
             }
 
             $property->update($data);
+
+            if (isset($data['facilities'])) {
+                $property->facilities()->sync($data['facilities']);
+            }
 
             if ($mainThumbnail) {
                 $oldMain = $property->images()->where('is_main_thumbnail', true)->first();

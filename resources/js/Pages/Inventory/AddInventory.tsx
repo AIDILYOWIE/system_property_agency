@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import InventoryForm from "./Partials/InventoryForm";
 
-export default function AddInventory() {
+export default function AddInventory({ facilitiesMaster }: { facilitiesMaster: any[] }) {
     return (
         <DashboardLayout
             pageTitle="Add New Property"
@@ -36,7 +36,7 @@ export default function AddInventory() {
                 </div>
             }
         >
-            <InventoryForm />
+            <InventoryForm facilitiesMaster={facilitiesMaster} />
         </DashboardLayout>
     );
 }
