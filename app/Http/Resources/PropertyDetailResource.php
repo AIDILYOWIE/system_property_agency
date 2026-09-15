@@ -26,9 +26,12 @@ class PropertyDetailResource extends JsonResource
         $mainImage = $this->images->where('is_main_thumbnail', true)->first();
         $galleryImages = $this->images->where('is_main_thumbnail', false)->sortBy('sort_order')->values();
 
-        $mainImageUrl = Storage::url($mainImage->image_path);
+        $mainImageUrl = $mainImage ? Storage::url($mainImage->image_path) : null;
 
-        $imageUrls = [$mainImageUrl];
+        $imageUrls = [];
+        if ($mainImageUrl) {
+            $imageUrls[] = $mainImageUrl;
+        }
         foreach ($galleryImages as $img) {
             $imageUrls[] = Storage::url($img->image_path);
         }
