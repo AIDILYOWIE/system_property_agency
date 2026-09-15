@@ -26,7 +26,7 @@ class UpdatePropertyRequest extends FormRequest
         return [
             'action_type' => 'nullable|in:draft,publish',
             'title' => 'required|string|max:255|unique:properties,title,' . $propertyId,
-            'description' => 'required_if:action_type,publish|nullable|string',
+            'description' => 'nullable|string',
             'location_area' => 'required|string|max:2000',
             'full_address' => 'required|string|max:5000',
             'listing_type' => 'required|in:sale,rent',

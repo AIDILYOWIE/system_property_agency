@@ -92,12 +92,19 @@ class PropertyDetailResource extends JsonResource
             'facilities' => $facilitiesGroups,
             'clients' => $this->relationLoaded('inquiries') ? $this->inquiries->map(function ($inquiry) {
                 return [
-                    'id' => $inquiry->id,
-                    'customer_id' => $inquiry->customer_id,
-                    'client' => $inquiry->customer->full_name ?? '-',
-                    'status' => ucwords(str_replace('_', ' ', $inquiry->pipeline_status)),
-                    'source' => $inquiry->customer->source ?? '-',
-                    'lastActivity' => $inquiry->updated_at ? $inquiry->updated_at->diffForHumans() : '-',
+                    'id' => $inquiry->customer->id ?? $inquiry->id,
+                    'name' => $inquiry->customer->full_name ?? '-',
+                    'phone' => $inquiry->customer->phone ?? '-',
+                    'email' => $inquiry->customer->email ?? null,
+                    'customer_type' => $inquiry->customer->type ?? 'buyer',
+                    'pipeline_status' => $inquiry->pipeline_status ?? 'new_lead',
+                    'interested_property' => $this->title,
+                    'source' => $inquiry->customer->source ?? 'organic',
+                    'notes' => $inquiry->customer->notes ?? null,
+                    'created_at' => intval(substr($inquiry->created_at, 0, 4)) > 1970
+                        ? $inquiry->created_at->toIso8601String()
+                        : now()->toIso8601String(),
+                    'last_contacted' => $inquiry->updated_at ? $inquiry->updated_at->toIso8601String() : null,
                 ];
             }) : [],
         ];
