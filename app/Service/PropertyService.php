@@ -132,6 +132,7 @@ class PropertyService
             if (isset($data['action_type']) && $data['action_type'] === 'draft') {
                 $data['visibility'] = 'draft';
                 $data['published_at'] = null;
+                $data['marketing_start_date'] = null; // Fix: Stop Days on Market logic from running during draft
             } else {
                 $data['visibility'] = 'published';
                 $data['published_at'] = now();
@@ -209,6 +210,17 @@ class PropertyService
                     $data['sold_at'] = $property->sold_at ?? now();
                 } else if ($data['status'] === 'available') {
                     $data['sold_at'] = null;
+                }
+            }
+
+            if (isset($data['action_type'])) {
+                if ($data['action_type'] === 'draft') {
+                    $data['visibility'] = 'draft';
+                    $data['published_at'] = null;
+                    $data['marketing_start_date'] = null;
+                } else if ($data['action_type'] === 'publish' && $property->visibility !== 'published') {
+                    $data['visibility'] = 'published';
+                    $data['published_at'] = now();
                 }
             }
 
