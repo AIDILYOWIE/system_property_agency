@@ -120,7 +120,7 @@ class ClientService
             return [
                 'id' => $prop->id,
                 'title' => $prop->title,
-                'location' => $prop->location_area,
+                'full_address' => $prop->full_address,
                 'price' => (float)$prop->price,
                 'currency' => $prop->currency,
                 'thumbnail' => Storage::url($prop->mainImage->image_path),
@@ -171,7 +171,7 @@ class ClientService
             return [
                 'id' => $prop->id,
                 'title' => $prop->title,
-                'location' => $prop->location_area ?? '-',
+                'full_address' => $prop->full_address,
                 'category' => $prop->category ?? 'Property',
                 'price' => (float)$prop->price,
                 'currency' => $prop->currency,

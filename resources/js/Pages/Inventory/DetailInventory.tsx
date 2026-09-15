@@ -357,7 +357,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                                 </p>
                                                 {(property.status === 'sold' || property.status === 'rented') && (
                                                     <span className="flex items-center gap-1 text-[8px] font-bold text-sky-600 bg-sky-100/50 px-1.5 py-0.5 rounded border border-sky-200 uppercase" title="Waktu Dibekukan (Sold/Rented)">
-                                                        <Lock size={10} /> Locked
+                                                        <Lock size={14} />
                                                     </span>
                                                 )}
                                             </div>
@@ -426,12 +426,12 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                         </div>
                                     </div>
                                     <div className={cn(
-                                        "flex gap-3 bg-gray-50 p-3 rounded-xl border",
+                                        "flex items-center gap-3 bg-gray-50 p-3 rounded-xl border",
                                         property.status === 'sold' || property.status === 'rented'
                                             ? "border-sky-200 bg-sky-50 opacity-90"
                                             : (!property.normal.is_normal ? "bg-red-50/50 border-red-200" : "border-border-base")
                                     )}>
-                                        <div className="pt-1">
+                                        <div className="">
                                             <Clock className={cn(
                                                 "w-5 h-5",
                                                 property.status === 'sold' || property.status === 'rented' ? "text-sky-600" : (!property.normal.is_normal ? "text-red-500" : "text-primary")
@@ -446,8 +446,8 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                                     Days on Market
                                                 </p>
                                                 {(property.status === 'sold' || property.status === 'rented') && (
-                                                    <span className="flex items-center gap-1 text-[8px] font-bold text-sky-600 bg-sky-100/50 px-1.5 py-0.5 rounded border border-sky-200 uppercase" title="Waktu Dibekukan (Sold/Rented)">
-                                                        <Lock size={10} /> Locked
+                                                    <span className="flex items-center gap-1 text-[8px] font-bold text-sky-600 uppercase" title="Waktu Dibekukan (Sold/Rented)">
+                                                        <Lock size={14} />
                                                     </span>
                                                 )}
                                             </div>

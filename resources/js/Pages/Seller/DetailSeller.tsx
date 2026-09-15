@@ -334,7 +334,7 @@ export default function DetailSeller({
                                             property={{
                                                 id: p.id,
                                                 title: p.title,
-                                                location: p.full_address || "-",
+                                                full_address: p.full_address || "-",
                                                 price: p.price ?? null,
                                                 currency: p.currency ?? "IDR",
                                                 thumbnail: p.images?.[0]?.image_path

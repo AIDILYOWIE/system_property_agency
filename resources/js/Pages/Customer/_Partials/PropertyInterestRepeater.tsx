@@ -10,7 +10,7 @@ import PropertyCard from "./PropertyCard";
 export interface InventoryProperty {
     id: string;
     title: string;
-    location: string;
+    full_address: string;
     price: number;
     currency: "IDR" | "USD";
     category: string;
@@ -25,7 +25,7 @@ export const MOCK_PROPERTIES: InventoryProperty[] = [
     {
         id: "prop-1",
         title: "Modern Villa Ubud",
-        location: "Ubud, Bali",
+        full_address: "Ubud, Bali",
         price: 850000,
         currency: "USD",
         category: "Villa",
@@ -37,7 +37,7 @@ export const MOCK_PROPERTIES: InventoryProperty[] = [
     {
         id: "prop-2",
         title: "Minimalist Villa Canggu",
-        location: "Canggu, Bali",
+        full_address: "Canggu, Bali",
         price: 35000,
         currency: "USD",
         category: "Villa",
@@ -49,7 +49,7 @@ export const MOCK_PROPERTIES: InventoryProperty[] = [
     {
         id: "prop-3",
         title: "Beachfront Premium House",
-        location: "Seminyak, Bali",
+        full_address: "Seminyak, Bali",
         price: 2100000,
         currency: "USD",
         category: "Premium House",
@@ -61,7 +61,7 @@ export const MOCK_PROPERTIES: InventoryProperty[] = [
     {
         id: "prop-4",
         title: "Tropical Garden Townhouse",
-        location: "Kerobokan, Bali",
+        full_address: "Kerobokan, Bali",
         price: 420000,
         currency: "USD",
         category: "Villa",
@@ -73,7 +73,7 @@ export const MOCK_PROPERTIES: InventoryProperty[] = [
     {
         id: "prop-5",
         title: "Strategic Commercial Land",
-        location: "Kuta, Bali",
+        full_address: "Kuta, Bali",
         price: 980000000,
         currency: "IDR",
         category: "Land",
@@ -85,7 +85,7 @@ export const MOCK_PROPERTIES: InventoryProperty[] = [
     {
         id: "prop-6",
         title: "Luxury Clifftop Villa",
-        location: "Uluwatu, Bali",
+        full_address: "Uluwatu, Bali",
         price: 3200000,
         currency: "USD",
         category: "Villa",
