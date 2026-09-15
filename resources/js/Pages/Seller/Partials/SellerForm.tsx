@@ -96,7 +96,7 @@ export default function SellerForm({
                 <BreadcrumbList>
                     <BreadcrumbItem>
                         <BreadcrumbLink render={<Link href="#" onClick={(e) => { e.preventDefault(); window.history.back(); }} />}>
-                            Pipeline
+                            All Seller
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
