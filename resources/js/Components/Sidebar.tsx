@@ -80,10 +80,17 @@ const NAV_SECTIONS: NavSection[] = [
             // },
             {
                 key: 'customers',
-                label: 'All Customers',
+                label: 'Customers',
                 href: '/customer',
                 icon: Users,
                 routeName: 'customer',
+            },
+            {
+                key: 'sellers',
+                label: 'Seller',
+                href: '/seller',
+                icon: Users,
+                routeName: 'seller.index',
             },
         ],
     },

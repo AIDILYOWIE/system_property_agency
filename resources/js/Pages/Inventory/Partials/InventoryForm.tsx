@@ -48,6 +48,7 @@ import {
     BreadcrumbSeparator,
 } from "@/Components/ui/breadcrumb";
 import { MapPicker } from "@/Components/Map";
+import { CATEGORYS } from "@/lib/property_category";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -95,12 +96,7 @@ const CURRENCY = [
 ];
 
 
-const CATEGORYS = [
-    { label: "Villas", value: "villas" },
-    { label: "Premium Houses", value: "premium_houses" },
-    { label: "Strategic Land", value: "strategic_land" },
-    { label: "Commercial", value: "commercial" },
-]
+
 
 const TITLESTATUS = [
     { label: "Freehold", value: "freehold" },
@@ -115,7 +111,7 @@ const ZOONING = [
     { label: "Pink (Tourism)", value: "pink" },
 ]
 
-export default function InventoryForm({ initialData, isEdit, propertyId, facilitiesMaster = [] }: { initialData?: Partial<FormState>, isEdit?: boolean, propertyId?: string | number, facilitiesMaster?: any[] }) {
+export default function InventoryForm({ initialData, isEdit, propertyId, facilitiesMaster = [], sellerId }: { initialData?: Partial<FormState>, isEdit?: boolean, propertyId?: string | number, facilitiesMaster?: any[], sellerId?: string }) {
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
@@ -125,7 +121,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
     const [galleryPreviews, setGalleryPreviews] = useState<string[]>(existingGallery);
     const [deletedImages, setDeletedImages] = useState<string[]>([]);
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, transform } = useForm({
         title: initialData?.title ?? "",
         location_area: initialData?.location ?? "",
         full_address: initialData?.full_address ?? "",
@@ -149,6 +145,8 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
         main_thumbnail: null as File | null,
         gallery: [] as File[],
         deleted_images: [] as string[],
+        seller_id: sellerId ?? "",
+        action_type: 'publish',
         _method: isEdit ? 'patch' : 'post'
     });
 
@@ -172,11 +170,17 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
         }
     }
 
-    function handlePublish(e: React.FormEvent) {
+    function handlePublish(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        // sync deleted_images before post
-        data.deleted_images = deletedImages;
+        const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+        const actionType = submitter?.value || 'publish';
+
+        transform((data) => ({
+            ...data,
+            action_type: actionType,
+            deleted_images: deletedImages,
+        }));
 
         const targetRoute = isEdit && propertyId
             ? route('inventory.update', propertyId)
@@ -601,7 +605,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
                             <div className="flex flex-col gap-4">
                                 {/* Main Thumbnail */}
                                 <Field data-invalid={!!errors.main_thumbnail}>
-                                    <FieldLabel required>Main Thumbnail</FieldLabel>
+                                    <FieldLabel >Main Thumbnail <span className="font-normal text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200 ml-2">Required for Publish</span></FieldLabel>
                                     <Input
                                         ref={thumbnailInputRef}
                                         type="file"
@@ -660,7 +664,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
 
                                 {/* Gallery */}
                                 <Field data-invalid={!!errors.gallery}>
-                                    <FieldLabel required>Gallery Images</FieldLabel>
+                                    <FieldLabel required>Gallery Images <span className="font-normal text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200 ml-2">Required for Publish</span></FieldLabel>
                                     <Input
                                         ref={galleryInputRef}
                                         type="file"
@@ -734,7 +738,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
                         >
                             <div className="flex flex-col gap-5">
                                 <Field data-invalid={!!errors.marketing_start_date}>
-                                    <FieldLabel required>Marketing Start Date</FieldLabel>
+                                    <FieldLabel required>Marketing Start Date <span className="font-normal text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200 ml-2">Required for Publish</span></FieldLabel>
                                     <Input
                                         type="date"
                                         value={data.marketing_start_date}

@@ -22,8 +22,9 @@ class StorePropertyRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'action_type' => 'required|in:draft,publish',
             'title' => 'required|string|max:255|unique:properties,title',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'location_area' => 'required|string|max:2000',
             'full_address' => 'required|string|max:5000',
             'listing_type' => 'required|in:sale,rent',
@@ -37,14 +38,15 @@ class StorePropertyRequest extends FormRequest
             'tenure_type' => 'nullable|string|in:freehold,leasehold',
             'leasehold_years' => 'nullable|required_if:tenure_type,leasehold|integer|min:1',
             'projected_roi' => 'nullable|numeric|min:0|max:100',
-            'main_thumbnail' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB max
-            'gallery' => 'required|array',
+            'main_thumbnail' => 'required_if:action_type,publish|nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB max
+            'gallery' => 'required_if:action_type,publish|nullable|array',
             'gallery.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
-            'marketing_start_date' => 'required|date',
+            'marketing_start_date' => 'required_if:action_type,publish|nullable|date',
             'social_media_1' => 'nullable|url|max:255',
             'social_media_2' => 'nullable|url|max:255',
             'facilities' => 'nullable|array',
             'facilities.*' => 'exists:facilities,id',
+            'seller_id' => 'nullable|exists:sellers,id',
         ];
     }
 }

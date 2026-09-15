@@ -11,6 +11,9 @@ class Property extends Model
     use HasUuids;
 
     protected $fillable = [
+        'seller_id',
+        'seller_pipeline_status',
+        'seller_rejection_reason',
         'title',
         'description',
         'location_area',
@@ -48,6 +51,11 @@ class Property extends Model
         'marketing_start_date' => 'date',
         'sold_at' => 'datetime'
     ];
+
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class, 'seller_id');
+    }
 
     public function images(): HasMany
     {

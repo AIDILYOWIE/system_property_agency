@@ -8,6 +8,7 @@ use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\BuyerPipelineController;
 use App\Http\Controllers\DossierController;
 use App\Http\Controllers\PublicLeadController;
+use App\Http\Controllers\SellerController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -55,6 +56,15 @@ Route::prefix('/customer')->group(function () {
 
 Route::get('/buyer-pipeline', [BuyerPipelineController::class, 'index'])->name('buyer-pipeline');
 Route::patch('/buyer-pipeline/{id}/status', [BuyerPipelineController::class, 'updateStatus'])->name('buyer-pipeline.status');
+
+// Seller Pipeline
+Route::prefix('/seller')->group(function () {
+    Route::get('/', [SellerController::class, 'index'])->name('seller.index');
+    Route::get('/add', [SellerController::class, 'create'])->name('seller.create');
+    Route::post('/', [SellerController::class, 'store'])->name('seller.store');
+    Route::get('/{seller}', [SellerController::class, 'show'])->name('seller.show');
+    Route::post('/{seller}/property', [SellerController::class, 'storeProperty'])->name('seller.property.store');
+});
 
 Route::prefix('/settings')->group(function () {
     Route::get('/', [FacilityController::class, 'index'])->name('settings.index');

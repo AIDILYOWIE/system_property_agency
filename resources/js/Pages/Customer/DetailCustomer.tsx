@@ -99,7 +99,7 @@ const PIPELINE_CONFIG: Record<PipelineStatus, { label: string; color: string; do
 const CUSTOMER_TYPE_CONFIG: Record<CustomerType, { label: string; color: string; icon: React.ReactNode }> = {
     buyer: { label: "Buyer", color: "bg-sky-50 text-sky-600 border-sky-200", icon: <User size={12} /> },
     renter: { label: "Renter", color: "bg-purple-50 text-purple-600 border-purple-200", icon: <Home size={12} /> },
-    property_owner: { label: "Property Owner", color: "bg-teal-50 text-teal-600 border-teal-200", icon: <Building2 size={12} /> },
+    property_owner: { label: "Owner", color: "bg-teal-50 text-teal-600 border-teal-200", icon: <Building2 size={12} /> },
 };
 
 const TIMELINE_ICON: Record<TimelineEvent["type"], React.ReactNode> = {

@@ -45,10 +45,11 @@ class PropertyController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         return Inertia::render('Inventory/AddInventory', [
-            'facilitiesMaster' => Facility::all()
+            'facilitiesMaster' => Facility::all(),
+            'seller_id' => $request->get('seller_id')
         ]);
     }
 
@@ -65,6 +66,10 @@ class PropertyController extends Controller
             $gallery = $request->file('gallery', []);
 
             $property = $this->propertyService->storeProperty($data, $mainThumbnail, $gallery);
+
+            if ($request->filled('seller_id')) {
+                return redirect()->route('seller.show', $request->seller_id)->with('success', 'Properti terkait "' . $property->title . '" berhasil ditambahkan.');
+            }
 
             return redirect()->route('inventory')->with('success', 'Property "' . $property->title . '" created successfully.');
         } catch (\Exception $e) {
