@@ -229,6 +229,25 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
     };
 
     const handlePublicToggle = (checked: boolean) => {
+        if (checked) {
+            const missingRequirements: string[] = [];
+
+            if (propertyImages.length === 0) missingRequirements.push("Foto Properti");
+            if (!property.price || property.price <= 0) missingRequirements.push("Harga");
+            if (!property.marketing_start_date) missingRequirements.push("Marketing Start Date");
+            if (!property.specification.land_size || property.specification.land_size <= 0) missingRequirements.push("Luas Tanah");
+            if (!property.specification.building_size && property.category !== 'tanah') missingRequirements.push("Luas Bangunan");
+
+            if (missingRequirements.length > 0) {
+                toast.add({
+                    title: "Tidak Dapat Mempublikasikan",
+                    description: `Harap lengkapi data wajib berikut: ${missingRequirements.join(", ")}. Klik tombol Edit untuk melengkapinya.`,
+                    type: 'error'
+                });
+                return; // Stop the dispatch and keep it as draft
+            }
+        }
+
         setIsPublic(checked);
 
         router.patch(`/inventory/${property.id}/visibility`, {
