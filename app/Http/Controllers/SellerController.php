@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SellerPropertyRequest;
+use App\Http\Requests\SellerRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Seller;
@@ -30,7 +32,7 @@ class SellerController extends Controller
         return Inertia::render('Seller/AddSeller');
     }
 
-    public function store(\App\Http\Requests\SellerRequest $request)
+    public function store(SellerRequest $request)
     {
         // 1. HTTP Validation (Handled by SellerRequest)
         $validated = $request->validated();
@@ -43,11 +45,29 @@ class SellerController extends Controller
             ->with('success', 'Seller berhasil ditambahkan. Tambahkan properti pertama?');
     }
 
-    // Placeholder for US 4.3 (Seller Detail) so the redirect doesn't crash completely.
+    // Placeholder for US 4.3 (Seller Detail) — loads seller + their properties
     public function show(Seller $seller)
     {
+        $seller->load(['properties.images' => function ($query) {
+            $query->where('is_main_thumbnail', true);
+        }]);
+
         return Inertia::render('Seller/DetailSeller', [
-            'seller' => $seller
+            'seller'     => $seller,
+            'properties' => $seller->properties,
         ]);
+    }
+
+    /**
+     * US 4.2 — Store a new pra-listing property for a seller via modal.
+     * Seller ID is auto-assigned from context — not chosen by the user.
+     */
+    public function storeProperty(SellerPropertyRequest $request, Seller $seller)
+    {
+        $validated  = $request->validated();
+        $this->sellerService->addProperty($seller, $validated);
+
+        return redirect()->route('seller.show', $seller->id)
+            ->with('success', 'Properti berhasil ditambahkan ke pipeline.');
     }
 }
