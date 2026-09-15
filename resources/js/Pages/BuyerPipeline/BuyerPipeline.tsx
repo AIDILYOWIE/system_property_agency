@@ -62,11 +62,11 @@ export default function BuyerPipeline({ leads: initialLeads }: { leads: any[] })
 
                         {/* Bottom row: Search */}
 
-                        <div className="relative w-72 flex-shrink-0">
+                        <div className="relative w-[350px] flex-shrink-0">
                             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                             <Input
                                 type="text"
-                                placeholder="Search customers..."
+                                placeholder="Search customers, properties, price..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full !bg-white border border-border-base rounded-lg py-3 pl-10 pr-4 text-sm focus:border-border-base transition-colors text-text-primary h-auto"

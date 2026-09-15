@@ -17,44 +17,63 @@ export function usePipelineLeads(initialLeads: PipelineLead[]) {
         "all",
     );
     const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedQuery, setDebouncedQuery] = useState("");
+
+    // ── Debounce Mechanism (300ms) ───────────────────────────────────────────
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedQuery(searchQuery);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    // ── Derived: searched leads (O(n) Single Source of Truth Filter) ─────────
+    const searchedLeads = useMemo(() => {
+        if (!debouncedQuery.trim()) return leads;
+
+        const q = debouncedQuery.toLowerCase().trim();
+        return leads.filter((l) => {
+            return (
+                // Customer details
+                (l.name && l.name.toLowerCase().includes(q)) ||
+                (l.phone && l.phone.includes(q)) ||
+                (l.email && l.email.toLowerCase().includes(q)) ||
+                (l.customerType && l.customerType.toLowerCase().includes(q)) ||
+                // Property details
+                (l.propertyName && l.propertyName.toLowerCase().includes(q)) ||
+                (l.propertyLocation &&
+                    l.propertyLocation.toLowerCase().includes(q)) ||
+                (l.propertyPrice && l.propertyPrice.toString().includes(q))
+            );
+        });
+    }, [leads, debouncedQuery]);
 
     // ── Derived: count per stage (O(n) single pass with Map) ─────────────────
     const countByStage = useMemo(() => {
         const map = new Map<BuyerPipelineStatus, number>();
         for (const stage of STAGE_ORDER) map.set(stage, 0);
-        for (const lead of leads) {
+        for (const lead of searchedLeads) {
             map.set(lead.status, (map.get(lead.status) ?? 0) + 1);
         }
         return map;
-    }, [leads]);
+    }, [searchedLeads]);
 
     // ── Derived: leads grouped by stage for kanban ────────────────────────────
     const leadsByStage = useMemo(() => {
         const map = new Map<BuyerPipelineStatus, PipelineLead[]>();
         for (const stage of STAGE_ORDER) map.set(stage, []);
-        for (const lead of leads) {
+        for (const lead of searchedLeads) {
             map.get(lead.status)?.push(lead);
         }
         return map;
-    }, [leads]);
+    }, [searchedLeads]);
 
     // ── Derived: filtered leads for the list view ─────────────────────────────
     const filteredLeads = useMemo(() => {
-        let result =
-            activeStage === "all"
-                ? leads
-                : (leadsByStage.get(activeStage) ?? []);
-        if (searchQuery.trim()) {
-            const q = searchQuery.toLowerCase();
-            result = result.filter(
-                (l) =>
-                    l.name.toLowerCase().includes(q) ||
-                    l.propertyName.toLowerCase().includes(q) ||
-                    l.phone.includes(q),
-            );
-        }
-        return result;
-    }, [leads, activeStage, leadsByStage, searchQuery]);
+        return activeStage === "all"
+            ? searchedLeads
+            : (leadsByStage.get(activeStage) ?? []);
+    }, [activeStage, searchedLeads, leadsByStage]);
 
     // ── Actions ───────────────────────────────────────────────────────────────
 
