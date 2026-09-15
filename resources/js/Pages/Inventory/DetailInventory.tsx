@@ -21,6 +21,7 @@ import {
     Activity,
     Lock,
     LayoutGrid,
+    Building2,
 } from "lucide-react";
 import * as icons from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
@@ -341,50 +342,57 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                         {/* Left Column: Media & Clients */}
                         <div className="lg:col-span-2 flex flex-col gap-6">
                             <div className="bg-white rounded-2xl p-4 shadow-card border border-border-base">
-                                <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[320px]">
-                                    {/* Main Image */}
-                                    <div
-                                        className="col-span-3 row-span-2 rounded-xl overflow-hidden relative group cursor-pointer z-0"
-                                        onClick={() => openGallery(0)}
-                                    >
-                                        <img
-                                            src={propertyImages[0]}
-                                            alt="Cover"
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                        <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                                {propertyImages.length > 0 ? (
+                                    <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[320px]">
+                                        {/* Main Image */}
+                                        <div
+                                            className="col-span-3 row-span-2 rounded-xl overflow-hidden relative group cursor-pointer z-0"
+                                            onClick={() => openGallery(0)}
+                                        >
+                                            <img
+                                                src={propertyImages[0]}
+                                                alt="Cover"
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
+                                            <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                                        </div>
+                                        {/* Thumbnails */}
+                                        {propertyImages[1] && (
+                                            <div
+                                                className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
+                                                onClick={() => openGallery(1)}
+                                            >
+                                                <img
+                                                    src={propertyImages[1]}
+                                                    alt="Interior 1"
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                            </div>
+                                        )}
+                                        {propertyImages[2] && (
+                                            <div
+                                                className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
+                                                onClick={() => openGallery(2)}
+                                            >
+                                                <img
+                                                    src={propertyImages[2]}
+                                                    alt="Interior 2"
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                                {propertyImages.length > 3 && (
+                                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-semibold text-sm backdrop-blur-[1px] hover:bg-black/50 transition-colors">
+                                                        +{propertyImages.length - 3}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
-                                    {/* Thumbnails */}
-                                    {propertyImages[1] && (
-                                        <div
-                                            className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
-                                            onClick={() => openGallery(1)}
-                                        >
-                                            <img
-                                                src={propertyImages[1]}
-                                                alt="Interior 1"
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                            />
-                                        </div>
-                                    )}
-                                    {propertyImages[2] && (
-                                        <div
-                                            className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
-                                            onClick={() => openGallery(2)}
-                                        >
-                                            <img
-                                                src={propertyImages[2]}
-                                                alt="Interior 2"
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                            />
-                                            {propertyImages.length > 3 && (
-                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-semibold text-sm backdrop-blur-[1px] hover:bg-black/50 transition-colors">
-                                                    +{propertyImages.length - 3}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
+                                ) : (
+                                    <div className="flex flex-col justify-center items-center h-[320px] text-border-base">
+                                        <icons.Image size={32} strokeWidth={1.5} className="mb-2 text-gray-300 transition-colors " />
+                                        <span className="text-xs font-bold tracking-widest text-text-primary transition-colors">NO IMAGE</span>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Map Location Section */}
