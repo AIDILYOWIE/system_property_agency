@@ -116,7 +116,7 @@ class PropertyService
      * @param array<UploadedFile>|null $gallery
      * @return Property
      */
-    public function storeProperty(array $data, UploadedFile $mainThumbnail, ?array $gallery = []): Property
+    public function storeProperty(array $data, ?UploadedFile $mainThumbnail, ?array $gallery = []): Property
     {
         try {
             DB::beginTransaction();
@@ -129,6 +129,21 @@ class PropertyService
                 $data['sold_at'] = now();
             }
 
+            if (isset($data['action_type']) && $data['action_type'] === 'draft') {
+                $data['visibility'] = 'draft';
+                $data['published_at'] = null;
+            } else {
+                $data['visibility'] = 'published';
+                $data['published_at'] = now();
+            }
+
+            // Assign seller specific pipeline status if seller_id is present
+            if (isset($data['seller_id'])) {
+                $data['seller_pipeline_status'] = isset($data['action_type']) && $data['action_type'] === 'publish'
+                    ? 'listed'
+                    : 'incoming';
+            }
+
             // Create property
             $property = Property::create($data);
 
@@ -137,12 +152,14 @@ class PropertyService
             }
 
             // Process and store main thumbnail
-            $mainImagePath = $this->uploadAndProcessImage($mainThumbnail, 'properties/' . $property->id);
-            $property->images()->create([
-                'image_path' => $mainImagePath,
-                'is_main_thumbnail' => true,
-                'sort_order' => 0
-            ]);
+            if ($mainThumbnail) {
+                $mainImagePath = $this->uploadAndProcessImage($mainThumbnail, 'properties/' . $property->id);
+                $property->images()->create([
+                    'image_path' => $mainImagePath,
+                    'is_main_thumbnail' => true,
+                    'sort_order' => 0
+                ]);
+            }
 
             // Process and store gallery images if any
             if (!empty($gallery)) {

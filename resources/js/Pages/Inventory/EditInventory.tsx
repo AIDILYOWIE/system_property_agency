@@ -40,14 +40,26 @@ export default function EditInventory({ property, facilitiesMaster }: { property
             pageTitle="Edit Property"
             pageDescription="Update the details of your property listing."
             action={
-                <div className="flex" >
+                <div className="flex gap-2">
                     <button
                         type="submit"
                         form="inventory-form"
+                        name="action_type"
+                        value="draft"
+                        formNoValidate
+                        className="btn bg-white border border-border-base text-text-primary hover:bg-gray-50 focus:ring-2 focus:ring-primary/20 transition-all font-semibold px-4 py-2 rounded-lg text-sm"
+                    >
+                        Save as Draft
+                    </button>
+                    <button
+                        type="submit"
+                        form="inventory-form"
+                        name="action_type"
+                        value="publish"
                         className="btn btn-primary"
                     >
                         <Check className="w-4 h-4 stroke-[2.5]" />
-                        Save
+                        Publish
                     </button>
                 </div>
             }

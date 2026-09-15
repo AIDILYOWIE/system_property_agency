@@ -63,6 +63,7 @@ Route::prefix('/seller')->group(function () {
     Route::get('/add', [SellerController::class, 'create'])->name('seller.create');
     Route::post('/', [SellerController::class, 'store'])->name('seller.store');
     Route::get('/{seller}', [SellerController::class, 'show'])->name('seller.show');
+    Route::post('/{seller}/property', [SellerController::class, 'storeProperty'])->name('seller.property.store');
 });
 
 Route::prefix('/settings')->group(function () {
