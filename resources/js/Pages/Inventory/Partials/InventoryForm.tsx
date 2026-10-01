@@ -138,7 +138,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
         leasehold_years: initialData?.leaseholdYears ?? "",
         projected_roi: initialData?.projectedRoi ?? "",
         zoning: initialData?.zoning ?? "",
-        marketing_start_date: initialData?.marketing_start_date ?? new Date().toISOString().split('T')[0],
+        marketing_start_date: initialData?.marketing_start_date ?? '',
         social_media_1: initialData?.social_media_1 ?? "",
         social_media_2: initialData?.social_media_2 ?? "",
         facilities: initialData?.facilities ?? [] as number[],

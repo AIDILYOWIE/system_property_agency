@@ -288,7 +288,7 @@ export default function CustomerForm({
                                             const mappedProps: PropertyInterestItem = {
                                                 id: property.id,
                                                 title: property.title,
-                                                location: property.location,
+                                                full_address: property.full_address,
                                                 price: property.price,
                                                 currency: property.currency,
                                                 thumbnail: property.thumbnail,

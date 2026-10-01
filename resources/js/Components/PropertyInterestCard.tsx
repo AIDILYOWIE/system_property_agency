@@ -9,7 +9,7 @@ export type AnyPipelineStatus = PipelineStatus | "incoming" | "surveyed" | "agre
 export interface PropertyInterestItem {
     id: string;
     title: string;
-    location: string;
+    full_address: string;
     price: number | null;
     currency: "IDR" | "USD";
     thumbnail: string;
@@ -119,7 +119,7 @@ export default function PropertyInterestCard({ property, action }: PropertyInter
                         </p>
                         <p className="text-[12px] text-text-muted flex items-center gap-1.5">
                             <MapPin size={12} className="flex-shrink-0" />
-                            {property.location}
+                            {property.full_address}
                         </p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">

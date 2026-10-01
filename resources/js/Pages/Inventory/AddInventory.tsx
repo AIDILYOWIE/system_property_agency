@@ -31,7 +31,7 @@ export default function AddInventory({ facilitiesMaster, seller_id }: { faciliti
                         name="action_type"
                         value="draft"
                         formNoValidate
-                        className="btn bg-white border border-border-base text-text-primary hover:bg-gray-50 focus:ring-2 focus:ring-primary/20 transition-all font-semibold px-4 py-2 rounded-lg text-sm"
+                        className="btn btn-secondary"
                     >
                         Save as Draft
                     </button>

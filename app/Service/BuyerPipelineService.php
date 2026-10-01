@@ -69,6 +69,18 @@ class BuyerPipelineService
 
                 $inquiry->update($statusUpdateArray);
 
+                // SYNC RULE: If inquiry is closed as WON, freeze the property listing.
+                if ($newStatus === 'won' && $inquiry->property) {
+                    $property = $inquiry->property;
+                    if ($property->status === 'available') {
+                        $propertyToStatus = $property->listing_type === 'sale' ? 'sold' : 'rented';
+                        $property->update([
+                            'status' => $propertyToStatus,
+                            'sold_at' => now(),
+                        ]);
+                    }
+                }
+
                 $desc = "Status prospek untuk properti {$inquiry->property->title} diubah dari " . strtoupper($oldStatus) . " menjadi " . strtoupper($newStatus) . " via Kanban.";
                 if (in_array($newStatus, ['won', 'lost']) && $statusReason) {
                     $desc .= " Alasan: " . $statusReason;

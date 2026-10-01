@@ -24,8 +24,9 @@ class UpdatePropertyRequest extends FormRequest
         $propertyId = $this->route('id');
 
         return [
+            'action_type' => 'nullable|in:draft,publish',
             'title' => 'required|string|max:255|unique:properties,title,' . $propertyId,
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'location_area' => 'required|string|max:2000',
             'full_address' => 'required|string|max:5000',
             'listing_type' => 'required|in:sale,rent',
@@ -45,7 +46,7 @@ class UpdatePropertyRequest extends FormRequest
             'gallery.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
             'deleted_images' => 'nullable|array',
             'deleted_images.*' => 'string',
-            'marketing_start_date' => 'required|date',
+            'marketing_start_date' => 'required_if:action_type,publish|nullable|date',
             'social_media_1' => 'nullable|url|max:255',
             'social_media_2' => 'nullable|url|max:255',
             'facilities' => 'nullable|array',

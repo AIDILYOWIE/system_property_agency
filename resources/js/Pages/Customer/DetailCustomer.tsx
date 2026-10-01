@@ -144,7 +144,7 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
         const mapped: PropertyInterest = {
             id: inv.id,
             title: inv.title,
-            location: inv.location,
+            full_address: inv.full_address,
             price: inv.price,
             currency: inv.currency,
             thumbnail: inv.thumbnail,

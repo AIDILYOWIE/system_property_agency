@@ -21,6 +21,7 @@ import {
     Activity,
     Lock,
     LayoutGrid,
+    Building2,
 } from "lucide-react";
 import * as icons from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
@@ -42,112 +43,9 @@ import { type DataTableFeatures } from "@/Components/ui/table-data-features";
 import { Switch } from "@/Components/ui/switch";
 import { toast } from "@/Components/ui/toast";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/Components/ui/breadcrumb";
+import { CustomerColumns, type CustomerData } from "@/Pages/Customer/_Partials/CustomerColumn";
 
-type ClientData = {
-    id: string;
-    customer_id: string;
-    client: string;
-    status: string;
-    source: string;
-    lastActivity: string;
-    aksi?: boolean;
-}
 
-const clientColumns: ColumnDef<DataTableFeatures, ClientData>[] = [
-    {
-        accessorKey: "client",
-        header: "Client",
-        cell: ({ row }) => {
-            const initials = row.original.client.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase();
-            return (
-                <div className="flex items-center gap-4 px-6 py-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 font-bold text-sm select-none border border-primary/20">
-                        {initials}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <p className="font-semibold text-text-primary mb-0.5 line-clamp-1">
-                            {row.original.client}
-                        </p>
-                    </div>
-                </div>
-            )
-        }
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => {
-            const getPipelineStatusStyle = (status: string) => {
-                switch (status.toLowerCase()) {
-                    case "new lead":
-                    case "new request": return "bg-blue-50 text-blue-600 border-blue-100";
-                    case "contacted":
-                    case "qualifying": return "bg-amber-50 text-amber-600 border-amber-100";
-                    case "viewing": return "bg-violet-50 text-violet-600 border-violet-100";
-                    case "negotiation": return "bg-orange-50 text-orange-600 border-orange-100";
-                    case "won": return "bg-emerald-50 text-emerald-600 border-emerald-100";
-                    case "lost": return "bg-red-50 text-red-500 border-red-100";
-                    default: return "bg-gray-50 text-gray-500 border-gray-100";
-                }
-            };
-            return (
-                <div className="px-6 py-4">
-                    <span className={cn(
-                        "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                        getPipelineStatusStyle(row.original.status)
-                    )}>
-                        {row.original.status}
-                    </span>
-                </div>
-            );
-        }
-    },
-    {
-        accessorKey: "source",
-        header: "Source",
-        cell: ({ row }) => (
-            <div className="px-6 py-4">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-canvas text-text-muted border border-border-base uppercase tracking-wider">
-                    {row.original.source}
-                </span>
-            </div>
-        )
-    },
-    {
-        accessorKey: "lastActivity",
-        header: "Last Activity",
-        cell: ({ row }) => (
-            <div className="px-6 py-4 text-[13px] text-text-muted font-medium">
-                {row.original.lastActivity}
-            </div>
-        )
-    },
-    {
-        id: "aksi",
-        header: () => <div className="w-max">Action</div>,
-        cell: ({ row }) => (
-            <div className="flex items-center justify-center gap-2 px-6 py-4 w-max h-full">
-                <DropdownMenu>
-                    <DropdownMenuTrigger
-                        className="w-8 h-8 rounded-lg border border-border-base flex items-center justify-center text-text-muted transition-colors focus:outline-none data-[state=open]:bg-primary-50 data-[state=open]:text-primary outline-none hover:bg-gray-50"
-                        title="More Options"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <MoreHorizontal size={14} />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 font-sans">
-                        <Link href={route('customer.detail', row.original.customer_id)} className="w-full inline-block">
-                            <DropdownMenuItem className="cursor-pointer">
-                                <Eye className="mr-2 h-4 w-4" />
-                                <span>View Profile</span>
-                            </DropdownMenuItem>
-                        </Link>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-        )
-    }
-];
 
 interface DetailInventoryProps {
     property: {
@@ -186,7 +84,7 @@ interface DetailInventoryProps {
             roi: string;
             zoning: string;
         };
-        clients: ClientData[];
+        clients: CustomerData[];
         facilities?: Record<string, any[]>;
     }
 }
@@ -228,6 +126,25 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
     };
 
     const handlePublicToggle = (checked: boolean) => {
+        if (checked) {
+            const missingRequirements: string[] = [];
+
+            if (propertyImages.length === 0) missingRequirements.push("Foto Properti");
+            if (!property.price || property.price <= 0) missingRequirements.push("Harga");
+            if (!property.marketing_start_date) missingRequirements.push("Marketing Start Date");
+            if (!property.specification.land_size || property.specification.land_size <= 0) missingRequirements.push("Luas Tanah");
+            if (!property.specification.building_size && property.category !== 'tanah') missingRequirements.push("Luas Bangunan");
+
+            if (missingRequirements.length > 0) {
+                toast.add({
+                    title: "Tidak Dapat Mempublikasikan",
+                    description: `Harap lengkapi data wajib berikut: ${missingRequirements.join(", ")}. Klik tombol Edit untuk melengkapinya.`,
+                    type: 'error'
+                });
+                return; // Stop the dispatch and keep it as draft
+            }
+        }
+
         setIsPublic(checked);
 
         router.patch(`/inventory/${property.id}/visibility`, {
@@ -341,50 +258,57 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                         {/* Left Column: Media & Clients */}
                         <div className="lg:col-span-2 flex flex-col gap-6">
                             <div className="bg-white rounded-2xl p-4 shadow-card border border-border-base">
-                                <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[320px]">
-                                    {/* Main Image */}
-                                    <div
-                                        className="col-span-3 row-span-2 rounded-xl overflow-hidden relative group cursor-pointer z-0"
-                                        onClick={() => openGallery(0)}
-                                    >
-                                        <img
-                                            src={propertyImages[0]}
-                                            alt="Cover"
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                        <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                                {propertyImages.length > 0 ? (
+                                    <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[320px]">
+                                        {/* Main Image */}
+                                        <div
+                                            className="col-span-3 row-span-2 rounded-xl overflow-hidden relative group cursor-pointer z-0"
+                                            onClick={() => openGallery(0)}
+                                        >
+                                            <img
+                                                src={propertyImages[0]}
+                                                alt="Cover"
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
+                                            <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                                        </div>
+                                        {/* Thumbnails */}
+                                        {propertyImages[1] && (
+                                            <div
+                                                className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
+                                                onClick={() => openGallery(1)}
+                                            >
+                                                <img
+                                                    src={propertyImages[1]}
+                                                    alt="Interior 1"
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                            </div>
+                                        )}
+                                        {propertyImages[2] && (
+                                            <div
+                                                className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
+                                                onClick={() => openGallery(2)}
+                                            >
+                                                <img
+                                                    src={propertyImages[2]}
+                                                    alt="Interior 2"
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                                {propertyImages.length > 3 && (
+                                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-semibold text-sm backdrop-blur-[1px] hover:bg-black/50 transition-colors">
+                                                        +{propertyImages.length - 3}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
-                                    {/* Thumbnails */}
-                                    {propertyImages[1] && (
-                                        <div
-                                            className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
-                                            onClick={() => openGallery(1)}
-                                        >
-                                            <img
-                                                src={propertyImages[1]}
-                                                alt="Interior 1"
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                            />
-                                        </div>
-                                    )}
-                                    {propertyImages[2] && (
-                                        <div
-                                            className="col-span-1 row-span-1 rounded-xl overflow-hidden relative group cursor-pointer"
-                                            onClick={() => openGallery(2)}
-                                        >
-                                            <img
-                                                src={propertyImages[2]}
-                                                alt="Interior 2"
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                            />
-                                            {propertyImages.length > 3 && (
-                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-semibold text-sm backdrop-blur-[1px] hover:bg-black/50 transition-colors">
-                                                    +{propertyImages.length - 3}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
+                                ) : (
+                                    <div className="flex flex-col justify-center items-center h-[320px] text-border-base">
+                                        <icons.Image size={32} strokeWidth={1.5} className="mb-2 text-gray-300 transition-colors " />
+                                        <span className="text-xs font-bold tracking-widest text-text-primary transition-colors">NO IMAGE</span>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Map Location Section */}
@@ -414,18 +338,16 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                         </div>
                                     </div>
                                     <div className={cn(
-                                        "flex gap-3 bg-gray-50 p-3 rounded-xl border",
+                                        "flex gap-3 bg-gray-50 p-3 items-center rounded-xl border",
                                         property.status === 'sold' || property.status === 'rented'
                                             ? "border-sky-200 bg-sky-50 opacity-90"
                                             : (!property.normal.is_normal ? "bg-red-50/50 border-red-200" : "border-border-base")
                                     )}>
-                                        <div className="pt-1">
-                                            <Clock className={cn(
-                                                "w-5 h-5",
-                                                property.status === 'sold' || property.status === 'rented' ? "text-sky-600" : (!property.normal.is_normal ? "text-red-500" : "text-primary")
-                                            )} />
-                                        </div>
-                                        <div className="flex-1">
+                                        <Clock className={cn(
+                                            "w-5 h-5",
+                                            property.status === 'sold' || property.status === 'rented' ? "text-sky-600" : (!property.normal.is_normal ? "text-red-500" : "text-primary")
+                                        )} />
+                                        <div className="">
                                             <div className="flex items-center justify-between">
                                                 <p className={cn(
                                                     "text-[10px] font-medium uppercase",
@@ -435,7 +357,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                                 </p>
                                                 {(property.status === 'sold' || property.status === 'rented') && (
                                                     <span className="flex items-center gap-1 text-[8px] font-bold text-sky-600 bg-sky-100/50 px-1.5 py-0.5 rounded border border-sky-200 uppercase" title="Waktu Dibekukan (Sold/Rented)">
-                                                        <Lock size={10} /> Locked
+                                                        <Lock size={14} />
                                                     </span>
                                                 )}
                                             </div>
@@ -465,7 +387,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                             </div>
 
                             <DataTable
-                                columns={clientColumns as any}
+                                columns={CustomerColumns as any}
                                 data={property.clients}
                                 headerSlot={
                                     <div className="p-6 flex items-center justify-between">
@@ -504,12 +426,12 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                         </div>
                                     </div>
                                     <div className={cn(
-                                        "flex gap-3 bg-gray-50 p-3 rounded-xl border",
+                                        "flex items-center gap-3 bg-gray-50 p-3 rounded-xl border",
                                         property.status === 'sold' || property.status === 'rented'
                                             ? "border-sky-200 bg-sky-50 opacity-90"
                                             : (!property.normal.is_normal ? "bg-red-50/50 border-red-200" : "border-border-base")
                                     )}>
-                                        <div className="pt-1">
+                                        <div className="">
                                             <Clock className={cn(
                                                 "w-5 h-5",
                                                 property.status === 'sold' || property.status === 'rented' ? "text-sky-600" : (!property.normal.is_normal ? "text-red-500" : "text-primary")
@@ -524,8 +446,8 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                                                     Days on Market
                                                 </p>
                                                 {(property.status === 'sold' || property.status === 'rented') && (
-                                                    <span className="flex items-center gap-1 text-[8px] font-bold text-sky-600 bg-sky-100/50 px-1.5 py-0.5 rounded border border-sky-200 uppercase" title="Waktu Dibekukan (Sold/Rented)">
-                                                        <Lock size={10} /> Locked
+                                                    <span className="flex items-center gap-1 text-[8px] font-bold text-sky-600 uppercase" title="Waktu Dibekukan (Sold/Rented)">
+                                                        <Lock size={14} />
                                                     </span>
                                                 )}
                                             </div>
