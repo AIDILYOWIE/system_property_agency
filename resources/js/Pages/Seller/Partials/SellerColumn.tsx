@@ -143,7 +143,7 @@ export const SellerColumns = columnHelper.columns([
                     {/* More Actions Dropdown */}
                     <DropdownMenu>
                         <DropdownMenuTrigger
-                            className="w-8 h-8 rounded-lg border border-border-base flex items-center justify-center text-text-muted transition-colors focus:outline-none data-[state=open]:bg-primary-50 data-[state=open]:text-primary outline-none"
+                            className="w-8 h-8 rounded-md border border-border-base flex items-center justify-center text-text-muted transition-colors focus:outline-none data-[state=open]:bg-primary-50 data-[state=open]:text-primary outline-none"
                             title="More Options"
                             onClick={(e) => e.stopPropagation()}
                         >
