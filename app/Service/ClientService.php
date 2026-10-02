@@ -21,6 +21,40 @@ class ClientService
     {
         //
     }
+
+    public function getAllCustomers()
+    {
+        return Client::with(['inquiries.property'])->orderBy('last_active_at', 'desc')->get()->map(function ($client) {
+            $statusWeight = [
+                'lost' => -1,
+                'new_lead' => 0,
+                'contacted' => 1,
+                'viewing' => 2,
+                'negotiation' => 3,
+                'won' => 4,
+            ];
+
+            $primaryInquiry = $client->inquiries->sortByDesc(function ($inq) use ($statusWeight) {
+                return $statusWeight[$inq->pipeline_status] ?? 0;
+            })->first();
+
+            $property = $primaryInquiry ? $primaryInquiry->property : null;
+
+            return [
+                'id' => $client->id,
+                'name' => $client->full_name,
+                'phone' => $client->phone,
+                'email' => $client->email,
+                'customer_type' => $property ? ($property->listing_type === 'sale' ? 'buyer' : 'renter') : 'buyer',
+                'pipeline_status' => $primaryInquiry ? $primaryInquiry->pipeline_status : 'new_lead',
+                'interested_property' => $property ? $property->title : null,
+                'source' => $client->source,
+                'notes' => $client->notes,
+                'created_at' => $client->created_at->toIso8601String(),
+                'last_contacted' => $client->last_active_at ? $client->last_active_at->toIso8601String() : null,
+            ];
+        });
+    }
     public function storeManualLead(array $data)
     {
         return DB::transaction(function () use ($data) {
