@@ -1,15 +1,9 @@
 // ─── Pipeline Types ─────────────────────────────────────────────────────────────
 // Single source of truth for all US 2.2 pipeline types.
 
-export type BuyerPipelineStatus =
-    | "new_lead"
-    | "contacted"
-    | "viewing"
-    | "negotiation"
-    | "won"
-    | "lost";
+export type PipelineStatus = string;
 
-export interface PipelineLead {
+export interface PipelineItem {
     id: string;
     customerId: string;
     name: string;
@@ -21,7 +15,7 @@ export interface PipelineLead {
     fullAddress: string;
     propertyPrice: number;
     propertyCurrency: "IDR" | "USD";
-    status: BuyerPipelineStatus;
+    status: PipelineStatus;
     /** "buyer" or "renter" — determines pipeline copy */
     customerType: "buyer" | "renter";
     source: string;
@@ -30,7 +24,7 @@ export interface PipelineLead {
 }
 
 export interface StageConfig {
-    status: BuyerPipelineStatus;
+    status: PipelineStatus;
     label: string;
     color: string; // Tailwind bg class for badge
     textColor: string; // Tailwind text class for badge

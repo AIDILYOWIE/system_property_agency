@@ -29,3 +29,33 @@ export const formatCurrency = (amount: number, currency: string) => {
     }
     return `Rp ${new Intl.NumberFormat("id-ID").format(amount)}`;
 };
+
+export function formatPrice(price: number, currency: string): string {
+    if (currency === "IDR") {
+        return new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+            notation: "compact",
+            compactDisplay: "short",
+        }).format(price);
+    }
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0,
+        notation: "compact",
+        compactDisplay: "short",
+    }).format(price);
+}
+
+export function timeAgo(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (days === 0) return "Today";
+    if (days === 1) return "Yesterday";
+    if (days < 7) return `${days}d ago`;
+    if (days < 30) return `${Math.floor(days / 7)}w ago`;
+    return `${Math.floor(days / 30)}mo ago`;
+}

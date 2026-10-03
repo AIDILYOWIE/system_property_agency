@@ -1,31 +1,29 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronDown, CheckCircle2, XCircle } from "lucide-react";
-import { STAGE_ORDER, STAGE_CONFIG } from "./pipelineConstants";
-import { type BuyerPipelineStatus } from "./pipelineTypes";
-
-// ─── Props ──────────────────────────────────────────────────────────────────────
+import { ChevronDown, CheckCircle2 } from "lucide-react";
+import { type PipelineStatus, type StageConfig } from "./pipelineTypes";
 
 interface PipelineStatusDropdownProps {
     leadId: string;
-    currentStatus: BuyerPipelineStatus;
-    onChange: (leadId: string, newStatus: BuyerPipelineStatus) => void;
+    currentStatus: PipelineStatus;
+    onChange: (leadId: string, newStatus: PipelineStatus) => void;
+    stageOrder: PipelineStatus[];
+    stageConfigs: Record<PipelineStatus, StageConfig>;
     disabled?: boolean;
 }
-
-// ─── Component ──────────────────────────────────────────────────────────────────
 
 export default function PipelineStatusDropdown({
     leadId,
     currentStatus,
     onChange,
+    stageOrder,
+    stageConfigs,
     disabled = false,
 }: PipelineStatusDropdownProps) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
-    const cfg = STAGE_CONFIG[currentStatus];
+    const cfg = stageConfigs[currentStatus];
 
-    // Close on outside click — stable handler via ref
     const handleOutsideClick = useCallback((e: MouseEvent) => {
         if (ref.current && !ref.current.contains(e.target as Node)) {
             setOpen(false);
@@ -40,7 +38,7 @@ export default function PipelineStatusDropdown({
     }, [open, handleOutsideClick]);
 
     const handleSelect = useCallback(
-        (status: BuyerPipelineStatus) => {
+        (status: PipelineStatus) => {
             onChange(leadId, status);
             setOpen(false);
         },
@@ -60,13 +58,13 @@ export default function PipelineStatusDropdown({
                     "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all duration-150",
                     !disabled && "cursor-pointer hover:opacity-80",
                     disabled && "opacity-70 cursor-not-allowed",
-                    cfg.color,
-                    cfg.textColor,
-                    cfg.borderColor
+                    cfg?.color,
+                    cfg?.textColor,
+                    cfg?.borderColor
                 )}
             >
-                <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", cfg.dotColor)} />
-                {cfg.label}
+                <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", cfg?.dotColor)} />
+                {cfg?.label || currentStatus}
                 {!disabled && (
                     <ChevronDown
                         size={10}
@@ -77,8 +75,8 @@ export default function PipelineStatusDropdown({
 
             {open && !disabled && (
                 <div className="absolute left-0 top-full mt-1.5 z-[9999] w-44 bg-white rounded-xl border border-border-base shadow-lg py-1 overflow-hidden">
-                    {STAGE_ORDER.map((stage) => {
-                        const stageCfg = STAGE_CONFIG[stage];
+                    {stageOrder.map((stage) => {
+                        const stageCfg = stageConfigs[stage];
                         const isCurrent = stage === currentStatus;
                         return (
                             <button
@@ -98,10 +96,10 @@ export default function PipelineStatusDropdown({
                                 <span
                                     className={cn(
                                         "w-2 h-2 rounded-full flex-shrink-0",
-                                        stageCfg.dotColor
+                                        stageCfg?.dotColor
                                     )}
                                 />
-                                {stageCfg.label}
+                                {stageCfg?.label}
                                 {isCurrent && (
                                     <CheckCircle2 size={12} className="ml-auto text-primary" />
                                 )}

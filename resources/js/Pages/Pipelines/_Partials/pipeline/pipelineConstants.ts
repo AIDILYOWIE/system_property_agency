@@ -4,7 +4,7 @@
 import {
     type BuyerPipelineStatus,
     type StageConfig,
-    type PipelineLead,
+    type PipelineItem,
 } from "./pipelineTypes";
 
 // ─── Stage configuration ─────────────────────────────────────────────────────────

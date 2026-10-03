@@ -4,11 +4,13 @@ import { UserPlus, Search, X, LayoutGrid, List } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-import { usePipelineLeads } from "./_Partials/pipeline/usePipelineLeads";
-import PipelineStageBar from "./_Partials/pipeline/PipelineStageBar";
-import PipelineKanbanBoard from "./_Partials/pipeline/PipelineKanbanBoard";
-import PipelineLeadList from "./_Partials/pipeline/PipelineLeadList";
-import StatusReasonModal from "./_Partials/pipeline/StatusReasonModal";
+import { usePipeline } from "../_Partials/pipeline/usePipeline";
+import PipelineStageBar from "../_Partials/pipeline/PipelineStageBar";
+import PipelineKanbanBoard from "../_Partials/pipeline/PipelineKanbanBoard";
+import PipelineList from "../_Partials/pipeline/PipelineList";
+import StatusReasonModal from "../_Partials/pipeline/StatusReasonModal";
+import { STAGE_ORDER, STAGE_CONFIG } from "../_Partials/pipeline/pipelineConstants";
+import { BuyerCard } from "./Components/BuyerCard";
 import { Input } from "@/Components/ui/input";
 
 // ─── Page ───────────────────────────────────────────────────────────────────────
@@ -26,7 +28,7 @@ export default function BuyerPipeline({ leads: initialLeads }: { leads: any[] })
         handleStatusChange,
         statusModalTarget,
         setStatusModalTarget,
-    } = usePipelineLeads(initialLeads);
+    } = usePipeline(initialLeads, STAGE_ORDER, "buyer-pipeline");
 
     // View mode — "list" default on all screens; kanban only shown on lg+ via CSS
     const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban");
@@ -56,6 +58,8 @@ export default function BuyerPipeline({ leads: initialLeads }: { leads: any[] })
                                 activeStage={activeStage}
                                 countByStage={countByStage}
                                 totalCount={leads.length}
+                                stageOrder={STAGE_ORDER}
+                                stageConfigs={STAGE_CONFIG}
                                 onChange={setActiveStage}
                             />
                         </div>
@@ -113,8 +117,22 @@ export default function BuyerPipeline({ leads: initialLeads }: { leads: any[] })
                         {/* Fixed height kanban — scrollable columns */}
                         <div style={{ height: "calc(100vh - 280px)", minHeight: "480px" }}>
                             <PipelineKanbanBoard
-                                leadsByStage={leadsByStage}
+                                itemsByStage={leadsByStage}
+                                stageOrder={STAGE_ORDER}
+                                stageConfigs={STAGE_CONFIG}
                                 onStatusChange={handleStatusChange}
+                                dndType="BUYER_PIPELINE"
+                                renderCard={(item, isDragging, variant, isShadow) => (
+                                    <BuyerCard
+                                        lead={item}
+                                        isDragging={isDragging}
+                                        variant={variant}
+                                        isShadow={isShadow}
+                                        onStatusChange={handleStatusChange}
+                                        stageOrder={STAGE_ORDER}
+                                        stageConfigs={STAGE_CONFIG}
+                                    />
+                                )}
                             />
                         </div>
                     </div>
@@ -122,9 +140,21 @@ export default function BuyerPipeline({ leads: initialLeads }: { leads: any[] })
 
                 {/* ── List View (always shown on mobile; shown on lg+ when in list mode) ── */}
                 <div className={cn(isKanbanMode ? "lg:hidden" : "")}>
-                    <PipelineLeadList
-                        leads={filteredLeads}
+                    <PipelineList
+                        items={filteredLeads}
+                        stageConfigs={STAGE_CONFIG}
                         onStatusChange={handleStatusChange}
+                        renderCard={(item, isDragging, variant, isShadow) => (
+                            <BuyerCard
+                                lead={item}
+                                isDragging={isDragging}
+                                variant={variant}
+                                isShadow={isShadow}
+                                onStatusChange={handleStatusChange}
+                                stageOrder={STAGE_ORDER}
+                                stageConfigs={STAGE_CONFIG}
+                            />
+                        )}
                     />
                 </div>
 

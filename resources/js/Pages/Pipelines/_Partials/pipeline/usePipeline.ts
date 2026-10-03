@@ -1,19 +1,23 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { router } from "@inertiajs/react";
-import { type PipelineLead, type BuyerPipelineStatus } from "./pipelineTypes";
-import { STAGE_ORDER } from "./pipelineConstants";
+import { type PipelineItem, type PipelineStatus } from "./pipelineTypes";
+// constants injected via options
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-export function usePipelineLeads(initialLeads: PipelineLead[]) {
-    const [leads, setLeads] = useState<PipelineLead[]>(initialLeads || []);
+export function usePipeline(
+    initialLeads: PipelineItem[],
+    stageOrder: string[],
+    routePrefix: string,
+) {
+    const [leads, setLeads] = useState<PipelineItem[]>(initialLeads || []);
 
     // Sync if props change
     useEffect(() => {
         setLeads(initialLeads || []);
     }, [initialLeads]);
 
-    const [activeStage, setActiveStage] = useState<BuyerPipelineStatus | "all">(
+    const [activeStage, setActiveStage] = useState<PipelineStatus | "all">(
         "all",
     );
     const [searchQuery, setSearchQuery] = useState("");
@@ -50,8 +54,8 @@ export function usePipelineLeads(initialLeads: PipelineLead[]) {
 
     // ── Derived: count per stage (O(n) single pass with Map) ─────────────────
     const countByStage = useMemo(() => {
-        const map = new Map<BuyerPipelineStatus, number>();
-        for (const stage of STAGE_ORDER) map.set(stage, 0);
+        const map = new Map<PipelineStatus, number>();
+        for (const stage of stageOrder) map.set(stage, 0);
         for (const lead of searchedLeads) {
             map.set(lead.status, (map.get(lead.status) ?? 0) + 1);
         }
@@ -60,8 +64,8 @@ export function usePipelineLeads(initialLeads: PipelineLead[]) {
 
     // ── Derived: leads grouped by stage for kanban ────────────────────────────
     const leadsByStage = useMemo(() => {
-        const map = new Map<BuyerPipelineStatus, PipelineLead[]>();
-        for (const stage of STAGE_ORDER) map.set(stage, []);
+        const map = new Map<PipelineStatus, PipelineItem[]>();
+        for (const stage of stageOrder) map.set(stage, []);
         for (const lead of searchedLeads) {
             map.get(lead.status)?.push(lead);
         }
@@ -80,17 +84,13 @@ export function usePipelineLeads(initialLeads: PipelineLead[]) {
     // Manage which lead is currently prompting for a won/lost reason
     interface StatusModalTarget {
         leadId: string;
-        status: BuyerPipelineStatus;
+        status: PipelineStatus;
     }
     const [statusModalTarget, setStatusModalTarget] =
         useState<StatusModalTarget | null>(null);
 
     const handleStatusChange = useCallback(
-        (
-            leadId: string,
-            newStatus: BuyerPipelineStatus,
-            statusReason?: string,
-        ) => {
+        (leadId: string, newStatus: PipelineStatus, statusReason?: string) => {
             const requiresReason = newStatus === "lost" || newStatus === "won";
 
             if (requiresReason && !statusReason) {
@@ -108,9 +108,8 @@ export function usePipelineLeads(initialLeads: PipelineLead[]) {
                 ),
             );
 
-            // Real-time backend sync without page load
             router.patch(
-                route("buyer-pipeline.status", leadId),
+                route(`${routePrefix}.status`, leadId),
                 { status: newStatus, status_reason: statusReason },
                 {
                     preserveScroll: true,
