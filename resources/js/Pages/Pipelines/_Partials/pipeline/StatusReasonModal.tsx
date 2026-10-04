@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
 import Modal from "@/Components/Modal";
-import { Button } from "@/Components/ui/button";
 import { Textarea } from "@/Components/ui/textarea";
-import { BuyerPipelineStatus } from "./pipelineTypes";
+import { type PipelineStatus } from "./pipelineTypes";
 
 interface StatusReasonModalProps {
     show: boolean;
     leadId: string | null;
-    status: BuyerPipelineStatus | null;
+    status: PipelineStatus | null;
     onClose: () => void;
-    onSubmit: (leadId: string, status: BuyerPipelineStatus, reason: string) => void;
+    onSubmit: (leadId: string, status: PipelineStatus, reason: string) => void;
+    /** 'buyer' shows won/lost copy; 'property' shows rejected copy. Default: 'buyer' */
+    pipelineType?: "buyer" | "property";
 }
 
-export default function StatusReasonModal({ show, leadId, status, onClose, onSubmit }: StatusReasonModalProps) {
+export default function StatusReasonModal({ show, leadId, status, onClose, onSubmit, pipelineType = "buyer" }: StatusReasonModalProps) {
     const [reason, setReason] = useState("");
     const [error, setError] = useState("");
 
@@ -24,14 +25,54 @@ export default function StatusReasonModal({ show, leadId, status, onClose, onSub
         }
     }, [show]);
 
+    // ── Copy resolver: per-status, per-pipeline ────────────────────────────
+    const isPropertyPipeline = pipelineType === "property";
     const isWon = status === "won";
-    const title = isWon ? "Tandai sebagai WON (Deal)" : "Tandai sebagai LOST (Gagal)";
-    const description = isWon
-        ? "Selamat! Mohon sebutkan alasan mengapa klien ini berhasil closing (won). Informasi ini sangat berguna untuk strategi sales berikutnya."
-        : "Mohon sebutkan alasan mengapa klien ini gagal dikonversi (lost), informasi ini sangat berguna untuk analitik sales berikutnya.";
-    const placeholder = isWon
-        ? "Contoh: Klien menyukai lokasi, harga cocok, KPR disetujui..."
-        : "Contoh: Klien merasa harga terlalu mahal, atau klien pindah ke agen lain...";
+    const isListed = status === "listed";
+
+    type ModalCopy = { title: string; description: string; placeholder: string };
+
+    const copy: ModalCopy = (() => {
+        if (isPropertyPipeline && isListed) {
+            return {
+                title: "Tandai Properti sebagai Listed",
+                description:
+                    "Berikan alasan mengapa properti ini siap untuk dipasarkan. " +
+                    "Informasi ini digunakan team sales untuk strategi pemasaran.",
+                placeholder:
+                    "Contoh: Harga sesuai pasar, dokumen lengkap, akses jalan bagus, foto sudah siap...",
+            };
+        }
+        if (isPropertyPipeline) {
+            // rejected
+            return {
+                title: "Tandai Properti sebagai Rejected",
+                description:
+                    "Mohon tuliskan alasan penolakan properti ini. " +
+                    "Informasi ini membantu screening dan analisis supply team.",
+                placeholder:
+                    "Contoh: Harga terlalu tinggi, lokasi tidak strategis, kondisi buruk, pemilik batal...",
+            };
+        }
+        // Buyer pipeline
+        if (isWon) {
+            return {
+                title: "Tandai sebagai WON (Deal)",
+                description:
+                    "Berikan alasan mengapa klien ini berhasil closing (won). " +
+                    "Informasi ini sangat berguna untuk strategi sales berikutnya.",
+                placeholder: "Contoh: Klien menyukai lokasi, harga cocok, KPR disetujui...",
+            };
+        }
+        return {
+            title: "Tandai sebagai LOST (Gagal)",
+            description:
+                "Mohon sebutkan alasan mengapa klien ini gagal dikonversi (lost), " +
+                "informasi ini sangat berguna untuk analitik sales berikutnya.",
+            placeholder: "Contoh: Klien merasa harga terlalu mahal, atau klien pindah ke agen lain...",
+        };
+    })();
+    const { title, description, placeholder } = copy;
 
     const handleSubmit = () => {
         if (!reason.trim()) {

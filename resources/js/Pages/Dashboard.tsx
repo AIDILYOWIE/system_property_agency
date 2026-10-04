@@ -111,15 +111,6 @@ export default function Dashboard() {
         inventoryHealth: 2,
     };
 
-    const websiteLeadsData = useMemo(() => [
-        { day: 'S', leads: 4, type: 'actual' as const },
-        { day: 'M', leads: 9, type: 'actual' as const },
-        { day: 'T', leads: 12, type: 'today' as const },
-        { day: 'W', leads: 10, type: 'projected' as const },
-        { day: 'T', leads: 7, type: 'projected' as const },
-        { day: 'F', leads: 4, type: 'projected' as const },
-        { day: 'S', leads: 8, type: 'projected' as const },
-    ], []);
 
     const openSlotPurchase = useMemo(() => [
         { day: 'S', leads: 20, type: 'actual' as const },
@@ -167,8 +158,8 @@ export default function Dashboard() {
                     description="Leads currently in Viewing or Negotiation stage"
                     icon={TrendingUp}
                     designVariant="primary"
-                    action="View Buyer Pipeline"
-                    actionHref="/admin/crm/buyers"
+                    action="View Pipelines"
+                    actionHref="/pipelines"
                 />
 
                 {/* 2. Recurring Revenue Alert */}

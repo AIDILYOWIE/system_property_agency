@@ -24,7 +24,7 @@ function PipelineCardComponent<T extends PipelineItem>({
     dndType,
     renderCard,
 }: PipelineCardProps<T>) {
-    const isLocked = item.status === "lost" || item.status === "won" || item.status === "rejected";
+    const isLocked = item.status === "lost" || item.status === "won" || item.status === "rejected" || item.status === "listed";
     const canDrag = variant === "compact" && !isShadow && !isLocked;
 
     return (

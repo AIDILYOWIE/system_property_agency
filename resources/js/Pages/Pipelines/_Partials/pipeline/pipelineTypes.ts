@@ -3,6 +3,15 @@
 
 export type PipelineStatus = string;
 
+/** Backward-compat alias — Buyer pipeline statuses */
+export type BuyerPipelineStatus =
+    | "new_lead"
+    | "contacted"
+    | "viewing"
+    | "negotiation"
+    | "won"
+    | "lost";
+
 export interface PipelineItem {
     id: string;
     customerId: string;
@@ -29,6 +38,5 @@ export interface StageConfig {
     color: string; // Tailwind bg class for badge
     textColor: string; // Tailwind text class for badge
     borderColor: string; // Tailwind border class for badge
-    columnBg: string; // Tailwind bg class for kanban column header
     dotColor: string; // Tailwind color for the dot indicator
 }

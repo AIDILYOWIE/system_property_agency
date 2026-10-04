@@ -65,11 +65,11 @@ const NAV_SECTIONS: NavSection[] = [
         title: 'CRM',
         items: [
             {
-                key: 'crm-buyers',
-                label: 'Buyer Pipeline',
-                href: '/buyer-pipeline',
+                key: 'pipelines',
+                label: 'Pipelines',
+                href: '/pipelines',
                 icon: TrendingUp,
-                routeName: 'buyer-pipeline',
+                routeName: 'pipelines.index',
             },
             // {
             //     key: 'crm-partners',

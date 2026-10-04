@@ -66,7 +66,6 @@ function PipelineKanbanColumnComponent<T extends PipelineItem>({
             <div
                 className={cn(
                     "flex items-center justify-between px-3 py-2.5 rounded-t-xl border border-b-0 transition-colors duration-150",
-                    `${cfg.columnBg} border-border-base`
                 )}
             >
                 <div className="flex items-center gap-2">

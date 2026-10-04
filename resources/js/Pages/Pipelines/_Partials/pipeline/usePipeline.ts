@@ -36,18 +36,24 @@ export function usePipeline(
         if (!debouncedQuery.trim()) return leads;
 
         const q = debouncedQuery.toLowerCase().trim();
-        return leads.filter((l) => {
+        return leads.filter((l: any) => {
             return (
-                // Customer details
+                // Buyer pipeline — customer details
                 (l.name && l.name.toLowerCase().includes(q)) ||
                 (l.phone && l.phone.includes(q)) ||
                 (l.email && l.email.toLowerCase().includes(q)) ||
                 (l.customerType && l.customerType.toLowerCase().includes(q)) ||
-                // Property details
+                // Buyer pipeline — property details
                 (l.propertyName && l.propertyName.toLowerCase().includes(q)) ||
                 (l.propertyLocation &&
                     l.propertyLocation.toLowerCase().includes(q)) ||
-                (l.propertyPrice && l.propertyPrice.toString().includes(q))
+                (l.propertyPrice && l.propertyPrice.toString().includes(q)) ||
+                // Property pipeline — property & seller fields
+                (l.propertyTitle &&
+                    l.propertyTitle.toLowerCase().includes(q)) ||
+                (l.sellerName && l.sellerName.toLowerCase().includes(q)) ||
+                (l.locationArea && l.locationArea.toLowerCase().includes(q)) ||
+                (l.estimatedPrice && l.estimatedPrice.toString().includes(q))
             );
         });
     }, [leads, debouncedQuery]);
@@ -91,7 +97,11 @@ export function usePipeline(
 
     const handleStatusChange = useCallback(
         (leadId: string, newStatus: PipelineStatus, statusReason?: string) => {
-            const requiresReason = newStatus === "lost" || newStatus === "won";
+            const requiresReason =
+                newStatus === "lost" ||
+                newStatus === "won" ||
+                newStatus === "rejected" ||
+                newStatus === "listed";
 
             if (requiresReason && !statusReason) {
                 setStatusModalTarget({ leadId, status: newStatus });
