@@ -71,6 +71,9 @@ Route::prefix('/seller')->group(function () {
     Route::post('/', [SellerController::class, 'store'])->name('seller.store');
     Route::get('/{seller}', [SellerController::class, 'show'])->name('seller.show');
     Route::post('/{seller}/property', [SellerController::class, 'storeProperty'])->name('seller.property.store');
+    // Picker modal: fetch unassigned draft properties & assign one to this seller
+    Route::get('/properties/unassigned', [SellerController::class, 'unassignedProperties'])->name('seller.properties.unassigned');
+    Route::patch('/{seller}/property/{property}/assign', [SellerController::class, 'assignProperty'])->name('seller.property.assign');
 });
 
 Route::prefix('/settings')->group(function () {
