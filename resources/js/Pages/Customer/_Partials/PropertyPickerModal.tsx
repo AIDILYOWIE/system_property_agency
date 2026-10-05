@@ -69,7 +69,7 @@ export default function PropertyPickerModal({
     const filtered = availableProperties.filter(
         (p) =>
             p.title.toLowerCase().includes(query.toLowerCase()) ||
-            p.location.toLowerCase().includes(query.toLowerCase()) ||
+            p.full_address.toLowerCase().includes(query.toLowerCase()) ||
             p.category.toLowerCase().includes(query.toLowerCase())
     );
 
@@ -219,7 +219,7 @@ export default function PropertyPickerModal({
                                             </p>
                                             <p className="text-[11px] text-text-muted mt-0.5 flex items-center gap-1">
                                                 <MapPin size={10} className="flex-shrink-0" />
-                                                {property.location}
+                                                {property.full_address}
                                             </p>
                                             <div className="flex items-center justify-between mt-2">
                                                 <p className="text-[13px] font-bold text-text-primary">
