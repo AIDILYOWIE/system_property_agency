@@ -36,6 +36,7 @@ import {
     Clock,
 } from "lucide-react";
 import PropertyInterestCard from "@/Components/PropertyInterestCard";
+import SellerPropertyPickerModal from "./_Partials/SellerPropertyPickerModal";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -98,6 +99,9 @@ export default function DetailSeller({
     const [editingNotes, setEditingNotes] = useState(false);
     const [draftNotes, setDraftNotes] = useState(seller.notes ?? "");
     const notesRef = useRef<HTMLTextAreaElement>(null);
+
+    // Property picker state
+    const [pickerOpen, setPickerOpen] = useState(false);
 
     // Check flash for post-create prompt
     const { props: pageProps } = usePage<any>();
@@ -299,12 +303,13 @@ export default function DetailSeller({
                                     {properties.length} properti ditawarkan
                                 </p>
                             </div>
-                            <Link
-                                href={route('inventory.add', { seller_id: seller.id })}
+                            <button
+                                type="button"
+                                onClick={() => setPickerOpen(true)}
                                 className="text-xs font-semibold text-primary bg-[#EAF3EF] px-3 py-1.5 rounded-md hover:bg-[#EAF3EF]/80 transition-colors flex items-center gap-1"
                             >
                                 <Plus size={12} className="stroke-[3]" /> Tambah
-                            </Link>
+                            </button>
                         </div>
 
                         <div className="divide-y divide-border-base">
@@ -362,6 +367,13 @@ export default function DetailSeller({
                             )}
                         </div>
                     </div>
+
+                    {/* ── Property Picker Modal ─────────────────────── */}
+                    <SellerPropertyPickerModal
+                        open={pickerOpen}
+                        sellerId={seller.id}
+                        onClose={() => setPickerOpen(false)}
+                    />
 
                     {/* ── Zone 3: Activity Timeline (placeholder) ─── */}
                     <div className="bg-white rounded-2xl border border-border-base shadow-card overflow-hidden">

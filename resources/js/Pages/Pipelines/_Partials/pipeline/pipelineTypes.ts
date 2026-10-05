@@ -1,6 +1,9 @@
 // ─── Pipeline Types ─────────────────────────────────────────────────────────────
 // Single source of truth for all US 2.2 pipeline types.
 
+export type PipelineStatus = string;
+
+/** Backward-compat alias — Buyer pipeline statuses */
 export type BuyerPipelineStatus =
     | "new_lead"
     | "contacted"
@@ -9,7 +12,7 @@ export type BuyerPipelineStatus =
     | "won"
     | "lost";
 
-export interface PipelineLead {
+export interface PipelineItem {
     id: string;
     customerId: string;
     name: string;
@@ -21,7 +24,7 @@ export interface PipelineLead {
     fullAddress: string;
     propertyPrice: number;
     propertyCurrency: "IDR" | "USD";
-    status: BuyerPipelineStatus;
+    status: PipelineStatus;
     /** "buyer" or "renter" — determines pipeline copy */
     customerType: "buyer" | "renter";
     source: string;
@@ -30,11 +33,10 @@ export interface PipelineLead {
 }
 
 export interface StageConfig {
-    status: BuyerPipelineStatus;
+    status: PipelineStatus;
     label: string;
     color: string; // Tailwind bg class for badge
     textColor: string; // Tailwind text class for badge
     borderColor: string; // Tailwind border class for badge
-    columnBg: string; // Tailwind bg class for kanban column header
     dotColor: string; // Tailwind color for the dot indicator
 }

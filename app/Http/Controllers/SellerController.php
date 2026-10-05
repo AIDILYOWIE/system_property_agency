@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SellerPropertyRequest;
 use App\Http\Requests\SellerRequest;
+use App\Http\Resources\PropertyResource;
+use App\Models\Property;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Seller;
@@ -56,6 +58,31 @@ class SellerController extends Controller
             'seller'     => $seller,
             'properties' => $seller->properties,
         ]);
+    }
+
+    /**
+     * Return properties that have no seller assigned yet (seller_id IS NULL).
+     * Used by the "Assign Property" picker modal in Seller Detail page.
+     */
+    public function unassignedProperties()
+    {
+        $properties = $this->sellerService->getUnassignedProperties();
+
+        return response()->json(
+            $properties->map(fn($p) => (new PropertyResource($p))->resolve())
+        );
+    }
+
+    /**
+     * Assign an existing (unassigned) property to a seller.
+     * Sets seller_id and seller_pipeline_status = 'incoming'.
+     */
+    public function assignProperty(Seller $seller, Property $property)
+    {
+        $this->sellerService->assignProperty($seller, $property);
+
+        return redirect()->route('seller.show', $seller->id)
+            ->with('success', 'Properti berhasil ditautkan ke seller.');
     }
 
     /**

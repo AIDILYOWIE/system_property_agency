@@ -71,4 +71,38 @@ class SellerService
             'currency'                => 'IDR',
         ]);
     }
+
+    /**
+     * Return properties that have no seller assigned yet (seller_id IS NULL).
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getUnassignedProperties()
+    {
+        return Property::whereNull('seller_id')
+            ->with('mainImage')
+            ->withCount('inquiries')
+            ->latest()
+            ->get();
+    }
+
+    /**
+     * Assign an existing (unassigned) property to a seller.
+     * Sets seller_id and seller_pipeline_status = 'incoming'.
+     *
+     * @param Seller $seller
+     * @param Property $property
+     * @return Property
+     */
+    public function assignProperty(Seller $seller, Property $property): Property
+    {
+        abort_if($property->seller_id !== null, 422, 'Properti ini sudah memiliki seller.');
+
+        $property->update([
+            'seller_id'               => $seller->id,
+            'seller_pipeline_status'  => 'incoming',
+        ]);
+
+        return $property;
+    }
 }

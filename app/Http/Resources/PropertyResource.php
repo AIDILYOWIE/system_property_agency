@@ -24,6 +24,13 @@ class PropertyResource extends JsonResource
             'commercial' => 'Commercial'
         ];
 
+        $missingRequirements = [];
+        if (! $this->mainImage) $missingRequirements[] = "Foto Properti";
+        if (! $this->price || $this->price <= 0) $missingRequirements[] = "Harga";
+        if (! $this->marketing_start_date) $missingRequirements[] = "Marketing Start Date";
+        if (! $this->land_size_sqm || $this->land_size_sqm <= 0) $missingRequirements[] = "Luas Tanah";
+        if (! $this->building_size_sqm && $this->category !== 'strategic_land') $missingRequirements[] = "Luas Bangunan";
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -37,6 +44,7 @@ class PropertyResource extends JsonResource
             'leads' => $this->inquiries_count ?? 0,
             'days_on_market' => $this->days_on_market,
             'thumbnail' => $this->cloneValueOrUrl($this->mainImage), // Safe ref to helper logic inline
+            'missing_publish_requirements' => $missingRequirements,
         ];
     }
 

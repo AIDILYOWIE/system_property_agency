@@ -19,7 +19,7 @@ class BuyerPipelineController extends Controller
     {
         $leads = $this->pipelineService->getLeads();
 
-        return Inertia::render('BuyerPipeline/BuyerPipeline', [
+        return Inertia::render('Pipelines/BuyerPipeline/BuyerPipeline', [
             'leads' => $leads
         ]);
     }

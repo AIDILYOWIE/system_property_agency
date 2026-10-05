@@ -19,7 +19,7 @@ return new class extends Migration
                 ->nullable()
                 ->after('status');
 
-            $table->string('seller_rejection_reason')->nullable()->after('seller_pipeline_status');
+            $table->string('seller_reason')->nullable()->after('seller_pipeline_status');
 
             // Make price and location_area nullable for pra-listing stage
             $table->decimal('price', 15, 2)->nullable()->change();
@@ -34,7 +34,7 @@ return new class extends Migration
     {
         Schema::table('properties', function (Blueprint $table) {
             $table->dropForeign(['seller_id']);
-            $table->dropColumn(['seller_id', 'seller_pipeline_status', 'seller_rejection_reason']);
+            $table->dropColumn(['seller_id', 'seller_pipeline_status', 'seller_reason']);
 
             $table->decimal('price', 15, 2)->nullable(false)->change();
             $table->string('location_area')->nullable(false)->change();

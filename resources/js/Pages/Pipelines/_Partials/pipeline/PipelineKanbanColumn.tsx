@@ -1,44 +1,43 @@
 import { memo, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Users } from "lucide-react";
-import { STAGE_CONFIG } from "./pipelineConstants";
-import { type PipelineLead, type BuyerPipelineStatus } from "./pipelineTypes";
-import PipelineLeadCard from "./PipelineLeadCard";
+import { type PipelineItem, type PipelineStatus, type StageConfig } from "./pipelineTypes";
+import PipelineCard from "./PipelineCard";
 
-// ─── Props ──────────────────────────────────────────────────────────────────────
-
-interface PipelineKanbanColumnProps {
-    stage: BuyerPipelineStatus;
-    leads: PipelineLead[];
-    onStatusChange: (leadId: string, newStatus: BuyerPipelineStatus) => void;
-    /** The lead currently being dragged, passed by the board */
-    draggingLead: PipelineLead | null;
-    onDragStart: (e: React.DragEvent, leadId: string) => void;
+interface PipelineKanbanColumnProps<T extends PipelineItem> {
+    stage: PipelineStatus;
+    stageConfig: StageConfig;
+    items: T[];
+    onStatusChange: (itemId: string, newStatus: PipelineStatus) => void;
+    draggingItem: T | null;
+    onDragStart: (e: React.DragEvent, itemId: string) => void;
     onDragEnd: (e: React.DragEvent) => void;
-    onDropLead: (targetStage: BuyerPipelineStatus) => void;
+    onDropLead: (targetStage: PipelineStatus) => void;
+    dndType: string;
+    renderCard: (item: T, isDragging: boolean, variant: "compact" | "full", isShadow: boolean) => React.ReactNode;
 }
 
-// ─── Component (memoized) ────────────────────────────────────────────────────────
-
-const PipelineKanbanColumn = memo(function PipelineKanbanColumn({
+function PipelineKanbanColumnComponent<T extends PipelineItem>({
     stage,
-    leads,
+    stageConfig: cfg,
+    items,
     onStatusChange,
-    draggingLead,
+    draggingItem,
     onDragStart,
     onDragEnd,
     onDropLead,
-}: PipelineKanbanColumnProps) {
-    const cfg = STAGE_CONFIG[stage];
+    dndType,
+    renderCard,
+}: PipelineKanbanColumnProps<T>) {
     const [isDragOver, setIsDragOver] = useState(false);
 
-    // Only activate drop zone when a card from another column is dragged over
     const isDraggingFromOtherColumn =
-        draggingLead !== null &&
-        !leads.some((l) => l.id === draggingLead.id);
+        draggingItem !== null &&
+        !items.some((i) => i.id === draggingItem.id);
 
     const handleDragOver = useCallback(
         (e: React.DragEvent) => {
+            // Context sandboxing checking (if item holds correct dndType internally or fallback to general drag state)
             if (!isDraggingFromOtherColumn) return;
             e.preventDefault();
             e.dataTransfer.dropEffect = "move";
@@ -48,7 +47,6 @@ const PipelineKanbanColumn = memo(function PipelineKanbanColumn({
     );
 
     const handleDragLeave = useCallback((e: React.DragEvent) => {
-        // Only clear if leaving the column container itself (not a child)
         if (!e.currentTarget.contains(e.relatedTarget as Node)) {
             setIsDragOver(false);
         }
@@ -65,11 +63,9 @@ const PipelineKanbanColumn = memo(function PipelineKanbanColumn({
 
     return (
         <div className="flex flex-col min-w-0 h-full">
-            {/* Column header */}
             <div
                 className={cn(
                     "flex items-center justify-between px-3 py-2.5 rounded-t-xl border border-b-0 transition-colors duration-150",
-                    `${cfg.columnBg} border-border-base`
                 )}
             >
                 <div className="flex items-center gap-2">
@@ -86,11 +82,10 @@ const PipelineKanbanColumn = memo(function PipelineKanbanColumn({
                         cfg.borderColor
                     )}
                 >
-                    {leads.length}
+                    {items.length}
                 </span>
             </div>
 
-            {/* Drop zone + cards container */}
             <div
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -100,39 +95,42 @@ const PipelineKanbanColumn = memo(function PipelineKanbanColumn({
                     "bg-canvas/50 border-border-base"
                 )}
             >
-
-                {/* Shadow skeleton card shown when dragging over from another column */}
-                {isDragOver && draggingLead && isDraggingFromOtherColumn && (
-                    <PipelineLeadCard
+                {isDragOver && draggingItem && isDraggingFromOtherColumn && (
+                    <PipelineCard
                         key="shadow"
-                        lead={draggingLead}
+                        item={draggingItem}
                         onStatusChange={onStatusChange}
                         variant="compact"
                         isShadow={true}
+                        dndType={dndType}
+                        renderCard={renderCard}
                     />
                 )}
 
-                {leads.length === 0 && !isDragOver ? (
+                {items.length === 0 && !isDragOver ? (
                     <div className="flex flex-col items-center justify-center py-10 text-center">
                         <Users size={20} className="text-border-base mb-2" />
-                        <p className="text-[11px] text-text-muted/60">No leads</p>
+                        <p className="text-[11px] text-text-muted/60">No items</p>
                     </div>
                 ) : (
-                    leads.map((lead) => (
-                        <PipelineLeadCard
-                            key={lead.id}
-                            lead={lead}
+                    items.map((item) => (
+                        <PipelineCard
+                            key={item.id}
+                            item={item}
                             onStatusChange={onStatusChange}
                             variant="compact"
-                            isDragging={draggingLead?.id === lead.id}
+                            isDragging={draggingItem?.id === item.id}
                             onDragStart={onDragStart}
                             onDragEnd={onDragEnd}
+                            dndType={dndType}
+                            renderCard={renderCard}
                         />
                     ))
                 )}
             </div>
         </div>
     );
-});
+}
 
+export const PipelineKanbanColumn = memo(PipelineKanbanColumnComponent) as typeof PipelineKanbanColumnComponent;
 export default PipelineKanbanColumn;

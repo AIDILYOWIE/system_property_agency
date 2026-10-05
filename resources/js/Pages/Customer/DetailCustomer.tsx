@@ -32,7 +32,7 @@ import {
     FileText,
 } from "lucide-react";
 import { type PipelineStatus, type CustomerType } from "./_Partials/CustomerColumn";
-import PipelineTracker from "../BuyerPipeline/_Partials/pipeline/PipelineTracker";
+import PipelineTracker from "../Pipelines/_Partials/pipeline/PipelineTracker";
 import PropertyInterestCard, { type PropertyInterestItem } from "@/Components/PropertyInterestCard";
 import PropertyPickerModal from "./_Partials/PropertyPickerModal";
 import WAPopupModal from "./_Partials/WAPopupModal";

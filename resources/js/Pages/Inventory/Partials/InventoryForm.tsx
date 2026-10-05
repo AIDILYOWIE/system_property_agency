@@ -540,7 +540,6 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
                                                 setData(prev => ({
                                                     ...prev,
                                                     category: value as Category,
-                                                    listing_type: "sale",
                                                     bedrooms: "",
                                                     bathrooms: "",
                                                     building_size_sqm: ""
@@ -576,7 +575,6 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
                                                 <button
                                                     key={type}
                                                     type="button"
-                                                    disabled={isLand && type === "rent"}
                                                     onClick={() =>
                                                         setData("listing_type", type)
                                                     }
@@ -584,8 +582,7 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
                                                         "flex-1 py-2 text-sm font-medium rounded-lg transition-all",
                                                         data.listing_type === type
                                                             ? "bg-white shadow-sm text-primary"
-                                                            : "text-text-muted hover:text-text-primary",
-                                                        (isLand && type === "rent") && "opacity-50 cursor-not-allowed"
+                                                            : "text-text-muted hover:text-text-primary"
                                                     )}
                                                 >
                                                     {type === "sale"

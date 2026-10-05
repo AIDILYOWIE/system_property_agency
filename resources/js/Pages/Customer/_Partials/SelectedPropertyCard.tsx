@@ -42,7 +42,7 @@ export default function SelectedPropertyCard({
                 </p>
                 <p className="text-[11px] text-text-muted mt-0.5 flex items-center gap-1">
                     <MapPin size={10} className="flex-shrink-0" />
-                    {property.location}
+                    {property.full_address}
                 </p>
                 <p className="text-[13px] font-bold text-text-primary">
                     {formatPrice(property.price, property.currency)}

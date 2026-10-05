@@ -6,6 +6,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\BuyerPipelineController;
+use App\Http\Controllers\PropertyPipelineController;
+use App\Http\Controllers\PipelineController;
 use App\Http\Controllers\DossierController;
 use App\Http\Controllers\PublicLeadController;
 use App\Http\Controllers\SellerController;
@@ -54,8 +56,13 @@ Route::prefix('/customer')->group(function () {
 });
 
 
-Route::get('/buyer-pipeline', [BuyerPipelineController::class, 'index'])->name('buyer-pipeline');
+Route::get('/pipelines', [PipelineController::class, 'index'])->name('pipelines.index');
+
 Route::patch('/buyer-pipeline/{id}/status', [BuyerPipelineController::class, 'updateStatus'])->name('buyer-pipeline.status');
+
+// Property Pipeline (Seller Supply — US 4.4)
+Route::patch('/property-pipeline/{id}/status', [PropertyPipelineController::class, 'updateStatus'])->name('property-pipeline.status');
+Route::patch('/property-pipeline/{id}/surveyed', [PropertyPipelineController::class, 'advanceToSurveyed'])->name('property-pipeline.surveyed');
 
 // Seller Pipeline
 Route::prefix('/seller')->group(function () {
@@ -64,6 +71,9 @@ Route::prefix('/seller')->group(function () {
     Route::post('/', [SellerController::class, 'store'])->name('seller.store');
     Route::get('/{seller}', [SellerController::class, 'show'])->name('seller.show');
     Route::post('/{seller}/property', [SellerController::class, 'storeProperty'])->name('seller.property.store');
+    // Picker modal: fetch unassigned draft properties & assign one to this seller
+    Route::get('/properties/unassigned', [SellerController::class, 'unassignedProperties'])->name('seller.properties.unassigned');
+    Route::patch('/{seller}/property/{property}/assign', [SellerController::class, 'assignProperty'])->name('seller.property.assign');
 });
 
 Route::prefix('/settings')->group(function () {

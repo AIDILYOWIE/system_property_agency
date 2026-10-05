@@ -13,6 +13,7 @@ import {
     DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu"
 import { Button } from "@/Components/ui/button"
+import { toast } from "@/Components/ui/toast"
 
 export type PropertyStatus = "available" | "sold" | "rented" | "draft"
 
@@ -28,6 +29,7 @@ export type PropertyData = {
     leads: number
     days_on_market: number
     thumbnail: string
+    missing_publish_requirements: string[]
 }
 
 import { formatCurrency } from "@/lib/format"
@@ -197,8 +199,19 @@ export const columns = columnHelper.columns([
                                 className="cursor-pointer"
                                 onClick={(e) => {
                                     e.preventDefault();
+
+                                    const prop = info.row.original;
+                                    if (isDraft && prop.missing_publish_requirements?.length > 0) {
+                                        toast.add({
+                                            title: "Tidak Dapat Mempublikasikan",
+                                            description: `Harap lengkapi data wajib berikut: ${prop.missing_publish_requirements.join(", ")}.`,
+                                            type: 'error'
+                                        });
+                                        return;
+                                    }
+
                                     import("@inertiajs/react").then(({ router }) => {
-                                        router.patch(`/inventory/${info.row.original.id}/visibility`, {
+                                        router.patch(`/inventory/${prop.id}/visibility`, {
                                             visibility: isDraft ? 'published' : 'draft'
                                         }, { preserveScroll: true });
                                     });
