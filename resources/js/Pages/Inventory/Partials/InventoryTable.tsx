@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { router } from "@inertiajs/react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { DataTable } from "@/Components/ui/data-table";
@@ -62,16 +62,24 @@ export default function InventoryTable({ properties, initialFilters }: Inventory
         applyFilters(nextFilters);
     };
 
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const nextFilters = { ...filters, search: e.target.value };
-        setFilters(nextFilters);
-        // Debounce can be implemented here if desired; for now, relying on enter key or standard behavior.
-    };
+    const firstRender = useRef(true);
 
-    const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            applyFilters(filters);
+    // Debounce effect for search
+    useEffect(() => {
+        if (firstRender.current) {
+            firstRender.current = false;
+            return;
         }
+
+        const handler = setTimeout(() => {
+            applyFilters(filters);
+        }, 500); // 500ms debounce
+
+        return () => clearTimeout(handler);
+    }, [filters.search]);
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFilters((prev) => ({ ...prev, search: e.target.value }));
     };
 
     // Count active filters for badge indicator
@@ -92,10 +100,9 @@ export default function InventoryTable({ properties, initialFilters }: Inventory
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                     <Input
                         type="text"
-                        placeholder="Search properties (Press Enter)..."
+                        placeholder="Search properties..."
                         value={filters.search || ""}
                         onChange={handleSearch}
-                        onKeyDown={handleSearchSubmit}
                         className="w-full !bg-white border border-border-base rounded-lg py-3 pl-10 pr-4 text-sm focus:border-border-base transition-colors text-text-primary h-auto"
                     />
                 </div>
