@@ -212,7 +212,7 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                         </button>
                         <button type="button" onClick={copySecretLink} className="btn btn-primary">
                             <LinkIcon className="w-4 h-4 stroke-[2.5]" />
-                            Salin Secret Link
+                            Secret Link
                         </button>
                     </div>
                 }
