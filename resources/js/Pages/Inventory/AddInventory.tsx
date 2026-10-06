@@ -15,6 +15,7 @@ import {
     Check,
     UploadCloud,
     PlusCircle,
+    Download,
 } from "lucide-react";
 import InventoryForm from "./Partials/InventoryForm";
 
@@ -33,6 +34,7 @@ export default function AddInventory({ facilitiesMaster, seller_id }: { faciliti
                         formNoValidate
                         className="btn btn-secondary"
                     >
+                        <Download size={15} />
                         Save as Draft
                     </button>
                     <button

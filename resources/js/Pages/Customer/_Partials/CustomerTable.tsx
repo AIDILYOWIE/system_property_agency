@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { router } from "@inertiajs/react";
 import { Search, SlidersHorizontal, UserPlus } from "lucide-react";
 import { DataTable } from "@/Components/ui/data-table";
@@ -30,12 +30,20 @@ type FilterState = {
 // ─── CustomerTable Component ────────────────────────────────────────────────────
 
 export default function CustomerTable({ data }: { data: CustomerData[] }) {
+    const [searchInput, setSearchInput] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [filters, setFilters] = useState<FilterState>({
         customerType: "All Types",
         pipelineStatus: "All Statuses",
         source: "All Sources",
     });
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setSearchQuery(searchInput);
+        }, 300); // 300ms debounce
+        return () => clearTimeout(handler);
+    }, [searchInput]);
 
     // ── Filter handlers ────────────────────────────────────────────────────────
     const setCustomerType = (val: string | null) =>
@@ -86,8 +94,8 @@ export default function CustomerTable({ data }: { data: CustomerData[] }) {
                     <Input
                         type="text"
                         placeholder="Search customers..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
                         className="w-full !bg-white border border-border-base rounded-lg py-3 pl-10 pr-4 text-sm focus:border-border-base transition-colors text-text-primary h-auto"
                     />
                 </div>
