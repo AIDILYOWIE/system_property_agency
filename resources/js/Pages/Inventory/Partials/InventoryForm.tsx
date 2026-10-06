@@ -370,8 +370,8 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
                                                 </SelectContent>
                                             </Select>
                                             <Input
-                                                value={data.price}
-                                                onChange={(e) => setData("price", e.target.value)}
+                                                value={data.price ? new Intl.NumberFormat('id-ID').format(Number(data.price)) : ""}
+                                                onChange={(e) => setData("price", e.target.value.replace(/\D/g, ""))}
                                                 className="!bg-canvas !rounded-lg !rounded-tl-none !rounded-bl-none "
                                                 placeholder="Enter your price"
                                             />
