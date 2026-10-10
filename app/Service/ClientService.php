@@ -201,19 +201,26 @@ class ClientService
     }
     public function getAvailableProperties()
     {
-        return Property::with('mainImage')->where('status', 'available')->get()->map(function ($prop) {
-            return [
-                'id' => $prop->id,
-                'title' => $prop->title,
-                'full_address' => $prop->full_address,
-                'category' => $prop->category ?? 'Property',
-                'price' => (float)$prop->price,
-                'currency' => $prop->currency,
-                'listingType' => $prop->listing_type === 'sale' ? 'For Sale' : 'For Rent',
-                'status' => $prop->status,
-                'thumbnail' => $prop->mainImage ? Storage::url($prop->mainImage->image_path) : null
-            ];
-        });
+        return Property::with('mainImage')
+            ->where('status', 'available')
+            ->where(function ($query) {
+                $query->where('seller_pipeline_status', 'listed')
+                    ->orWhereNull('seller_pipeline_status');
+            })
+            ->get()
+            ->map(function ($prop) {
+                return [
+                    'id' => $prop->id,
+                    'title' => $prop->title,
+                    'full_address' => $prop->full_address,
+                    'category' => $prop->category ?? 'Property',
+                    'price' => (float)$prop->price,
+                    'currency' => $prop->currency,
+                    'listingType' => $prop->listing_type === 'sale' ? 'For Sale' : 'For Rent',
+                    'status' => $prop->status,
+                    'thumbnail' => $prop->mainImage ? Storage::url($prop->mainImage->image_path) : null
+                ];
+            });
     }
 
     public function updateCustomerNotes($id, $notes)
