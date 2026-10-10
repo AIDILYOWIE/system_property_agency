@@ -47,6 +47,11 @@ class StorePropertyRequest extends FormRequest
             'facilities' => 'nullable|array',
             'facilities.*' => 'exists:facilities,id',
             'seller_id' => 'nullable|exists:sellers,id',
+
+            // ── Rental-specific fields (only required when listing_type = rent) ──
+            // rent_period determines the unit for min_lease_duration
+            'rent_period'        => ['required_if:listing_type,rent', 'nullable', 'in:monthly,yearly'],
+            'min_lease_duration' => ['required_if:listing_type,rent', 'nullable', 'integer', 'min:1', 'max:120'],
         ];
     }
 }

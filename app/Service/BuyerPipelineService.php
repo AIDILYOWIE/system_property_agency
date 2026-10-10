@@ -4,12 +4,15 @@ namespace App\Service;
 
 use App\Models\Inquiry;
 use App\Models\CustomerActivity;
+use App\Service\PropertyService;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Validation\ValidationException;
 
 class BuyerPipelineService
 {
+    public function __construct(private PropertyService $propertyService) {}
+
     /**
      * Get all active pipeline leads formatted for the Kanban board.
      */
@@ -32,7 +35,8 @@ class BuyerPipelineService
                 'fullAddress' => $prop->full_address ?? '',
                 'propertyPrice' => (float) $prop->price,
                 'propertyCurrency' => $prop->currency,
-                'status' => $inq->pipeline_status,
+                'listingType'      => $prop->listing_type,
+                'status'           => $inq->pipeline_status,
                 'customerType' => $prop->listing_type === 'sale' ? 'buyer' : 'renter',
                 'source' => ucwords(str_replace('-', ' ', $cust->source ?? 'Manual')),
                 'createdAt' => $inq->created_at->toIso8601String(),
@@ -73,11 +77,24 @@ class BuyerPipelineService
                 if ($newStatus === 'won' && $inquiry->property) {
                     $property = $inquiry->property;
                     if ($property->status === 'available') {
-                        $propertyToStatus = $property->listing_type === 'sale' ? 'sold' : 'rented';
-                        $property->update([
-                            'status' => $propertyToStatus,
-                            'sold_at' => now(),
-                        ]);
+                        if ($property->listing_type === 'rent') {
+                            // Use service so lease_end_date is calculated & DOM is frozen properly
+                            $this->propertyService->markAsRented($property->load('rentalDetail'), now()->toDateString());
+                        } else {
+                            $property->update([
+                                'status'  => 'sold',
+                                'sold_at' => now(),
+                            ]);
+                        }
+
+                        // PRD US 1.6 Rule 1: auto-LOST rival inquiries for same property
+                        Inquiry::where('property_id', $property->id)
+                            ->where('id', '!=', $inquiry->id)
+                            ->whereNotIn('pipeline_status', ['won', 'lost'])
+                            ->update([
+                                'pipeline_status' => 'lost',
+                                'status_reason'   => 'Properti telah ' . ($property->listing_type === 'rent' ? 'tersewa' : 'terjual') . ' kepada penyewa/pembeli lain.',
+                            ]);
                     }
                 }
 

@@ -139,4 +139,22 @@ class PropertyController extends Controller
             return redirect()->back()->with('Terjadi Kesalahan', 'Gagal mengubah status visibilitas properti.');
         }
     }
+    /**
+     * Re-list a rented property back to Available/Draft.
+     * US 1.7 Re-list Rented Property
+     */
+    public function relist(string $id)
+    {
+        try {
+            $property = $this->propertyService->getPropertyDetails($id);
+            $this->propertyService->reListProperty($property);
+
+            return redirect()
+                ->route('inventory.detail', $id)
+                ->with('success', 'Properti berhasil di-relist dan kembali ke status Available (Draft).');
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->back()->with('error', 'Gagal me-relist properti: ' . $e->getMessage());
+        }
+    }
 }

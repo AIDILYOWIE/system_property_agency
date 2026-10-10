@@ -5,6 +5,8 @@ import Chart from '@/Components/Chart';
 import InventoryStatusChart from '@/Components/InventoryStatusChart';
 import PropertyListingCard from '@/Components/PropertyListingCard';
 import type { PropertyListingItem } from '@/Components/PropertyListingCard';
+import LeaseExpiringCard from '@/Components/LeaseExpiringCard';
+import type { LeaseExpiringItem } from '@/Components/LeaseExpiringCard';
 import GroupColumnChart from '@/Components/charts/GroupColumnChart';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -102,13 +104,17 @@ KPICard.displayName = 'KPICard';
 
 // ─── Dashboard Page ───────────────────────────────────────────────────────────
 
-export default function Dashboard() {
-    // TODO: replace with real props from Inertia controller
-    const metrics = {
-        moneyOnTable: 40,
-        recurringRevenue: 3,
-        conversionSnapshot: "68%",
-        inventoryHealth: 2,
+interface DashboardMetrics {
+    leaseExpiringSoon: number;
+    expiringLeasesList: LeaseExpiringItem[];
+}
+
+export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
+    const kpiMetrics = {
+        moneyOnTable: 40,           // TODO: derive from inquiry pipeline
+        leaseExpiringSoon: metrics?.leaseExpiringSoon ?? 0,
+        conversionSnapshot: "68%",  // TODO: derive from won/lost ratio
+        inventoryHealth: 2,         // TODO: derive from stale property count
     };
 
 
@@ -144,7 +150,7 @@ export default function Dashboard() {
             pageTitle="Dashboard"
             pageDescription="Actionable metrics for Chris Property Signature"
             badgeOverrides={{
-                'crm-buyers': metrics.moneyOnTable,
+                'crm-buyers': kpiMetrics.moneyOnTable,
             }}
         >
 
@@ -154,7 +160,7 @@ export default function Dashboard() {
                 {/* 1. Money on the Table (Primary Variant) */}
                 <KPICard
                     title="Money on the Table"
-                    value={metrics.moneyOnTable}
+                    value={kpiMetrics.moneyOnTable}
                     description="Leads currently in Viewing or Negotiation stage"
                     icon={TrendingUp}
                     designVariant="primary"
@@ -162,23 +168,23 @@ export default function Dashboard() {
                     actionHref="/pipelines"
                 />
 
-                {/* 2. Recurring Revenue Alert */}
+                {/* 2. Lease Expiring Soon Alert */}
                 <KPICard
-                    title="Recurring Revenue"
-                    value={metrics.recurringRevenue}
-                    description="Open Slot listings expiring within 7 days"
+                    title="Lease Expiring Soon"
+                    value={kpiMetrics.leaseExpiringSoon}
+                    description="Kontrak sewa properti akan berakhir dalam <= 45 hari"
                     icon={Clock}
                     iconBg="bg-warning/10"
                     iconColor="text-warning"
                     designVariant="secondary"
-                    action="View Expiring Listings"
-                    actionHref="/admin/properties?filter=expiring"
+                    action="View Expiring Leases"
+                    actionHref="/inventory?category=expiring_lease"
                 />
 
                 {/* 3. Conversion Snapshot */}
                 <KPICard
                     title="Conversion Snapshot"
-                    value={metrics.conversionSnapshot}
+                    value={kpiMetrics.conversionSnapshot}
                     description="Leads yang berakhir WON vs LOST 30 hari terakhir"
                     icon={PieChart}
                     iconBg="bg-success/10"
@@ -191,7 +197,7 @@ export default function Dashboard() {
                 {/* 4. Inventory Health */}
                 <KPICard
                     title="Inventory Health"
-                    value={metrics.inventoryHealth}
+                    value={kpiMetrics.inventoryHealth}
                     description="Listings on market >60 days with zero leads (Stale)"
                     icon={AlertTriangle}
                     iconBg="bg-danger/10"
@@ -209,14 +215,22 @@ export default function Dashboard() {
                 <Chart data={openSlotPurchase} title="Property Lead" />
             </div>
 
-            {/* ── Inventory Status + New Listings ──────────────────── */}
+            {/* ── Inventory Status + New Listings + Lease Expiring ─── */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-                <InventoryStatusChart className='col-span-1' data={inventoryData} />
                 <PropertyListingCard
-                    className='col-span-2'
+                    className='col-span-1 md:col-span-2 xl:col-span-2'
                     listings={newListings}
                     viewAllHref="/admin/properties"
                 />
+                <LeaseExpiringCard
+                    className='col-span-1 md:col-span-2 xl:col-span-2'
+                    leases={metrics?.expiringLeasesList || []}
+                    viewAllHref="/inventory?category=expiring_lease"
+                />
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6' >
+                <InventoryStatusChart className='col-span-1' data={inventoryData} />
+                
             </div>
 
         </DashboardLayout>

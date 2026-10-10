@@ -51,6 +51,10 @@ class UpdatePropertyRequest extends FormRequest
             'social_media_2' => 'nullable|url|max:255',
             'facilities' => 'nullable|array',
             'facilities.*' => 'exists:facilities,id',
+
+            // ── Rental-specific fields (only required when listing_type = rent) ──
+            'rent_period'        => ['required_if:listing_type,rent', 'nullable', 'in:monthly,yearly'],
+            'min_lease_duration' => ['required_if:listing_type,rent', 'nullable', 'integer', 'min:1', 'max:120'],
         ];
     }
 }

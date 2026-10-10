@@ -18,6 +18,7 @@ import {
     UploadCloud,
     PlusCircle,
     X,
+    Clock,
 } from "lucide-react";
 import { Input } from "@/Components/ui/input";
 import { FieldLabel, FieldDescription, Field, FieldError } from "@/Components/ui/field";
@@ -85,6 +86,8 @@ interface FormState {
     social_media_2: string;
     images?: string[];
     facilities?: number[];
+    rent_period?: "monthly" | "yearly";
+    min_lease_duration?: string;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -142,6 +145,8 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
         social_media_1: initialData?.social_media_1 ?? "",
         social_media_2: initialData?.social_media_2 ?? "",
         facilities: initialData?.facilities ?? [] as number[],
+        rent_period: initialData?.rent_period ?? "monthly",
+        min_lease_duration: initialData?.min_lease_duration ?? "",
         main_thumbnail: null as File | null,
         gallery: [] as File[],
         deleted_images: [] as string[],
@@ -596,6 +601,60 @@ export default function InventoryForm({ initialData, isEdit, propertyId, facilit
 
                             </div>
                         </SectionCard >
+
+                        {/* Rental Terms (Appears only if listing_type === rent) */}
+                        {data.listing_type === 'rent' && (
+                            <SectionCard icon={<Clock size={16} />} title="Rental Terms">
+                                <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                                    {/* Rent Period */}
+                                    <Field>
+                                        <FieldLabel required>Rent Period</FieldLabel>
+                                        <div className="flex bg-canvas border border-border-base p-1 rounded-lg">
+                                            {(["monthly", "yearly"] as const).map((period) => (
+                                                <button
+                                                    key={period}
+                                                    type="button"
+                                                    onClick={() => setData("rent_period", period)}
+                                                    className={cn(
+                                                        "flex-1 py-1.5 text-sm font-medium rounded-lg transition-all",
+                                                        data.rent_period === period
+                                                            ? "bg-white shadow-sm text-primary"
+                                                            : "text-text-muted hover:text-text-primary"
+                                                    )}
+                                                >
+                                                    {period === "monthly" ? "Per Bulan" : "Per Tahun"}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </Field>
+
+                                    {/* Minimum Lease Duration */}
+                                    <Field data-invalid={!!errors.min_lease_duration}>
+                                        <FieldLabel required>Minimum Lease Duration</FieldLabel>
+                                        <InputGroup className="!focus:ring-0">
+                                            <Input
+                                                value={data.min_lease_duration}
+                                                onChange={(e) => setData("min_lease_duration", e.target.value.replace(/\D/g, ""))}
+                                                className="!bg-canvas border-none"
+                                                placeholder={`Contoh: 6`}
+                                            />
+                                            <InputGroupAddon align={"inline-end"} className="bg-canvas/50">
+                                                <InputGroupText className="text-sm font-medium text-text-primary">
+                                                    {data.rent_period === 'monthly' ? 'Bulan' : 'Tahun'}
+                                                </InputGroupText>
+                                            </InputGroupAddon>
+                                        </InputGroup>
+                                        {errors.min_lease_duration ? (
+                                            <FieldError>{errors.min_lease_duration}</FieldError>
+                                        ) : (
+                                            <FieldDescription className="text-[11px] text-text-muted mt-1.5 leading-snug">
+                                                Durasi digunakan otomatis untuk menghitung <b>Lease End Date</b> sistem saat deal (WON) divalidasi.
+                                            </FieldDescription>
+                                        )}
+                                    </Field>
+                                </div>
+                            </SectionCard>
+                        )}
 
                         {/* Media Upload */}
                         < SectionCard icon={< ImageIcon size={16} />} title="Media" >

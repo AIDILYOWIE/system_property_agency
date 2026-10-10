@@ -25,7 +25,47 @@ Route::get('/', function () {
 });
 
 Route::get('/', function () {
-    return Inertia::render('Dashboard');
+    // Count rental properties whose lease ends within 45 days (inclusive)
+    $leaseExpiringSoon = \App\Models\PropertyRental::query()
+        ->whereNotNull('lease_end_date')
+        ->whereDate('lease_end_date', '>=', now()->toDateString())
+        ->whereDate('lease_end_date', '<=', now()->addDays(45)->toDateString())
+        ->count();
+
+    $expiringLeases = \App\Models\Property::query()
+        ->where('status', 'rented')
+        ->whereHas('rentalDetail', function ($query) {
+            $query->whereNotNull('lease_end_date')
+                ->whereDate('lease_end_date', '>=', now()->toDateString())
+                ->whereDate('lease_end_date', '<=', now()->addDays(45)->toDateString());
+        })
+        ->with(['rentalDetail', 'seller'])
+        ->take(5)
+        ->get()
+        ->map(function ($property) {
+            return [
+                'id' => $property->id,
+                'name' => $property->title,
+                'type' => match ($property->category) {
+                    'villas' => 'villa',
+                    'premium_houses' => 'house',
+                    'commercial' => 'commercial',
+                    'strategic_land' => 'land',
+                    default => 'house'
+                },
+                'sellerName' => $property->seller->name ?? 'Unknown Seller',
+                'sellerPhone' => $property->seller->phone ?? null,
+                'leaseEndDate' => $property->rentalDetail->lease_end_date ? $property->rentalDetail->lease_end_date->format('j M Y') : null,
+                'daysRemaining' => max(0, $property->rentalDetail->days_until_lease_ends),
+            ];
+        });
+
+    return Inertia::render('Dashboard', [
+        'metrics' => [
+            'leaseExpiringSoon' => $leaseExpiringSoon,
+            'expiringLeasesList' => $expiringLeases,
+        ],
+    ]);
 })->name('dashboard');
 
 Route::prefix('/inventory')->group(function () {
@@ -42,6 +82,7 @@ Route::prefix('/inventory')->group(function () {
 
     Route::get('/edit/{id}', [PropertyController::class, 'edit'])->name('inventory.edit');
     Route::patch('/{id}', [PropertyController::class, 'update'])->name('inventory.update');
+    Route::patch('/{id}/relist', [PropertyController::class, 'relist'])->name('inventory.relist');
 });
 
 Route::prefix('/customer')->group(function () {

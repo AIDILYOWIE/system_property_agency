@@ -3,12 +3,15 @@
 namespace App\Service;
 
 use App\Models\Property;
+use App\Models\PropertyRental;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class PropertyService
 {
@@ -28,12 +31,12 @@ class PropertyService
      */
     public function getAllProperties(array $params)
     {
-        $query = Property::query()->with(['mainImage']);
+        $query = Property::query()->with(['mainImage', 'rentalDetail']);
 
         $this->applySearchAndFilters($query, $params);
         $this->applySorting($query, $params);
 
-        return $query->paginate(10);
+        return $query->withCount('inquiries')->paginate(10);
     }
 
     /**
@@ -105,7 +108,7 @@ class PropertyService
      */
     public function getPropertyDetails($id): Property
     {
-        return Property::with(['images', 'inquiries.customer', 'facilities'])->withCount('inquiries')->findOrFail($id);
+        return Property::with(['images', 'inquiries.customer', 'facilities', 'rentalDetail'])->withCount('inquiries')->findOrFail($id);
     }
 
     /**
@@ -175,6 +178,14 @@ class PropertyService
             }
 
             DB::commit();
+
+            // Create PropertyRental detail if listing_type is 'rent'
+            if (($data['listing_type'] ?? '') === 'rent' && !empty($data['rent_period'])) {
+                $property->rentalDetail()->create([
+                    'rent_period'        => $data['rent_period'],
+                    'min_lease_duration' => (int) ($data['min_lease_duration'] ?? 1),
+                ]);
+            }
 
             return $property;
         } catch (Exception $e) {
@@ -273,6 +284,21 @@ class PropertyService
 
             DB::commit();
 
+            // Sync PropertyRental detail based on listing_type
+            $effectiveListingType = $data['listing_type'] ?? $property->listing_type;
+            if ($effectiveListingType === 'rent' && !empty($data['rent_period'])) {
+                $property->rentalDetail()->updateOrCreate(
+                    ['property_id' => $property->id],
+                    [
+                        'rent_period'        => $data['rent_period'],
+                        'min_lease_duration' => (int) ($data['min_lease_duration'] ?? 1),
+                    ]
+                );
+            } elseif ($effectiveListingType === 'sale') {
+                // If switched from rent to sale, remove any existing rental detail
+                $property->rentalDetail()->delete();
+            }
+
             return $property;
         } catch (Exception $e) {
             DB::rollBack();
@@ -318,5 +344,85 @@ class PropertyService
             'property' => $property,
             'active_leads_count' => $activeLeadsCount
         ];
+    }
+    /**
+     * Mark a property as Rented following a WON deal in Buyer Pipeline.
+     * Calculates and persists lease_end_date and rented_at on PropertyRental.
+     * Freezes DOM calculation via rented_at.
+     * US 1.6 Rule 5 (Lease End Date Calculation for Rent)
+     *
+     * @param Property $property The property being rented.
+     * @param string   $wonDate  ISO date string of when the WON deal was confirmed.
+     * @return Property
+     */
+    public function markAsRented(Property $property, string $wonDate): Property
+    {
+        if ($property->listing_type !== 'rent') {
+            throw new Exception('markAsRented called on a non-rent property.');
+        }
+
+        $rental = $property->rentalDetail;
+        if (!$rental) {
+            throw new Exception('PropertyRental detail not found. Ensure listing_type=rent properties always have a rental record.');
+        }
+
+        $wonCarbon = Carbon::parse($wonDate);
+
+        // Calculate lease_end_date using rent_period as the unit for min_lease_duration
+        $leaseEndDate = $rental->rent_period === 'monthly'
+            ? $wonCarbon->copy()->addMonths($rental->min_lease_duration)
+            : $wonCarbon->copy()->addYears($rental->min_lease_duration);
+
+        DB::transaction(function () use ($property, $rental, $wonCarbon, $leaseEndDate) {
+            // Update property status
+            $property->update([
+                'status'     => 'rented',
+                'visibility' => 'published', // stays visible with RENTED badge
+            ]);
+
+            // Persist lease dates on the rental record to freeze DOM
+            $rental->update([
+                'lease_end_date' => $leaseEndDate->toDateString(),
+                'rented_at'      => $wonCarbon,
+            ]);
+        });
+
+        return $property->fresh(['rentalDetail']);
+    }
+
+    /**
+     * Re-list a rented property back to Available/Draft status.
+     * Resets marketing_start_date for fresh DOM, clears lease dates.
+     * US 1.7 Re-list Rented Property
+     *
+     * @param Property $property
+     * @return Property
+     */
+    public function reListProperty(Property $property): Property
+    {
+        if ($property->status !== 'rented') {
+            throw ValidationException::withMessages([
+                'status' => 'Hanya properti berstatus Rented yang dapat di-relist.'
+            ]);
+        }
+
+        DB::transaction(function () use ($property) {
+            // Reset property back to available, draft for review
+            $property->update([
+                'status'               => 'available',
+                'visibility'           => 'draft',
+                'marketing_start_date' => Carbon::today()->toDateString(),
+            ]);
+
+            // Clear rental deal dates so DOM calculation resets to 0
+            if ($property->rentalDetail) {
+                $property->rentalDetail->update([
+                    'lease_end_date' => null,
+                    'rented_at'      => null,
+                ]);
+            }
+        });
+
+        return $property->fresh(['rentalDetail']);
     }
 }

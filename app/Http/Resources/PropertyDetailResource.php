@@ -62,6 +62,7 @@ class PropertyDetailResource extends JsonResource
             'currency' => $this->currency,
             'category' => $categoryMap[$this->category] ?? ucfirst(str_replace('_', ' ', $this->category)),
             'listingType' => $this->listing_type === 'sale' ? 'For Sale' : 'For Rent',
+            'listing_type_raw' => $this->listing_type,
             'status' => $this->status,
             'visibility' => $this->visibility,
             'normal' => [
@@ -89,6 +90,16 @@ class PropertyDetailResource extends JsonResource
                 'roi' => $this->projected_roi ? $this->projected_roi : 0,
                 'zoning' => 'Yellow (Residential)',
             ],
+            'rental' => $this->whenLoaded('rentalDetail', function () {
+                return [
+                    'rent_period'            => $this->rentalDetail->rent_period,
+                    'rent_period_label'      => $this->rentalDetail->rent_period_label,
+                    'min_lease_duration'     => $this->rentalDetail->min_lease_duration,
+                    'min_lease_duration_label' => $this->rentalDetail->min_lease_duration_label,
+                    'lease_end_date'         => $this->rentalDetail->lease_end_date?->format('Y-m-d'),
+                    'days_until_lease_ends'  => $this->rentalDetail->days_until_lease_ends,
+                ];
+            }),
             'facilities' => $facilitiesGroups,
             'clients' => $this->relationLoaded('inquiries') ? $this->inquiries->map(function ($inquiry) {
                 return [
