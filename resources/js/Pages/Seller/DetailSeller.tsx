@@ -188,18 +188,17 @@ export default function DetailSeller({
 
             {/* ── Post-Create Prompt ─────────────────────────────────────── */}
             {isPostCreate && (
-                <div className="flex items-center gap-4 px-5 py-4 bg-primary/5 border border-primary/20 rounded-xl mb-6">
-                    <BadgeCheck size={18} className="text-primary flex-shrink-0" />
-                    <p className="text-sm text-text-primary flex-1">
-                        <span className="font-semibold">Seller berhasil ditambahkan!</span>{" "}
+                <div className="flex items-center gap-4 px-5 py-4 bg-text-primary rounded-xl mb-6">
+                    <BadgeCheck size={18} className="text-white flex-shrink-0" />
+                    <p className="text-sm text-white flex-1">
                         Tambahkan properti pertama untuk mulai melacak di pipeline.
                     </p>
                     <Link
                         href={route('inventory.add', { seller_id: seller.id })}
-                        className="btn btn-primary !py-2 !text-xs"
+                        className="btn btn-secondary !border-none"
                     >
-                        <PlusIcon size={13} />
-                        Tambah
+                        <PlusIcon size={18} />
+                        Add
                     </Link>
                 </div>
             )}
@@ -261,7 +260,7 @@ export default function DetailSeller({
                         <div className="grid grid-cols-3 gap-4">
                             {/* Total Properties */}
                             <div className="flex items-center gap-4 bg-gray-50 p-5 rounded-xl border border-border-base">
-                                <Building2 className="w-7 h-7 text-primary" />
+                                <Building2 className="w-7 h-7 text-text-primary" />
                                 <div>
                                     <p className="text-[11px] text-text-muted font-medium uppercase tracking-wider">Properties</p>
                                     <p className="text-2xl font-bold text-text-primary tabular-nums leading-tight">{properties.length}</p>
@@ -270,7 +269,7 @@ export default function DetailSeller({
 
                             {/* Active in Pipeline */}
                             <div className="flex items-center gap-4 bg-gray-50 p-5 rounded-xl border border-border-base">
-                                <LayoutList className="w-7 h-7 text-primary" />
+                                <LayoutList className="w-7 h-7 text-text-primary" />
                                 <div>
                                     <p className="text-[11px] text-text-muted font-medium uppercase tracking-wider">Active</p>
                                     <p className="text-2xl font-bold text-text-primary tabular-nums leading-tight">{activeProperties}</p>
@@ -280,7 +279,7 @@ export default function DetailSeller({
                             {/* Listed */}
                             <div className="flex items-center gap-4 bg-gray-50 p-5 rounded-xl border border-border-base">
 
-                                <CheckCircle2 className="w-7 h-7 text-primary" />
+                                <CheckCircle2 className="w-7 h-7 text-text-primary" />
                                 <div>
                                     <p className="text-[11px] text-text-muted font-medium uppercase tracking-wider">Listed</p>
                                     <p className="text-2xl font-bold text-text-primary tabular-nums leading-tight">
@@ -296,7 +295,7 @@ export default function DetailSeller({
                         <div className="px-6 py-5 flex items-center justify-between border-b border-border-base">
                             <div>
                                 <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                                    <Building2 className="w-5 h-5 text-primary" />
+                                    <Building2 className="w-5 h-5 text-text-primary" />
                                     Properties
                                 </h2>
                                 <p className="text-xs text-text-muted mt-1">
@@ -306,9 +305,9 @@ export default function DetailSeller({
                             <button
                                 type="button"
                                 onClick={() => setPickerOpen(true)}
-                                className="text-xs font-semibold text-primary bg-[#EAF3EF] px-3 py-1.5 rounded-md hover:bg-[#EAF3EF]/80 transition-colors flex items-center gap-1"
+                                className="text-xs font-semibold text-white px-3 py-1.5 rounded-md bg-black transition-colors flex items-center gap-1"
                             >
-                                <Plus size={12} className="stroke-[3]" /> Tambah
+                                <Plus size={12} className="stroke-[3]" /> Add
                             </button>
                         </div>
 
@@ -317,12 +316,6 @@ export default function DetailSeller({
                                 <div className="py-12 flex flex-col items-center text-center">
                                     <Building2 size={32} className="text-border-base mb-3" />
                                     <p className="text-sm font-medium text-text-muted">Belum ada properti</p>
-                                    <Link
-                                        href={route('inventory.add', { seller_id: seller.id })}
-                                        className="mt-3 font-semibold text-xs text-primary text bg-[#EAF3EF] px-3 py-1.5 rounded-md hover:bg-[#EAF3EF]/80 transition-colors flex items-center gap-1"
-                                    >
-                                        <PlusIcon size={12} className="font-medium" /> Add Property
-                                    </Link>
                                 </div>
                             ) : (
                                 properties.map((p) => {
@@ -380,7 +373,7 @@ export default function DetailSeller({
                         <div className="px-6 py-5 flex items-center justify-between border-b border-border-base">
                             <div>
                                 <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                                    <Activity className="w-5 h-5 text-primary" />
+                                    <Activity className="w-5 h-5 text-text-primary" />
                                     Activity Timeline
                                 </h2>
                                 <p className="text-xs text-text-muted mt-1">
@@ -405,7 +398,7 @@ export default function DetailSeller({
                     <div className="bg-white rounded-2xl border border-border-base shadow-card overflow-hidden">
                         <div className="px-6 py-5 flex items-center justify-between border-b border-border-base">
                             <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                                <FileText className="w-5 h-5 text-primary" />
+                                <FileText className="w-5 h-5 text-text-primary" />
                                 Notes
                             </h2>
                             {!editingNotes ? (

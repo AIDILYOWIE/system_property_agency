@@ -30,6 +30,7 @@ import {
     Tag,
     Activity,
     FileText,
+    Plus,
 } from "lucide-react";
 import { type PipelineStatus, type CustomerType } from "./_Partials/CustomerColumn";
 import PipelineTracker from "../Pipelines/_Partials/pipeline/PipelineTracker";
@@ -326,32 +327,31 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
                         {/* Divider */}
                         <div className="my-6 border-t border-border-base" />
 
-                        {/* Pipeline Stage Tracker */}
-                        <div>
-                            <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-3">
-                                Pipeline Progress
-                            </p>
-                            <PipelineTracker
-                                customerType={customer.customer_type}
-                                currentStatus={customer.pipeline_status}
-                            />
-                        </div>
 
                         {/* Stats Row */}
                         <div className="grid grid-cols-3 gap-4 mt-6">
-                            <div className="bg-canvas rounded-xl p-4 border border-border-base text-center flex flex-col justify-center">
-                                <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mb-1">Properties</p>
-                                <p className="text-2xl font-bold text-text-primary leading-none">{customer.properties.length}</p>
+                            <div className="flex items-center gap-4 bg-canvas p-5 rounded-xl border border-border-base">
+                                <Building2 className="w-7 h-7 text-text-primary flex-shrink-0" />
+                                <div>
+                                    <p className="text-[11px] text-text-muted font-medium uppercase tracking-wider">Properties</p>
+                                    <p className="text-2xl font-bold text-text-primary tabular-nums leading-tight">{customer.properties.length}</p>
+                                </div>
                             </div>
-                            <div className="bg-canvas rounded-xl p-4 border border-border-base text-center flex flex-col justify-center">
-                                <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mb-1">Interactions</p>
-                                <p className="text-2xl font-bold text-text-primary leading-none">{customer.total_interaction}</p>
+                            <div className="flex items-center gap-4 bg-canvas p-5 rounded-xl border border-border-base">
+                                <Activity className="w-7 h-7 text-text-primary flex-shrink-0" />
+                                <div>
+                                    <p className="text-[11px] text-text-muted font-medium uppercase tracking-wider">Interactions</p>
+                                    <p className="text-2xl font-bold text-text-primary tabular-nums leading-tight">{customer.total_interaction}</p>
+                                </div>
                             </div>
-                            <div className="bg-canvas rounded-xl p-4 border border-border-base text-center flex flex-col justify-center">
-                                <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mb-1">Days Active</p>
-                                <p className="text-2xl font-bold text-text-primary leading-none">
-                                    {Math.floor((Date.now() - new Date(customer.created_at).getTime()) / (1000 * 60 * 60 * 24))}
-                                </p>
+                            <div className="flex items-center gap-4 bg-canvas p-5 rounded-xl border border-border-base">
+                                <Calendar className="w-7 h-7 text-text-primary flex-shrink-0" />
+                                <div>
+                                    <p className="text-[11px] text-text-muted font-medium uppercase tracking-wider">Days Active</p>
+                                    <p className="text-2xl font-bold text-text-primary tabular-nums leading-tight">
+                                        {Math.floor((Date.now() - new Date(customer.created_at).getTime()) / (1000 * 60 * 60 * 24))}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -361,7 +361,7 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
                         <div className="px-6 py-5 flex items-center justify-between border-b border-border-base">
                             <div>
                                 <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                                    <Building2 className="w-5 h-5 text-primary" />{" "}
+                                    <Building2 className="w-5 h-5 text-text-primary" />{" "}
                                     Interested Property
                                 </h2>
                                 <p className="text-xs text-text-muted mt-1">
@@ -371,9 +371,9 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
                             <button
                                 type="button"
                                 onClick={() => setPickerOpen(true)}
-                                className="text-xs font-semibold text-primary bg-[#EAF3EF] px-3 py-1.5 rounded-md hover:bg-[#EAF3EF]/80 transition-colors"
+                                className="text-xs font-semibold text-white px-3 py-1.5 rounded-md bg-black transition-colors flex items-center gap-1"
                             >
-                                + Tambah
+                                <Plus size={12} className="stroke-[3]" /> Tambah
                             </button>
                         </div>
 
@@ -405,7 +405,7 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
                         <div className="px-6 py-5 flex items-center justify-between border-b border-border-base">
                             <div>
                                 <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                                    <Activity className="w-5 h-5 text-primary" />{" "}
+                                    <Activity className="w-5 h-5" />{" "}
                                     Activity Timeline
                                 </h2>
                                 <p className="text-xs text-text-muted mt-1">
@@ -457,7 +457,7 @@ export default function DetailCustomer({ customer }: { customer: Customer }) {
                     <div className="bg-white rounded-2xl border border-border-base shadow-card overflow-hidden">
                         <div className="px-6 py-5 flex items-center justify-between border-b border-border-base">
                             <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                                <FileText className="w-5 h-5 text-primary" />{" "}
+                                <FileText className="w-5 h-5" />{" "}
                                 Notes
                             </h2>
                             {!editingNotes ? (
