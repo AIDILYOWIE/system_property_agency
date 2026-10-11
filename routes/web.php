@@ -11,62 +11,12 @@ use App\Http\Controllers\PipelineController;
 use App\Http\Controllers\DossierController;
 use App\Http\Controllers\PublicLeadController;
 use App\Http\Controllers\SellerController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
-
-Route::get('/', function () {
-    // Count rental properties whose lease ends within 45 days (inclusive)
-    $leaseExpiringSoon = \App\Models\PropertyRental::query()
-        ->whereNotNull('lease_end_date')
-        ->whereDate('lease_end_date', '>=', now()->toDateString())
-        ->whereDate('lease_end_date', '<=', now()->addDays(45)->toDateString())
-        ->count();
-
-    $expiringLeases = \App\Models\Property::query()
-        ->where('status', 'rented')
-        ->whereHas('rentalDetail', function ($query) {
-            $query->whereNotNull('lease_end_date')
-                ->whereDate('lease_end_date', '>=', now()->toDateString())
-                ->whereDate('lease_end_date', '<=', now()->addDays(45)->toDateString());
-        })
-        ->with(['rentalDetail', 'seller'])
-        ->take(5)
-        ->get()
-        ->map(function ($property) {
-            return [
-                'id' => $property->id,
-                'name' => $property->title,
-                'type' => match ($property->category) {
-                    'villas' => 'villa',
-                    'premium_houses' => 'house',
-                    'commercial' => 'commercial',
-                    'strategic_land' => 'land',
-                    default => 'house'
-                },
-                'sellerName' => $property->seller->name ?? 'Unknown Seller',
-                'sellerPhone' => $property->seller->phone ?? null,
-                'leaseEndDate' => $property->rentalDetail->lease_end_date ? $property->rentalDetail->lease_end_date->format('j M Y') : null,
-                'daysRemaining' => max(0, $property->rentalDetail->days_until_lease_ends),
-            ];
-        });
-
-    return Inertia::render('Dashboard', [
-        'metrics' => [
-            'leaseExpiringSoon' => $leaseExpiringSoon,
-            'expiringLeasesList' => $expiringLeases,
-        ],
-    ]);
-})->name('dashboard');
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::prefix('/inventory')->group(function () {
     Route::post('/', [PropertyController::class, 'store'])->name('inventory.store');

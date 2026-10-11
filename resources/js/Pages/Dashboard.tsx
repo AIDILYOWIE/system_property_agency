@@ -1,6 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { TrendingUp, Clock, AlertTriangle, ArrowUpRight, PieChart } from 'lucide-react';
 import { memo, useMemo, type FC } from 'react';
+import { Link, router } from '@inertiajs/react';
 import Chart from '@/Components/Chart';
 import InventoryStatusChart from '@/Components/InventoryStatusChart';
 import PropertyListingCard from '@/Components/PropertyListingCard';
@@ -10,6 +11,17 @@ import type { LeaseExpiringItem } from '@/Components/LeaseExpiringCard';
 import GroupColumnChart from '@/Components/charts/GroupColumnChart';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface MoneyOnTableMetrics {
+    totalValue: number;
+
+}
+
+export interface DashboardMetrics {
+    moneyOnTable?: MoneyOnTableMetrics;
+    leaseExpiringSoon: number;
+    expiringLeasesList: LeaseExpiringItem[];
+}
 
 interface KPICardProps {
     title: string;
@@ -22,6 +34,9 @@ interface KPICardProps {
     designVariant?: 'primary' | 'secondary';
     action?: string;
     actionHref?: string;
+    badgeText?: string | number;
+    badgeTooltip?: string;
+    customTooltip?: string;
 }
 
 // ─── KPI Card (Bento Grid item) ───────────────────────────────────────────────
@@ -29,40 +44,49 @@ interface KPICardProps {
 const KPICard: FC<KPICardProps> = memo(({
     title, value, description, icon: Icon,
     iconBg, iconColor, designVariant = 'secondary', action, actionHref,
-    formatType = 'raw'
+    formatType = 'raw', badgeText, badgeTooltip, customTooltip
 }) => {
     const isPrimary = designVariant === 'primary';
 
     // ─── Format Resolution ───────────────────────────────────────────────────
     const formatted = useMemo(() => {
-        if (typeof value !== 'number') return { display: value, tooltip: String(value) };
+        if (typeof value !== 'number') return { display: value, tooltip: customTooltip || String(value) };
 
         let displayStr = String(value);
-        let tooltipStr = displayStr;
+        let tooltipStr = customTooltip || displayStr;
 
         if (formatType === 'currency' || formatType === 'compact-currency') {
-            tooltipStr = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
+            const fullCurrency = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
+            tooltipStr = customTooltip || fullCurrency;
             displayStr = formatType === 'compact-currency'
                 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', notation: 'compact', maximumFractionDigits: 1 }).format(value)
-                : tooltipStr;
+                : fullCurrency;
         } else if (formatType === 'number') {
             displayStr = new Intl.NumberFormat('id-ID').format(value);
-            tooltipStr = displayStr;
+            tooltipStr = customTooltip || displayStr;
         }
 
         return { display: displayStr, tooltip: tooltipStr };
-    }, [value, formatType]);
+    }, [value, formatType, customTooltip]);
 
     // ─── Responsive Font Sizing ──────────────────────────────────────────────
     const strLen = String(formatted.display).length;
     const textSize = strLen > 12 ? 'text-2xl' : strLen > 9 ? 'text-3xl' : 'text-4xl';
 
+    const handleCardClick = () => {
+        if (actionHref) {
+            router.visit(actionHref);
+        }
+    };
+
     return (
-        <div className={`card group cursor-pointer transition-all duration-300 relative overflow-hidden border
+        <div
+            onClick={handleCardClick}
+            className={`card group cursor-pointer transition-all duration-300 relative overflow-hidden border
             ${isPrimary
-                ? 'bg-primary border-primary hover:shadow-lg hover:shadow-primary/20'
-                : 'bg-surface border-border-base hover:shadow-dropdown hover:border-gray-300'
-            }`}
+                    ? 'bg-primary border-primary hover:shadow-lg hover:shadow-primary/20'
+                    : 'bg-surface border-border-base hover:shadow-dropdown hover:border-gray-300'
+                }`}
         >
             {/* Soft glow effect for primary card */}
             {isPrimary && (
@@ -71,18 +95,21 @@ const KPICard: FC<KPICardProps> = memo(({
                 </div>
             )}
 
-            <div className="flex items-center justify-between mb-5 relative z-10">
-                <p className={`text-sm font-semibold mb-1 ${isPrimary ? 'text-white/90' : 'text-text-primary'}`}>{title}</p>
+            <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="flex items-center gap-2">
+                    <p className={`text-sm font-medium ${isPrimary ? 'text-white' : 'text-text-primary'}`}>{title}</p>
+                </div>
                 {actionHref && (
-                    <a
+                    <Link
                         href={actionHref}
-                        className={`rounded-md
+                        onClick={(e) => e.stopPropagation()}
+                        className={`rounded-md p-1 transition-colors
                             ${isPrimary ? 'hover:bg-white/10 text-white hover:text-white' : 'hover:bg-gray-100 text-text-muted hover:text-text-primary'}
                         `}
                         aria-label={`Go to ${title}`}
                     >
-                        <ArrowUpRight size={28} aria-hidden="true" />
-                    </a>
+                        <ArrowUpRight size={22} aria-hidden="true" />
+                    </Link>
                 )}
             </div>
 
@@ -104,19 +131,18 @@ KPICard.displayName = 'KPICard';
 
 // ─── Dashboard Page ───────────────────────────────────────────────────────────
 
-interface DashboardMetrics {
-    leaseExpiringSoon: number;
-    expiringLeasesList: LeaseExpiringItem[];
-}
-
 export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
+    const moneyOnTable = useMemo(() => metrics?.moneyOnTable ?? {
+        totalValue: 0,
+    }, [metrics?.moneyOnTable]);
+
+
     const kpiMetrics = {
-        moneyOnTable: 40,           // TODO: derive from inquiry pipeline
+        moneyOnTableValue: moneyOnTable.totalValue,
         leaseExpiringSoon: metrics?.leaseExpiringSoon ?? 0,
         conversionSnapshot: "68%",  // TODO: derive from won/lost ratio
         inventoryHealth: 2,         // TODO: derive from stale property count
     };
-
 
     const openSlotPurchase = useMemo(() => [
         { day: 'S', leads: 20, type: 'actual' as const },
@@ -149,9 +175,6 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
         <DashboardLayout
             pageTitle="Dashboard"
             pageDescription="Actionable metrics for Chris Property Signature"
-            badgeOverrides={{
-                'crm-buyers': kpiMetrics.moneyOnTable,
-            }}
         >
 
 
@@ -160,8 +183,10 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
                 {/* 1. Money on the Table (Primary Variant) */}
                 <KPICard
                     title="Money on the Table"
-                    value={kpiMetrics.moneyOnTable}
-                    description="Leads currently in Viewing or Negotiation stage"
+                    value={kpiMetrics.moneyOnTableValue}
+                    formatType="compact-currency"
+                    // customTooltip={moneyOnTableTooltip}
+                    description={"Leads currently in Viewing or Negotiation stage"}
                     icon={TrendingUp}
                     designVariant="primary"
                     action="View Pipelines"
@@ -230,7 +255,7 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
             </div>
             <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6' >
                 <InventoryStatusChart className='col-span-1' data={inventoryData} />
-                
+
             </div>
 
         </DashboardLayout>

@@ -32,7 +32,7 @@ class StorePropertyRequest extends FormRequest
             'price' => 'required|numeric|min:0',
             'currency' => 'required|in:IDR,USD',
             'land_size_sqm' => 'required|numeric|min:0',
-            'building_size_sqm' => 'required|numeric|min:0',
+            'building_size_sqm' => ['exclude_if:category,strategic_land', 'required', 'numeric', 'min:0'],
             'bedrooms' => 'nullable|integer|min:0',
             'bathrooms' => 'nullable|integer|min:0',
             'tenure_type' => 'nullable|string|in:freehold,leasehold',
