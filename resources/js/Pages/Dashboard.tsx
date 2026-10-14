@@ -14,13 +14,34 @@ import GroupColumnChart from '@/Components/charts/GroupColumnChart';
 
 export interface MoneyOnTableMetrics {
     totalValue: number;
+}
 
+export interface ConversionSnapshot {
+    wonCount: number;
+    lostCount: number;
+    totalClosed: number;
+    conversionRate: number;  // 0–100
+    displayLabel: string;    // "68%" or "N/A"
+}
+
+export interface InventoryHealth {
+    staleCount: number;
+    staleListings: {
+        id: string;
+        title: string;
+        category: string;
+        daysOnMarket: number;
+        marketingStartDate: string | null;
+        href: string;
+    }[];
 }
 
 export interface DashboardMetrics {
     moneyOnTable?: MoneyOnTableMetrics;
     leaseExpiringSoon: number;
     expiringLeasesList: LeaseExpiringItem[];
+    conversionSnapshot?: ConversionSnapshot;
+    inventoryHealth?: InventoryHealth;
 }
 
 interface KPICardProps {
@@ -136,13 +157,32 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
         totalValue: 0,
     }, [metrics?.moneyOnTable]);
 
+    const conversionSnapshot = useMemo(() => metrics?.conversionSnapshot ?? {
+        wonCount: 0,
+        lostCount: 0,
+        totalClosed: 0,
+        conversionRate: 0,
+        displayLabel: '100',
+    }, [metrics?.conversionSnapshot]);
+
+
 
     const kpiMetrics = {
         moneyOnTableValue: moneyOnTable.totalValue,
         leaseExpiringSoon: metrics?.leaseExpiringSoon ?? 0,
-        conversionSnapshot: "68%",  // TODO: derive from won/lost ratio
-        inventoryHealth: 2,         // TODO: derive from stale property count
+        // PRD Section 5 Metric 5: properties on market >60 days with 0 leads
+        inventoryHealth: metrics?.inventoryHealth?.staleCount ?? 0,
     };
+
+    // Conversion Snapshot tooltip: "3 WON · 1 LOST · 30 hari terakhir"
+    const conversionTooltip = conversionSnapshot.totalClosed > 0
+        ? `${conversionSnapshot.wonCount} WON · ${conversionSnapshot.lostCount} LOST · 30 hari terakhir`
+        : 'Belum ada lead yang ditutup dalam 30 hari terakhir';
+
+    const conversionDescription = conversionSnapshot.totalClosed > 0
+        ? `${conversionSnapshot.wonCount} WON vs ${conversionSnapshot.lostCount} LOST (30 hari terakhir)`
+        : 'Belum ada data (30 hari terakhir)';
+
 
     const openSlotPurchase = useMemo(() => [
         { day: 'S', leads: 20, type: 'actual' as const },
@@ -197,20 +237,21 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
                 <KPICard
                     title="Lease Expiring Soon"
                     value={kpiMetrics.leaseExpiringSoon}
-                    description="Kontrak sewa properti akan berakhir dalam <= 45 hari"
+                    description="Kontrak sewa properti akan berakhir dalam <= 30 hari"
                     icon={Clock}
                     iconBg="bg-warning/10"
                     iconColor="text-warning"
                     designVariant="secondary"
                     action="View Expiring Leases"
-                    actionHref="/inventory?category=expiring_lease"
+                    actionHref="/inventory?listingType=For+Rent&status=rented"
                 />
 
-                {/* 3. Conversion Snapshot */}
+                {/* 3. Conversion Snapshot — real WON vs LOST ratio (PRD §5 Metric 6) */}
                 <KPICard
                     title="Conversion Snapshot"
-                    value={kpiMetrics.conversionSnapshot}
-                    description="Leads yang berakhir WON vs LOST 30 hari terakhir"
+                    value={conversionSnapshot.displayLabel}
+                    description={conversionDescription}
+                    customTooltip={conversionTooltip}
                     icon={PieChart}
                     iconBg="bg-success/10"
                     iconColor="text-success"
@@ -219,7 +260,7 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
                     actionHref="/customer"
                 />
 
-                {/* 4. Inventory Health */}
+                {/* 4. Inventory Health — stale listings (PRD Section 5 Metric 5) */}
                 <KPICard
                     title="Inventory Health"
                     value={kpiMetrics.inventoryHealth}
@@ -229,7 +270,7 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
                     iconColor="text-danger"
                     designVariant="secondary"
                     action="Review Stale Listings"
-                    actionHref="/admin/properties?filter=stale"
+                    actionHref={route('inventory') + '?stale=true'}
                 />
             </div>
 
@@ -250,7 +291,7 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
                 <LeaseExpiringCard
                     className='col-span-1 md:col-span-2 xl:col-span-2'
                     leases={metrics?.expiringLeasesList || []}
-                    viewAllHref="/inventory?category=expiring_lease"
+                    viewAllHref="/inventory?listingType=For+Rent&status=rented"
                 />
             </div>
             <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6' >

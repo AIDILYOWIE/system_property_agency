@@ -67,6 +67,9 @@ class BuyerPipelineService
 
                 if (in_array($newStatus, ['won', 'lost'])) {
                     $statusUpdateArray['status_reason'] = $statusReason;
+                    // Stamp closed_at ONCE — used by Conversion Snapshot dashboard metric (PRD §5 Metric 6).
+                    // Using a dedicated column (not updated_at) ensures non-status edits don't corrupt the window query.
+                    $statusUpdateArray['closed_at'] = now();
                 } else {
                     $statusUpdateArray['status_reason'] = null; // Clear if moved out
                 }
@@ -94,6 +97,7 @@ class BuyerPipelineService
                             ->update([
                                 'pipeline_status' => 'lost',
                                 'status_reason'   => 'Properti telah ' . ($property->listing_type === 'rent' ? 'tersewa' : 'terjual') . ' kepada penyewa/pembeli lain.',
+                                'closed_at'       => now(),
                             ]);
                     }
                 }

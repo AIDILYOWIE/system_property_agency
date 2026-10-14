@@ -72,6 +72,16 @@ class PropertyService
         if (!empty($params['visibility']) && $params['visibility'] !== 'All Visibilities') {
             $query->where('visibility', strtolower($params['visibility']));
         }
+
+        // Stale listing filter (PRD US 1.4 Rule 2 / Inventory Health deeplink)
+        // Triggered via ?stale=true from the dashboard KPI card.
+        if (!empty($params['stale']) && $params['stale'] === 'true') {
+            $staleCutoff = \Illuminate\Support\Carbon::today()->subDays(60)->toDateString();
+            $query->where('status', 'available')
+                ->whereNotNull('marketing_start_date')
+                ->whereDate('marketing_start_date', '<=', $staleCutoff)
+                ->doesntHave('inquiries');
+        }
     }
 
     /**

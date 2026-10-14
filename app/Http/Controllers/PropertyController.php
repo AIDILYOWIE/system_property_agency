@@ -28,7 +28,7 @@ class PropertyController extends Controller
 
         return Inertia::render('Inventory/Inventory', [
             'properties' => $properties->through(fn($item) => (new PropertyResource($item))->resolve()),
-            'filters' => $request->only(['search', 'category', 'listingType', 'status', 'visibility', 'sort', 'direction'])
+            'filters' => $request->only(['search', 'category', 'listingType', 'status', 'visibility', 'sort', 'direction', 'stale'])
         ]);
     }
 
@@ -150,7 +150,7 @@ class PropertyController extends Controller
             $this->propertyService->reListProperty($property);
 
             return redirect()
-                ->route('inventory.detail', $id)
+                ->back()
                 ->with('success', 'Properti berhasil di-relist dan kembali ke status Available (Draft).');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
