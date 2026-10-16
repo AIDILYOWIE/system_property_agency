@@ -9,6 +9,7 @@ import type { PropertyListingItem } from '@/Components/PropertyListingCard';
 import LeaseExpiringCard from '@/Components/LeaseExpiringCard';
 import type { LeaseExpiringItem } from '@/Components/LeaseExpiringCard';
 import GroupColumnChart from '@/Components/charts/GroupColumnChart';
+import type { PerformanceDataItem } from '@/Components/charts/GroupColumnChart';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ export interface DashboardMetrics {
     expiringLeasesList: LeaseExpiringItem[];
     conversionSnapshot?: ConversionSnapshot;
     inventoryHealth?: InventoryHealth;
+    performanceTransaction?: PerformanceDataItem[];
 }
 
 interface KPICardProps {
@@ -277,7 +279,7 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
             {/* ── Analytics & Secondary Widgets ────────────────────── */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                 {/* Bar Charts — each spans 2 cols on xl */}
-                <GroupColumnChart />
+                <GroupColumnChart data={metrics?.performanceTransaction ?? []} />
                 <Chart data={openSlotPurchase} title="Property Lead" />
             </div>
 

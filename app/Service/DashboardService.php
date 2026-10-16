@@ -36,7 +36,7 @@ class DashboardService
                 COALESCE(SUM(CASE WHEN inquiries.pipeline_status = 'negotiation' THEN properties.price ELSE 0 END), 0) as negotiation_value
             ")
             ->first();
-                
+
         return [
             'totalLeads'        => (int) ($stats->total_leads ?? 0),
             'totalValue'        => (float) ($stats->total_value ?? 0),
@@ -218,22 +218,96 @@ class DashboardService
     }
 
     /**
+     * Get Performance Transaction metrics for the current ISO week (Mon–Sun).
+     *
+     * Shows daily WON vs LOST count for each day of the current week.
+     * Data "resets" automatically — we always query the current week window,
+     * so last week's records are excluded once a new week begins.
+     *
+     * Each slot in the returned array corresponds to a display day (Sun … Sat):
+     *   - type 'actual'    → past days with real data
+     *   - type 'today'     → today's live running total
+     *   - type 'projected' → future days (won=0, lost=0, render as empty/hatched)
+     *
+     * @return array<int, array{label: string, won: int, lost: int, type: string}>
+     */
+    public function getPerformanceTransactionMetrics(): array
+    {
+        $today     = Carbon::now();
+        $weekStart = $today->copy()->startOfWeek(Carbon::MONDAY);
+        $weekEnd   = $today->copy()->endOfWeek(Carbon::SUNDAY);
+
+        // Single aggregated query — GROUP BY DOW + pipeline_status.
+        // EXTRACT(DOW …) returns PostgreSQL convention: 0=Sun … 6=Sat.
+        $rows = Inquiry::query()
+            ->whereIn('pipeline_status', ['won', 'lost'])
+            ->whereNotNull('closed_at')
+            ->whereDate('closed_at', '>=', $weekStart->toDateString())
+            ->whereDate('closed_at', '<=', $weekEnd->toDateString())
+            ->selectRaw("EXTRACT(DOW FROM closed_at)::int AS dow,
+                pipeline_status,
+                COUNT(*) AS cnt
+            ")
+            ->groupByRaw('dow, pipeline_status')
+            ->get()
+            ->groupBy('dow');   // Collection keyed by integer DOW (0=Sun … 6=Sat)
+
+        $todayDow = (int) $today->format('w'); // 0=Sun … 6=Sat
+
+        // Chart display order: Sun(0), Mon(1), Tue(2), Wed(3), Thu(4), Fri(5), Sat(6)
+        $labels      = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        $displayDows = [0, 1, 2, 3, 4, 5, 6];
+
+        $result = [];
+        foreach ($displayDows as $i => $dow) {
+            $dayRows = $rows->get($dow) ?? collect();
+
+            $won  = (int) ($dayRows->firstWhere('pipeline_status', 'won')?->cnt  ?? 0);
+            $lost = (int) ($dayRows->firstWhere('pipeline_status', 'lost')?->cnt ?? 0);
+
+            // Map DOW → calendar offset from Monday (the ISO week start).
+            // Sun(0) is 6 days after Mon; Mon(1)=0 … Sat(6)=5.
+            $dayOffset = $dow === 0 ? 6 : $dow - 1;
+            $dayDate   = $weekStart->copy()->addDays($dayOffset);
+
+            if ($dayDate->isSameDay($today)) {
+                $type = 'today';
+            } elseif ($dayDate->lt($today->copy()->startOfDay())) {
+                $type = 'actual';
+            } else {
+                $type = 'projected';
+            }
+
+            $result[] = [
+                'label' => $labels[$i],
+                'won'   => $won,
+                'lost'  => $lost,
+                'type'  => $type,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
      * Aggregate all overview dashboard metrics.
      * All sub-metric methods are independent — safe for parallelisation in the future.
      */
     public function getDashboardMetrics(): array
     {
-        $moneyOnTable       = $this->getMoneyOnTableMetrics();
-        $leaseMetrics       = $this->getLeaseExpiringMetrics();
-        $conversionSnapshot = $this->getConversionSnapshotMetrics();
-        $inventoryHealth    = $this->getInventoryHealthMetrics();
+        $moneyOnTable            = $this->getMoneyOnTableMetrics();
+        $leaseMetrics            = $this->getLeaseExpiringMetrics();
+        $conversionSnapshot      = $this->getConversionSnapshotMetrics();
+        $inventoryHealth         = $this->getInventoryHealthMetrics();
+        $performanceTransaction  = $this->getPerformanceTransactionMetrics();
 
         return [
-            'moneyOnTable'        => $moneyOnTable,
-            'leaseExpiringSoon'   => $leaseMetrics['leaseExpiringSoon'],
-            'expiringLeasesList'  => $leaseMetrics['expiringLeasesList'],
-            'conversionSnapshot'  => $conversionSnapshot,
-            'inventoryHealth'     => $inventoryHealth,
+            'moneyOnTable'           => $moneyOnTable,
+            'leaseExpiringSoon'      => $leaseMetrics['leaseExpiringSoon'],
+            'expiringLeasesList'     => $leaseMetrics['expiringLeasesList'],
+            'conversionSnapshot'     => $conversionSnapshot,
+            'inventoryHealth'        => $inventoryHealth,
+            'performanceTransaction' => $performanceTransaction,
         ];
     }
 }
