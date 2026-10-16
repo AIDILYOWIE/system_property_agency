@@ -93,6 +93,7 @@ class DashboardService
                 return [
                     'id'            => $property->id,
                     'name'          => $property->title,
+                    'address'       => $property->full_address ?? $property->location_area ?? null,
                     'type'          => match ($property->category) {
                         'villas'          => 'villa',
                         'premium_houses'  => 'house',
@@ -102,8 +103,10 @@ class DashboardService
                     },
                     'sellerName'    => $property->seller->name ?? 'Unknown Seller',
                     'sellerPhone'   => $property->seller->phone ?? null,
-                    'leaseEndDate'  => $property->rentalDetail->lease_end_date ? $property->rentalDetail->lease_end_date->format('j M Y') : null,
-                    'daysRemaining' => max(0, $property->rentalDetail->days_until_lease_ends),
+                    'leaseEndDate'  => $property->rentalDetail->lease_end_date
+                        ? $property->rentalDetail->lease_end_date->format('j M Y')
+                        : null,
+                    'daysRemaining' => max(0, $property->rentalDetail->days_until_lease_ends ?? 0),
                 ];
             })
             ->toArray();
@@ -290,6 +293,50 @@ class DashboardService
     }
 
     /**
+     * Get New Listings metrics.
+     * Returns the 5 most recently listed/published properties,
+     * ordered by marketing_start_date descending.
+     *
+     * @return array<int, array{
+     *     id: string,
+     *     name: string,
+     *     location: string,
+     *     type: string,
+     *     daysListed: int,
+     *     leads: int,
+     *     href: string
+     * }>
+     */
+    public function getNewListingsMetrics(): array
+    {
+        return Property::query()
+            ->whereIn('status', ['available', 'rented', 'sold'])
+            ->whereNotNull('marketing_start_date')
+            ->withCount('inquiries')
+            ->orderBy('marketing_start_date', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function (Property $property) {
+                return [
+                    'id'        => $property->id,
+                    'name'      => $property->title,
+                    'address'  => $property->full_address ?? '-',
+                    'type'      => match ($property->category) {
+                        'villas'          => 'villa',
+                        'premium_houses'  => 'house',
+                        'commercial'      => 'commercial',
+                        'strategic_land'  => 'land',
+                        default           => 'house',
+                    },
+                    'daysListed' => $property->days_on_market,
+                    'leads'      => (int) ($property->inquiries_count ?? 0),
+                    'href'       => route('inventory.detail', $property->id),
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
      * Aggregate all overview dashboard metrics.
      * All sub-metric methods are independent — safe for parallelisation in the future.
      */
@@ -300,6 +347,7 @@ class DashboardService
         $conversionSnapshot      = $this->getConversionSnapshotMetrics();
         $inventoryHealth         = $this->getInventoryHealthMetrics();
         $performanceTransaction  = $this->getPerformanceTransactionMetrics();
+        $newListings             = $this->getNewListingsMetrics();
 
         return [
             'moneyOnTable'           => $moneyOnTable,
@@ -308,6 +356,7 @@ class DashboardService
             'conversionSnapshot'     => $conversionSnapshot,
             'inventoryHealth'        => $inventoryHealth,
             'performanceTransaction' => $performanceTransaction,
+            'newListings'            => $newListings,
         ];
     }
 }

@@ -8,7 +8,7 @@ export type PropertyType = 'villa' | 'land' | 'commercial' | 'house';
 export interface PropertyListingItem {
     id: string | number;
     name: string;
-    location: string;
+    address: string;
     type: PropertyType;
     daysListed: number;
     leads: number;
@@ -50,14 +50,14 @@ const ListingRow: FC<{ item: PropertyListingItem }> = memo(({ item }) => {
                     {item.name}
                 </p>
                 <p className="text-[11px] text-text-muted mt-0.5">
-                    {item.location} &nbsp;•&nbsp; {item.daysListed}d ago &nbsp;•&nbsp; {item.leads} Leads
+                    {item.address} &nbsp;•&nbsp; {item.daysListed}d ago &nbsp;•&nbsp; {item.leads} Leads
                 </p>
             </div>
 
             {/* Action button — exact style from reference */}
             <a
                 href={item.href ?? '#'}
-                className="flex-shrink-0 px-3 py-1.5 text-[11px] font-semibold bg-white border border-border-base text-text-primary rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="flex-shrink-0 px-3 py-1.5 text-[11px] font-semibold bg-white border border-border-base text-text-primary rounded-md hover:bg-gray-50 hover:border-gray-300c"
                 aria-label={`View ${item.name}`}
             >
                 View

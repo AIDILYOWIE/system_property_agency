@@ -44,6 +44,7 @@ export interface DashboardMetrics {
     conversionSnapshot?: ConversionSnapshot;
     inventoryHealth?: InventoryHealth;
     performanceTransaction?: PerformanceDataItem[];
+    newListings?: PropertyListingItem[];
 }
 
 interface KPICardProps {
@@ -204,14 +205,10 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
         draft: 20,
     };
 
-    // TODO: replace with real props from Inertia controller
-    const newListings = useMemo<PropertyListingItem[]>(() => [
-        { id: 1, name: 'Beachfront Villa Seminyak', location: 'Seminyak, Bali', type: 'villa', daysListed: 1, leads: 0, href: '/admin/properties/1' },
-        { id: 2, name: 'Strategic Land Canggu', location: 'Canggu, Bali', type: 'land', daysListed: 3, leads: 2, href: '/admin/properties/2' },
-        { id: 3, name: 'Boutique Commercial Ubud', location: 'Ubud, Bali', type: 'commercial', daysListed: 5, leads: 1, href: '/admin/properties/3' },
-        { id: 4, name: 'Boutique Commercial Ubud', location: 'Ubud, Bali', type: 'commercial', daysListed: 5, leads: 1, href: '/admin/properties/3' },
-        { id: 5, name: 'Boutique Commercial Ubud', location: 'Ubud, Bali', type: 'commercial', daysListed: 5, leads: 1, href: '/admin/properties/3' },
-    ], []);
+    const newListings = useMemo<PropertyListingItem[]>(
+        () => metrics?.newListings ?? [],
+        [metrics?.newListings],
+    );
 
     return (
         <DashboardLayout
