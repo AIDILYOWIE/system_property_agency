@@ -11,22 +11,12 @@ use App\Http\Controllers\PipelineController;
 use App\Http\Controllers\DossierController;
 use App\Http\Controllers\PublicLeadController;
 use App\Http\Controllers\SellerController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
-
-Route::get('/', function () {
-    return Inertia::render('Dashboard');
-})->name('dashboard');
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::prefix('/inventory')->group(function () {
     Route::post('/', [PropertyController::class, 'store'])->name('inventory.store');
@@ -42,6 +32,7 @@ Route::prefix('/inventory')->group(function () {
 
     Route::get('/edit/{id}', [PropertyController::class, 'edit'])->name('inventory.edit');
     Route::patch('/{id}', [PropertyController::class, 'update'])->name('inventory.update');
+    Route::patch('/{id}/relist', [PropertyController::class, 'relist'])->name('inventory.relist');
 });
 
 Route::prefix('/customer')->group(function () {

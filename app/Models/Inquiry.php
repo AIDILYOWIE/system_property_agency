@@ -12,7 +12,18 @@ class Inquiry extends Model
         'property_id',
         'pipeline_status',
         'status_reason',
+        'closed_at',
     ];
+
+    protected $casts = [
+        'closed_at' => 'datetime',
+    ];
+
+    /** True when the inquiry has been finalized (WON or LOST). */
+    public function getIsClosedAttribute(): bool
+    {
+        return in_array($this->pipeline_status, ['won', 'lost']);
+    }
 
     public function property(): BelongsTo
     {

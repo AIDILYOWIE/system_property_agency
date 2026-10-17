@@ -34,7 +34,7 @@ class UpdatePropertyRequest extends FormRequest
             'price' => 'required|numeric|min:0',
             'currency' => 'required|in:IDR,USD',
             'land_size_sqm' => 'required|numeric|min:0',
-            'building_size_sqm' => 'required|numeric|min:0',
+            'building_size_sqm' => ['exclude_if:category,strategic_land', 'required', 'numeric', 'min:0'],
             'bedrooms' => 'nullable|integer|min:0',
             'bathrooms' => 'nullable|integer|min:0',
             'tenure_type' => 'nullable|string|in:freehold,leasehold',
@@ -51,6 +51,10 @@ class UpdatePropertyRequest extends FormRequest
             'social_media_2' => 'nullable|url|max:255',
             'facilities' => 'nullable|array',
             'facilities.*' => 'exists:facilities,id',
+
+            // ── Rental-specific fields (only required when listing_type = rent) ──
+            'rent_period'        => ['required_if:listing_type,rent', 'nullable', 'in:monthly,yearly'],
+            'min_lease_duration' => ['required_if:listing_type,rent', 'nullable', 'integer', 'min:1', 'max:120'],
         ];
     }
 }

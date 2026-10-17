@@ -32,19 +32,31 @@ class PropertyResource extends JsonResource
         if (! $this->building_size_sqm && $this->category !== 'strategic_land') $missingRequirements[] = "Luas Bangunan";
 
         return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'location' => $this->location_area,
-            'price' => $this->price,
-            'currency' => $this->currency,
-            'category' => $categoryMap[$this->category] ?? ucfirst(str_replace('_', ' ', $this->category)),
-            'listingType' => $listingType,
-            'status' => $this->status,
-            'visibility' => $this->visibility,
-            'leads' => $this->inquiries_count ?? 0,
+            'id'           => $this->id,
+            'title'        => $this->title,
+            'location'     => $this->location_area,
+            'price'        => $this->price,
+            'currency'     => $this->currency,
+            'category'     => $categoryMap[$this->category] ?? ucfirst(str_replace('_', ' ', $this->category)),
+            'listingType'  => $listingType,
+            'listing_type_raw' => $this->listing_type,
+            'status'       => $this->status,
+            'visibility'   => $this->visibility,
+            'leads'        => $this->inquiries_count ?? 0,
             'days_on_market' => $this->days_on_market,
-            'thumbnail' => $this->cloneValueOrUrl($this->mainImage), // Safe ref to helper logic inline
+            'thumbnail'    => $this->cloneValueOrUrl($this->mainImage),
             'missing_publish_requirements' => $missingRequirements,
+            // Exposed for Inventory card display — only present for rent listings
+            'rental'       => $this->whenLoaded('rentalDetail', function () {
+                return [
+                    'rent_period'             => $this->rentalDetail->rent_period,
+                    'rent_period_label'       => $this->rentalDetail->rent_period_label,
+                    'min_lease_duration'      => $this->rentalDetail->min_lease_duration,
+                    'min_lease_duration_label' => $this->rentalDetail->min_lease_duration_label,
+                    'lease_end_date'          => $this->rentalDetail->lease_end_date?->format('Y-m-d'),
+                    'days_until_lease_ends'   => $this->rentalDetail->days_until_lease_ends,
+                ];
+            }),
         ];
     }
 

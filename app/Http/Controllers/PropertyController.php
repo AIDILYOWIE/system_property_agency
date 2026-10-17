@@ -28,7 +28,7 @@ class PropertyController extends Controller
 
         return Inertia::render('Inventory/Inventory', [
             'properties' => $properties->through(fn($item) => (new PropertyResource($item))->resolve()),
-            'filters' => $request->only(['search', 'category', 'listingType', 'status', 'visibility', 'sort', 'direction'])
+            'filters' => $request->only(['search', 'category', 'listingType', 'status', 'visibility', 'sort', 'direction', 'stale'])
         ]);
     }
 
@@ -137,6 +137,24 @@ class PropertyController extends Controller
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->with('Terjadi Kesalahan', 'Gagal mengubah status visibilitas properti.');
+        }
+    }
+    /**
+     * Re-list a rented property back to Available/Draft.
+     * US 1.7 Re-list Rented Property
+     */
+    public function relist(string $id)
+    {
+        try {
+            $property = $this->propertyService->getPropertyDetails($id);
+            $this->propertyService->reListProperty($property);
+
+            return redirect()
+                ->back()
+                ->with('success', 'Properti berhasil di-relist dan kembali ke status Available (Draft).');
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->back()->with('error', 'Gagal me-relist properti: ' . $e->getMessage());
         }
     }
 }

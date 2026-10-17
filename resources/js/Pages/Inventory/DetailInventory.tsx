@@ -22,6 +22,7 @@ import {
     Lock,
     LayoutGrid,
     Building2,
+    RefreshCw,
 } from "lucide-react";
 import * as icons from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
@@ -60,6 +61,15 @@ interface DetailInventoryProps {
         listingType: string;
         status: string;
         visibility: string;
+        listing_type_raw: string;
+        rental?: {
+            rent_period: "monthly" | "yearly";
+            rent_period_label: string;
+            min_lease_duration: number;
+            min_lease_duration_label: string;
+            lease_end_date?: string;
+            days_until_lease_ends?: number;
+        };
         normal: {
             leads: number;
             days_on_market: number;
@@ -154,6 +164,12 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
         });
     };
 
+    const handleRelist = () => {
+        router.patch(`/inventory/${property.id}/relist`, {}, {
+            preserveScroll: true,
+        });
+    };
+
     const copySecretLink = () => {
         const url = `${window.location.origin}/dossier/${property.dossier.token}`;
         navigator.clipboard.writeText(url).then(() => {
@@ -210,6 +226,16 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                             <Edit2 className="w-4 h-4 stroke-[2.5]" />
                             Edit
                         </button>
+                        {property.status === 'rented' && property.listing_type_raw === 'rent' && (
+                            <button
+                                type="button"
+                                onClick={handleRelist}
+                                className="btn btn-primary !bg-amber-600 hover:!bg-amber-700 !border-amber-600"
+                            >
+                                <RefreshCw className="w-4 h-4 stroke-[2.5]" />
+                                Re-list
+                            </button>
+                        )}
                         <button type="button" onClick={copySecretLink} className="btn btn-primary">
                             <LinkIcon className="w-4 h-4 stroke-[2.5]" />
                             Secret Link
@@ -477,11 +503,22 @@ export default function DetailInventory({ property }: DetailInventoryProps) {
                             </div>
 
                             <div className="bg-white rounded-2xl p-6 shadow-card border border-border-base flex flex-col gap-6">
-                                <div className="w-full flex justify-between items-center">
-                                    <h3 className="text-[28px] font-bold text-text-primary mb-1">
-
-                                        {formatCurrency(property.price, property.currency)}
-                                    </h3>
+                                <div className="w-full flex justify-between items-start">
+                                    <div>
+                                        <h3 className="text-[28px] font-bold text-text-primary mb-1">
+                                            {formatCurrency(property.price, property.currency)}
+                                            {property.listing_type_raw === 'rent' && property.rental && (
+                                                <span className="text-sm text-text-muted font-medium ml-2">
+                                                    / {property.rental.rent_period_label}
+                                                </span>
+                                            )}
+                                        </h3>
+                                        {property.listing_type_raw === 'rent' && property.rental && (
+                                            <p className="text-xs text-text-muted">
+                                                Min. Lease: <span className="font-semibold text-text-primary">{property.rental.min_lease_duration_label}</span>
+                                            </p>
+                                        )}
+                                    </div>
                                     <div className="flex gap-2">
                                         <span className="flex w-max h-max items-center gap-1.5 px-3 py-1 text-[10px] rounded-md font-bold bg-[#EAF3EF] text-[#2B805A] uppercase   ">
                                             <div className="w-1.5 h-1.5 rounded-full bg-[#2B805A]"></div>{" "}

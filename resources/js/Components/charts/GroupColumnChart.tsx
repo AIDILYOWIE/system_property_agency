@@ -1,31 +1,47 @@
 import { memo, useMemo, useState } from 'react';
 
+// ─── Types ─────────────────────────────────────────────────────────────────────
+
 type ChartType = 'actual' | 'today' | 'projected';
-interface DataItem {
+
+export interface PerformanceDataItem {
     label: string;
-    d1: number;
-    d2: number;
+    won: number;
+    lost: number;
     type: ChartType;
 }
 
-const chartData: DataItem[] = [
-    { label: 'S', d1: 44, d2: 13, type: 'actual' },
-    { label: 'M', d1: 55, d2: 36, type: 'actual' },
-    { label: 'T', d1: 41, d2: 20, type: 'actual' },
-    { label: 'W', d1: 67, d2: 30, type: 'projected' },
-    { label: 'T', d1: 22, d2: 13, type: 'projected' },
-    { label: 'F', d1: 43, d2: 27, type: 'projected' },
-    { label: 'S', d1: 43, d2: 27, type: 'projected' },
+interface GroupColumnChartProps {
+    data: PerformanceDataItem[];
+}
+
+// ─── Fallback skeleton for when no data has arrived yet ────────────────────────
+
+const EMPTY_WEEK: PerformanceDataItem[] = [
+    { label: 'S', won: 0, lost: 0, type: 'projected' },
+    { label: 'M', won: 0, lost: 0, type: 'projected' },
+    { label: 'T', won: 0, lost: 0, type: 'projected' },
+    { label: 'W', won: 0, lost: 0, type: 'projected' },
+    { label: 'T', won: 0, lost: 0, type: 'projected' },
+    { label: 'F', won: 0, lost: 0, type: 'projected' },
+    { label: 'S', won: 0, lost: 0, type: 'projected' },
 ];
 
+// ─── Component ─────────────────────────────────────────────────────────────────
 
-const GroupColumnChart = memo(() => {
+const GroupColumnChart = memo(({ data }: GroupColumnChartProps) => {
     const CHART_H = 128;
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-    const maxTotal = useMemo(() => {
-        return Math.max(...chartData.map(d => d.d1 + d.d2), 1);
-    }, []);
+    // Use server data or fallback to an empty skeleton
+    const chartData = data?.length === 7 ? data : EMPTY_WEEK;
+
+    // Max bar height is driven by the tallest total (won + lost) on any day.
+    // Minimum 1 prevents division-by-zero when there is no data yet.
+    const maxTotal = useMemo(
+        () => Math.max(...chartData.map(d => d.won + d.lost), 1),
+        [chartData],
+    );
 
     const todayIndex = chartData.findIndex(d => d.type === 'today');
 
@@ -33,17 +49,16 @@ const GroupColumnChart = memo(() => {
         <div className="bg-white rounded-2xl p-6 border border-border-base col-span-1 md:col-span-2 flex flex-col h-full">
             <h3 className="text-base font-semibold text-text-primary mb-6">Performance Transaction</h3>
 
-            {/* Chart area matching Chart.tsx flex logic perfectly */}
             <div
                 className="flex-1 flex items-end justify-between px-2 gap-4 relative"
                 style={{ minHeight: CHART_H, marginTop: 32 }}
             >
-                {/* Floating tooltip imitating ApexCharts and fully matching the UI */}
+                {/* Floating tooltip — shows on hover, falls back to today's bar */}
                 {(() => {
                     const activeIdx = hoveredIndex !== null ? hoveredIndex : todayIndex;
                     if (activeIdx === -1 || activeIdx === null) return null;
                     const activeItem = chartData[activeIdx];
-                    const total = activeItem.d1 + activeItem.d2;
+                    const total = activeItem.won + activeItem.lost;
                     return (
                         <div
                             className="absolute z-20 bg-white border border-border-base shadow-lg rounded-md px-3 py-2 text-[10px] min-w-[110px] flex flex-col font-sans pointer-events-none transition-all duration-150"
@@ -55,45 +70,47 @@ const GroupColumnChart = memo(() => {
                         >
                             <div className="flex justify-between items-center mb-1 gap-3">
                                 <div className="flex items-center gap-1.5">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-status-sold"></div>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-status-sold" />
                                     <span className="font-medium text-text-muted">WON</span>
                                 </div>
-                                <span className="font-bold text-text-primary">{(activeItem.d1).toFixed(0)}</span>
+                                <span className="font-bold text-text-primary">{activeItem.won}</span>
                             </div>
                             <div className="flex justify-between items-center mb-1 gap-3">
                                 <div className="flex items-center gap-1.5">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-status-available"></div>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-status-available" />
                                     <span className="font-medium text-text-muted">LOST</span>
                                 </div>
-                                <span className="font-bold text-text-primary">{(activeItem.d2).toFixed(0)}</span>
+                                <span className="font-bold text-text-primary">{activeItem.lost}</span>
                             </div>
                             <div className="flex justify-between items-center pt-1 mt-0.5 border-t border-border-base gap-3">
                                 <span className="font-bold text-text-primary">Total</span>
-                                <span className="font-bold text-primary">{(total).toFixed(0)}</span>
+                                <span className="font-bold text-primary">{total}</span>
                             </div>
                         </div>
                     );
                 })()}
 
-                {/* Bars built in pure HTML/Tailwind exactly like Chart.tsx */}
+                {/* Bar columns */}
                 {chartData.map((item, index) => {
-                    const total = item.d1 + item.d2;
+                    const total = item.won + item.lost;
+                    // Ensure a minimum visual height of 16px so zero-data days still render
                     const heightPx = Math.max(Math.round((total / maxTotal) * CHART_H), 16);
 
-                    const q1Percent = (item.d1 / total) * 100;
-                    const q2Percent = (item.d2 / total) * 100;
+                    // Percentage split inside the pill
+                    const wonPercent = total > 0 ? (item.won / total) * 100 : 50;
+                    const lostPercent = total > 0 ? (item.lost / total) * 100 : 50;
+
                     const isHovered = hoveredIndex === index;
                     const isToday = item.type === 'today';
                     const isProjected = item.type === 'projected';
 
-                    let barContainerStyle: React.CSSProperties = {
+                    const barStyle: React.CSSProperties = {
                         height: heightPx,
                         transition: 'opacity 150ms ease, filter 150ms ease',
                         opacity: hoveredIndex !== null && !isHovered ? 0.55 : 1,
                         filter: isHovered ? 'brightness(1.12)' : 'brightness(1)',
                         cursor: 'pointer',
                     };
-
 
                     return (
                         <div
@@ -102,32 +119,31 @@ const GroupColumnChart = memo(() => {
                             onMouseEnter={() => setHoveredIndex(index)}
                             onMouseLeave={() => setHoveredIndex(null)}
                         >
-                            {/* Bar Pill Wrapper */}
+                            {/* Bar pill wrapper */}
                             <div className="w-full relative flex flex-col justify-end" style={{ height: heightPx }}>
-                                {/* The overflow-hidden rounded pill */}
                                 <div
                                     className="absolute inset-0 rounded-full overflow-hidden flex flex-col justify-end gap-1"
-                                    style={barContainerStyle}
+                                    style={barStyle}
                                 >
-                                    {/* Q2 Segment (Top) */}
+                                    {/* LOST segment (top) */}
                                     <div
                                         className={`w-full flex-shrink-0 ${isProjected ? 'bg-projected-pattern' : 'bg-status-available'}`}
-                                        style={{ height: `${q2Percent}%` }}
+                                        style={{ height: `${lostPercent}%` }}
                                     />
-                                    {/* Q1 Segment (Bottom) with a white top border acting as the GAP between stacks */}
+                                    {/* WON segment (bottom) */}
                                     <div
                                         className={`w-full flex-shrink-0 ${isProjected ? 'bg-projected-pattern' : 'bg-status-sold'}`}
-                                        style={{ height: `${q1Percent}%` }}
+                                        style={{ height: `${wonPercent}%` }}
                                     />
                                 </div>
 
-                                {/* White ring dot sticking out at top of today's bar */}
+                                {/* Today indicator dot */}
                                 {isToday && (
                                     <div className="absolute z-10 -top-[6px] left-1/2 -translate-x-1/2 w-[6px] h-[6px] rounded-full bg-white border border-status-available" />
                                 )}
                             </div>
 
-                            {/* Axis Label */}
+                            {/* Axis label */}
                             <span
                                 className={`text-[10px] uppercase transition-colors duration-150 ${isHovered || isToday ? 'text-primary font-semibold' : 'text-text-muted font-medium'
                                     }`}

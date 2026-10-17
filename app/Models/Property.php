@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Property extends Model
 {
@@ -52,6 +53,11 @@ class Property extends Model
         'sold_at' => 'datetime'
     ];
 
+    public function rentalDetail(): HasOne
+    {
+        return $this->hasOne(PropertyRental::class);
+    }
+
     public function seller()
     {
         return $this->belongsTo(Seller::class, 'seller_id');
@@ -83,13 +89,18 @@ class Property extends Model
             return 0;
         }
 
-        if (in_array($this->status, ['sold', 'rented']) && $this->sold_at) {
-            $days = (int) $this->marketing_start_date->diffInDays($this->sold_at);
-            return max(0, $days);
+        // Freeze DOM for sold properties using sold_at
+        if ($this->status === 'sold' && $this->sold_at) {
+            return (int) max(0, $this->marketing_start_date->diffInDays($this->sold_at));
+        }
+
+        // Freeze DOM for rented properties using rented_at from the rental relation
+        // This ensures edits to the property after renting don't corrupt DOM history.
+        if ($this->status === 'rented' && $this->rentalDetail && $this->rentalDetail->rented_at) {
+            return (int) max(0, $this->marketing_start_date->diffInDays($this->rentalDetail->rented_at));
         }
 
         $days = (int) $this->marketing_start_date->diffInDays(now());
-        // If start date is in the future, it could be negative, make it 0 at minimum
         return max(0, $days);
     }
 

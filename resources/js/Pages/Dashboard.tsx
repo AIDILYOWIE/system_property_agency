@@ -1,13 +1,51 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { TrendingUp, Clock, AlertTriangle, ArrowUpRight, PieChart } from 'lucide-react';
 import { memo, useMemo, type FC } from 'react';
+import { Link, router } from '@inertiajs/react';
 import Chart from '@/Components/Chart';
 import InventoryStatusChart from '@/Components/InventoryStatusChart';
 import PropertyListingCard from '@/Components/PropertyListingCard';
 import type { PropertyListingItem } from '@/Components/PropertyListingCard';
+import LeaseExpiringCard from '@/Components/LeaseExpiringCard';
+import type { LeaseExpiringItem } from '@/Components/LeaseExpiringCard';
 import GroupColumnChart from '@/Components/charts/GroupColumnChart';
+import type { PerformanceDataItem } from '@/Components/charts/GroupColumnChart';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface MoneyOnTableMetrics {
+    totalValue: number;
+}
+
+export interface ConversionSnapshot {
+    wonCount: number;
+    lostCount: number;
+    totalClosed: number;
+    conversionRate: number;  // 0–100
+    displayLabel: string;    // "68%" or "N/A"
+}
+
+export interface InventoryHealth {
+    staleCount: number;
+    staleListings: {
+        id: string;
+        title: string;
+        category: string;
+        daysOnMarket: number;
+        marketingStartDate: string | null;
+        href: string;
+    }[];
+}
+
+export interface DashboardMetrics {
+    moneyOnTable?: MoneyOnTableMetrics;
+    leaseExpiringSoon: number;
+    expiringLeasesList: LeaseExpiringItem[];
+    conversionSnapshot?: ConversionSnapshot;
+    inventoryHealth?: InventoryHealth;
+    performanceTransaction?: PerformanceDataItem[];
+    newListings?: PropertyListingItem[];
+}
 
 interface KPICardProps {
     title: string;
@@ -20,6 +58,9 @@ interface KPICardProps {
     designVariant?: 'primary' | 'secondary';
     action?: string;
     actionHref?: string;
+    badgeText?: string | number;
+    badgeTooltip?: string;
+    customTooltip?: string;
 }
 
 // ─── KPI Card (Bento Grid item) ───────────────────────────────────────────────
@@ -27,40 +68,49 @@ interface KPICardProps {
 const KPICard: FC<KPICardProps> = memo(({
     title, value, description, icon: Icon,
     iconBg, iconColor, designVariant = 'secondary', action, actionHref,
-    formatType = 'raw'
+    formatType = 'raw', badgeText, badgeTooltip, customTooltip
 }) => {
     const isPrimary = designVariant === 'primary';
 
     // ─── Format Resolution ───────────────────────────────────────────────────
     const formatted = useMemo(() => {
-        if (typeof value !== 'number') return { display: value, tooltip: String(value) };
+        if (typeof value !== 'number') return { display: value, tooltip: customTooltip || String(value) };
 
         let displayStr = String(value);
-        let tooltipStr = displayStr;
+        let tooltipStr = customTooltip || displayStr;
 
         if (formatType === 'currency' || formatType === 'compact-currency') {
-            tooltipStr = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
+            const fullCurrency = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
+            tooltipStr = customTooltip || fullCurrency;
             displayStr = formatType === 'compact-currency'
                 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', notation: 'compact', maximumFractionDigits: 1 }).format(value)
-                : tooltipStr;
+                : fullCurrency;
         } else if (formatType === 'number') {
             displayStr = new Intl.NumberFormat('id-ID').format(value);
-            tooltipStr = displayStr;
+            tooltipStr = customTooltip || displayStr;
         }
 
         return { display: displayStr, tooltip: tooltipStr };
-    }, [value, formatType]);
+    }, [value, formatType, customTooltip]);
 
     // ─── Responsive Font Sizing ──────────────────────────────────────────────
     const strLen = String(formatted.display).length;
     const textSize = strLen > 12 ? 'text-2xl' : strLen > 9 ? 'text-3xl' : 'text-4xl';
 
+    const handleCardClick = () => {
+        if (actionHref) {
+            router.visit(actionHref);
+        }
+    };
+
     return (
-        <div className={`card group cursor-pointer transition-all duration-300 relative overflow-hidden border
+        <div
+            onClick={handleCardClick}
+            className={`card group cursor-pointer transition-all duration-300 relative overflow-hidden border
             ${isPrimary
-                ? 'bg-primary border-primary hover:shadow-lg hover:shadow-primary/20'
-                : 'bg-surface border-border-base hover:shadow-dropdown hover:border-gray-300'
-            }`}
+                    ? 'bg-primary border-primary hover:shadow-lg hover:shadow-primary/20'
+                    : 'bg-surface border-border-base hover:shadow-dropdown hover:border-gray-300'
+                }`}
         >
             {/* Soft glow effect for primary card */}
             {isPrimary && (
@@ -69,18 +119,21 @@ const KPICard: FC<KPICardProps> = memo(({
                 </div>
             )}
 
-            <div className="flex items-center justify-between mb-5 relative z-10">
-                <p className={`text-sm font-semibold mb-1 ${isPrimary ? 'text-white/90' : 'text-text-primary'}`}>{title}</p>
+            <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="flex items-center gap-2">
+                    <p className={`text-sm font-medium ${isPrimary ? 'text-white' : 'text-text-primary'}`}>{title}</p>
+                </div>
                 {actionHref && (
-                    <a
+                    <Link
                         href={actionHref}
-                        className={`rounded-md
+                        onClick={(e) => e.stopPropagation()}
+                        className={`rounded-md p-1 transition-colors
                             ${isPrimary ? 'hover:bg-white/10 text-white hover:text-white' : 'hover:bg-gray-100 text-text-muted hover:text-text-primary'}
                         `}
                         aria-label={`Go to ${title}`}
                     >
-                        <ArrowUpRight size={28} aria-hidden="true" />
-                    </a>
+                        <ArrowUpRight size={22} aria-hidden="true" />
+                    </Link>
                 )}
             </div>
 
@@ -102,14 +155,36 @@ KPICard.displayName = 'KPICard';
 
 // ─── Dashboard Page ───────────────────────────────────────────────────────────
 
-export default function Dashboard() {
-    // TODO: replace with real props from Inertia controller
-    const metrics = {
-        moneyOnTable: 40,
-        recurringRevenue: 3,
-        conversionSnapshot: "68%",
-        inventoryHealth: 2,
+export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
+    const moneyOnTable = useMemo(() => metrics?.moneyOnTable ?? {
+        totalValue: 0,
+    }, [metrics?.moneyOnTable]);
+
+    const conversionSnapshot = useMemo(() => metrics?.conversionSnapshot ?? {
+        wonCount: 0,
+        lostCount: 0,
+        totalClosed: 0,
+        conversionRate: 0,
+        displayLabel: '100',
+    }, [metrics?.conversionSnapshot]);
+
+
+
+    const kpiMetrics = {
+        moneyOnTableValue: moneyOnTable.totalValue,
+        leaseExpiringSoon: metrics?.leaseExpiringSoon ?? 0,
+        // PRD Section 5 Metric 5: properties on market >60 days with 0 leads
+        inventoryHealth: metrics?.inventoryHealth?.staleCount ?? 0,
     };
+
+    // Conversion Snapshot tooltip: "3 WON · 1 LOST · 30 hari terakhir"
+    const conversionTooltip = conversionSnapshot.totalClosed > 0
+        ? `${conversionSnapshot.wonCount} WON · ${conversionSnapshot.lostCount} LOST · 30 hari terakhir`
+        : 'Belum ada lead yang ditutup dalam 30 hari terakhir';
+
+    const conversionDescription = conversionSnapshot.totalClosed > 0
+        ? `${conversionSnapshot.wonCount} WON vs ${conversionSnapshot.lostCount} LOST (30 hari terakhir)`
+        : 'Belum ada data (30 hari terakhir)';
 
 
     const openSlotPurchase = useMemo(() => [
@@ -130,22 +205,15 @@ export default function Dashboard() {
         draft: 20,
     };
 
-    // TODO: replace with real props from Inertia controller
-    const newListings = useMemo<PropertyListingItem[]>(() => [
-        { id: 1, name: 'Beachfront Villa Seminyak', location: 'Seminyak, Bali', type: 'villa', daysListed: 1, leads: 0, href: '/admin/properties/1' },
-        { id: 2, name: 'Strategic Land Canggu', location: 'Canggu, Bali', type: 'land', daysListed: 3, leads: 2, href: '/admin/properties/2' },
-        { id: 3, name: 'Boutique Commercial Ubud', location: 'Ubud, Bali', type: 'commercial', daysListed: 5, leads: 1, href: '/admin/properties/3' },
-        { id: 4, name: 'Boutique Commercial Ubud', location: 'Ubud, Bali', type: 'commercial', daysListed: 5, leads: 1, href: '/admin/properties/3' },
-        { id: 5, name: 'Boutique Commercial Ubud', location: 'Ubud, Bali', type: 'commercial', daysListed: 5, leads: 1, href: '/admin/properties/3' },
-    ], []);
+    const newListings = useMemo<PropertyListingItem[]>(
+        () => metrics?.newListings ?? [],
+        [metrics?.newListings],
+    );
 
     return (
         <DashboardLayout
             pageTitle="Dashboard"
             pageDescription="Actionable metrics for Chris Property Signature"
-            badgeOverrides={{
-                'crm-buyers': metrics.moneyOnTable,
-            }}
         >
 
 
@@ -154,32 +222,35 @@ export default function Dashboard() {
                 {/* 1. Money on the Table (Primary Variant) */}
                 <KPICard
                     title="Money on the Table"
-                    value={metrics.moneyOnTable}
-                    description="Leads currently in Viewing or Negotiation stage"
+                    value={kpiMetrics.moneyOnTableValue}
+                    formatType="compact-currency"
+                    // customTooltip={moneyOnTableTooltip}
+                    description={"Leads currently in Viewing or Negotiation stage"}
                     icon={TrendingUp}
                     designVariant="primary"
                     action="View Pipelines"
                     actionHref="/pipelines"
                 />
 
-                {/* 2. Recurring Revenue Alert */}
+                {/* 2. Lease Expiring Soon Alert */}
                 <KPICard
-                    title="Recurring Revenue"
-                    value={metrics.recurringRevenue}
-                    description="Open Slot listings expiring within 7 days"
+                    title="Lease Expiring Soon"
+                    value={kpiMetrics.leaseExpiringSoon}
+                    description="Kontrak sewa properti akan berakhir dalam <= 30 hari"
                     icon={Clock}
                     iconBg="bg-warning/10"
                     iconColor="text-warning"
                     designVariant="secondary"
-                    action="View Expiring Listings"
-                    actionHref="/admin/properties?filter=expiring"
+                    action="View Expiring Leases"
+                    actionHref="/inventory?listingType=For+Rent&status=rented"
                 />
 
-                {/* 3. Conversion Snapshot */}
+                {/* 3. Conversion Snapshot — real WON vs LOST ratio (PRD §5 Metric 6) */}
                 <KPICard
                     title="Conversion Snapshot"
-                    value={metrics.conversionSnapshot}
-                    description="Leads yang berakhir WON vs LOST 30 hari terakhir"
+                    value={conversionSnapshot.displayLabel}
+                    description={conversionDescription}
+                    customTooltip={conversionTooltip}
                     icon={PieChart}
                     iconBg="bg-success/10"
                     iconColor="text-success"
@@ -188,35 +259,43 @@ export default function Dashboard() {
                     actionHref="/customer"
                 />
 
-                {/* 4. Inventory Health */}
+                {/* 4. Inventory Health — stale listings (PRD Section 5 Metric 5) */}
                 <KPICard
                     title="Inventory Health"
-                    value={metrics.inventoryHealth}
+                    value={kpiMetrics.inventoryHealth}
                     description="Listings on market >60 days with zero leads (Stale)"
                     icon={AlertTriangle}
                     iconBg="bg-danger/10"
                     iconColor="text-danger"
                     designVariant="secondary"
                     action="Review Stale Listings"
-                    actionHref="/admin/properties?filter=stale"
+                    actionHref={route('inventory') + '?stale=true'}
                 />
             </div>
 
             {/* ── Analytics & Secondary Widgets ────────────────────── */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                 {/* Bar Charts — each spans 2 cols on xl */}
-                <GroupColumnChart />
+                <GroupColumnChart data={metrics?.performanceTransaction ?? []} />
                 <Chart data={openSlotPurchase} title="Property Lead" />
             </div>
 
-            {/* ── Inventory Status + New Listings ──────────────────── */}
+            {/* ── Inventory Status + New Listings + Lease Expiring ─── */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-                <InventoryStatusChart className='col-span-1' data={inventoryData} />
                 <PropertyListingCard
-                    className='col-span-2'
+                    className='col-span-1 md:col-span-2 xl:col-span-2'
                     listings={newListings}
                     viewAllHref="/admin/properties"
                 />
+                <LeaseExpiringCard
+                    className='col-span-1 md:col-span-2 xl:col-span-2'
+                    leases={metrics?.expiringLeasesList || []}
+                    viewAllHref="/inventory?listingType=For+Rent&status=rented"
+                />
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6' >
+                <InventoryStatusChart className='col-span-1' data={inventoryData} />
+
             </div>
 
         </DashboardLayout>

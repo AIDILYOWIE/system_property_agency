@@ -157,7 +157,7 @@ class ClientService
                 'full_address' => $prop->full_address,
                 'price' => (float)$prop->price,
                 'currency' => $prop->currency,
-                'thumbnail' => Storage::url($prop->mainImage->image_path),
+                'thumbnail' => $prop->mainImage ? Storage::url($prop->mainImage->image_path) : null,
                 'listingType' => $prop->listing_type === 'sale' ? 'For Sale' : 'For Rent',
                 'status' => $prop->status,
                 'pipelineStatus' => $inq->pipeline_status,
@@ -201,19 +201,23 @@ class ClientService
     }
     public function getAvailableProperties()
     {
-        return Property::with('mainImage')->where('status', 'available')->get()->map(function ($prop) {
-            return [
-                'id' => $prop->id,
-                'title' => $prop->title,
-                'full_address' => $prop->full_address,
-                'category' => $prop->category ?? 'Property',
-                'price' => (float)$prop->price,
-                'currency' => $prop->currency,
-                'listingType' => $prop->listing_type === 'sale' ? 'For Sale' : 'For Rent',
-                'status' => $prop->status,
-                'thumbnail' => $prop->mainImage ? Storage::url($prop->mainImage->image_path) : null
-            ];
-        });
+        return Property::with('mainImage')
+            ->where('status', 'available')
+            ->where('seller_pipeline_status', 'listed')
+            ->get()
+            ->map(function ($prop) {
+                return [
+                    'id' => $prop->id,
+                    'title' => $prop->title,
+                    'full_address' => $prop->full_address,
+                    'category' => $prop->category ?? 'Property',
+                    'price' => (float)$prop->price,
+                    'currency' => $prop->currency,
+                    'listingType' => $prop->listing_type === 'sale' ? 'For Sale' : 'For Rent',
+                    'status' => $prop->status,
+                    'thumbnail' => $prop->mainImage ? Storage::url($prop->mainImage->image_path) : null
+                ];
+            });
     }
 
     public function updateCustomerNotes($id, $notes)
