@@ -37,6 +37,13 @@ export interface InventoryHealth {
     }[];
 }
 
+export interface InventoryStatus {
+    available: number;
+    rented: number;
+    sold: number;
+    draft: number;
+}
+
 export interface DashboardMetrics {
     moneyOnTable?: MoneyOnTableMetrics;
     leaseExpiringSoon: number;
@@ -45,6 +52,7 @@ export interface DashboardMetrics {
     inventoryHealth?: InventoryHealth;
     performanceTransaction?: PerformanceDataItem[];
     newListings?: PropertyListingItem[];
+    inventoryStatus?: InventoryStatus;
 }
 
 interface KPICardProps {
@@ -197,13 +205,12 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
         { day: 'S', leads: 8, type: 'projected' as const },
     ], []);
 
-    // TODO: replace with real props from Inertia controller
-    const inventoryData = {
-        rented: 10,
-        sold: 20,
-        available: 80,
-        draft: 20,
-    };
+    const inventoryData = useMemo(() => ({
+        rented: metrics?.inventoryStatus?.rented ?? 0,
+        sold: metrics?.inventoryStatus?.sold ?? 0,
+        available: metrics?.inventoryStatus?.available ?? 0,
+        draft: metrics?.inventoryStatus?.draft ?? 0,
+    }), [metrics?.inventoryStatus]);
 
     const newListings = useMemo<PropertyListingItem[]>(
         () => metrics?.newListings ?? [],

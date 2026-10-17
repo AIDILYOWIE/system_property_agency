@@ -337,6 +337,37 @@ class DashboardService
     }
 
     /**
+     * Get Inventory Status breakdown (rented / sold / available / draft).
+     *
+     * Uses a single aggregated query (GROUP BY status + visibility) to avoid
+     * multiple round-trips. Draft is derived from visibility='draft' regardless
+     * of status, matching the UI legend semantics.
+     *
+     * @return array{rented: int, sold: int, available: int, draft: int}
+     */
+    public function getInventoryStatusMetrics(): array
+    {
+        // One query: count by status for non-draft properties
+        $statsCounts = Property::query()
+            ->where('visibility', '!=', 'draft')
+            ->selectRaw("status, COUNT(*) as cnt")
+            ->groupBy('status')
+            ->pluck('cnt', 'status');
+
+        // Draft count: visibility = 'draft' (any status)
+        $draftCount = Property::query()
+            ->where('visibility', 'draft')
+            ->count();
+
+        return [
+            'available' => (int) ($statsCounts->get('available') ?? 0),
+            'rented'    => (int) ($statsCounts->get('rented')    ?? 0),
+            'sold'      => (int) ($statsCounts->get('sold')      ?? 0),
+            'draft'     => $draftCount,
+        ];
+    }
+
+    /**
      * Aggregate all overview dashboard metrics.
      * All sub-metric methods are independent — safe for parallelisation in the future.
      */
@@ -348,6 +379,7 @@ class DashboardService
         $inventoryHealth         = $this->getInventoryHealthMetrics();
         $performanceTransaction  = $this->getPerformanceTransactionMetrics();
         $newListings             = $this->getNewListingsMetrics();
+        $inventoryStatus         = $this->getInventoryStatusMetrics();
 
         return [
             'moneyOnTable'           => $moneyOnTable,
@@ -357,6 +389,7 @@ class DashboardService
             'inventoryHealth'        => $inventoryHealth,
             'performanceTransaction' => $performanceTransaction,
             'newListings'            => $newListings,
+            'inventoryStatus'        => $inventoryStatus,
         ];
     }
 }
