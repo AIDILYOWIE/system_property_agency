@@ -368,6 +368,66 @@ class DashboardService
     }
 
     /**
+     * Get Property Lead metrics for the current ISO week (Mon–Sun).
+     *
+     * Counts all new inquiries (leads) created per day of the current week,
+     * regardless of pipeline status. Mirrors the day-slot logic of
+     * getPerformanceTransactionMetrics() so the Chart component receives
+     * an identical shape: { day, leads, type }.
+     *
+     *   - type 'actual'    → past days with real lead counts
+     *   - type 'today'     → today's running total
+     *   - type 'projected' → future days (leads = 0, rendered as hatched bar)
+     *
+     * @return array<int, array{day: string, leads: int, type: string}>
+     */
+    public function getPropertyLeadMetrics(): array
+    {
+        $today     = Carbon::now();
+        $weekStart = $today->copy()->startOfWeek(Carbon::MONDAY);
+        $weekEnd   = $today->copy()->endOfWeek(Carbon::SUNDAY);
+
+        // Single aggregated query — COUNT leads grouped by day-of-week.
+        // EXTRACT(DOW …) returns PostgreSQL convention: 0=Sun … 6=Sat.
+        $rows = Inquiry::query()
+            ->whereDate('created_at', '>=', $weekStart->toDateString())
+            ->whereDate('created_at', '<=', $weekEnd->toDateString())
+            ->selectRaw('EXTRACT(DOW FROM created_at)::int AS dow, COUNT(*) AS cnt')
+            ->groupByRaw('dow')
+            ->pluck('cnt', 'dow'); // Collection keyed by DOW integer
+
+        // Chart display order: Sun(0), Mon(1), Tue(2), Wed(3), Thu(4), Fri(5), Sat(6)
+        $labels      = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        $displayDows = [0, 1, 2, 3, 4, 5, 6];
+
+        $result = [];
+        foreach ($displayDows as $i => $dow) {
+            $leads = (int) ($rows->get($dow) ?? 0);
+
+            // Map DOW → calendar date (same offset logic as PerformanceTransaction).
+            // Sun(0) is 6 days after Monday; Mon(1)=+0 … Sat(6)=+5.
+            $dayOffset = $dow === 0 ? 6 : $dow - 1;
+            $dayDate   = $weekStart->copy()->addDays($dayOffset);
+
+            if ($dayDate->isSameDay($today)) {
+                $type = 'today';
+            } elseif ($dayDate->lt($today->copy()->startOfDay())) {
+                $type = 'actual';
+            } else {
+                $type = 'projected';
+            }
+
+            $result[] = [
+                'day'   => $labels[$i],
+                'leads' => $leads,
+                'type'  => $type,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
      * Aggregate all overview dashboard metrics.
      * All sub-metric methods are independent — safe for parallelisation in the future.
      */
@@ -380,6 +440,7 @@ class DashboardService
         $performanceTransaction  = $this->getPerformanceTransactionMetrics();
         $newListings             = $this->getNewListingsMetrics();
         $inventoryStatus         = $this->getInventoryStatusMetrics();
+        $propertyLead            = $this->getPropertyLeadMetrics();
 
         return [
             'moneyOnTable'           => $moneyOnTable,
@@ -390,6 +451,7 @@ class DashboardService
             'performanceTransaction' => $performanceTransaction,
             'newListings'            => $newListings,
             'inventoryStatus'        => $inventoryStatus,
+            'propertyLead'           => $propertyLead,
         ];
     }
 }

@@ -3,6 +3,7 @@ import { TrendingUp, Clock, AlertTriangle, ArrowUpRight, PieChart } from 'lucide
 import { memo, useMemo, type FC } from 'react';
 import { Link, router } from '@inertiajs/react';
 import Chart from '@/Components/Chart';
+import type { DailyLeadData } from '@/Components/Chart';
 import InventoryStatusChart from '@/Components/InventoryStatusChart';
 import PropertyListingCard from '@/Components/PropertyListingCard';
 import type { PropertyListingItem } from '@/Components/PropertyListingCard';
@@ -53,6 +54,7 @@ export interface DashboardMetrics {
     performanceTransaction?: PerformanceDataItem[];
     newListings?: PropertyListingItem[];
     inventoryStatus?: InventoryStatus;
+    propertyLead?: DailyLeadData[];
 }
 
 interface KPICardProps {
@@ -195,15 +197,10 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
         : 'Belum ada data (30 hari terakhir)';
 
 
-    const openSlotPurchase = useMemo(() => [
-        { day: 'S', leads: 20, type: 'actual' as const },
-        { day: 'M', leads: 35, type: 'actual' as const },
-        { day: 'T', leads: 1, type: 'actual' as const },
-        { day: 'W', leads: 4, type: 'projected' as const },
-        { day: 'T', leads: 5, type: 'projected' as const },
-        { day: 'F', leads: 11, type: 'projected' as const },
-        { day: 'S', leads: 8, type: 'projected' as const },
-    ], []);
+    const propertyLeadData = useMemo<DailyLeadData[]>(
+        () => metrics?.propertyLead ?? [],
+        [metrics?.propertyLead],
+    );
 
     const inventoryData = useMemo(() => ({
         rented: metrics?.inventoryStatus?.rented ?? 0,
@@ -284,7 +281,7 @@ export default function Dashboard({ metrics }: { metrics: DashboardMetrics }) {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                 {/* Bar Charts — each spans 2 cols on xl */}
                 <GroupColumnChart data={metrics?.performanceTransaction ?? []} />
-                <Chart data={openSlotPurchase} title="Property Lead" />
+                <Chart data={propertyLeadData} title="Property Lead" />
             </div>
 
             {/* ── Inventory Status + New Listings + Lease Expiring ─── */}
