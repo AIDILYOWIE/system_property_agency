@@ -40,7 +40,7 @@ function PipelineCardComponent<T extends PipelineItem>({
             }
             onDragEnd={canDrag ? onDragEnd : undefined}
             className={cn(
-                "bg-white rounded-xl border transition-all duration-200",
+                "bg-white rounded-xl border transition-all duration-200 w-full",
                 canDrag && "cursor-grab active:cursor-grabbing hover:border-primary/20",
                 !canDrag && variant === "compact" && !isShadow && "cursor-default",
                 variant === "compact" && "border-border-base select-none",

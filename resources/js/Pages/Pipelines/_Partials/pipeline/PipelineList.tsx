@@ -16,7 +16,7 @@ function PipelineListComponent<T extends PipelineItem>({
     renderCard,
 }: PipelineListProps<T>) {
     return (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-max-[300px]">
             {items.map((item) => (
                 <PipelineCard
                     key={item.id}

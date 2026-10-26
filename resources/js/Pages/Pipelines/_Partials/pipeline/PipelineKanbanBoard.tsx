@@ -60,8 +60,8 @@ function PipelineKanbanBoardComponent<T extends PipelineItem>({
     return (
         <div className="h-full overflow-x-auto custom-scrollbar flex flex-col">
             <div
-                className="grid gap-4 flex-1 min-h-0 min-w-max pb-3 pr-2"
-                style={{ gridTemplateColumns: `repeat(${stageOrder.length}, minmax(300px, 1fr))` }}
+                className="grid gap-4 flex-1 min-h-0 pb-3 pr-2"
+                style={{ gridTemplateColumns: `repeat(${stageOrder.length}, 300px)` }}
             >
                 {stageOrder.map((stage) => (
                     <PipelineKanbanColumn
